@@ -100,9 +100,7 @@ class PGZeroGame:
         try:
             draw = self.mod.draw
         except AttributeError:
-            raise AttributeError(
-                "Your game module must define a function 'draw()'"
-            )
+            return lambda: None
         else:
             if draw.__code__.co_argcount != 0:
                 raise TypeError(
