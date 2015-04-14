@@ -4,6 +4,7 @@ import pgzero.keyboard
 
 
 screen = None
+DISPLAY_FLAGS = pygame.HWSURFACE | pygame.DOUBLEBUF
 
 
 class PGZeroGame:
@@ -24,7 +25,7 @@ class PGZeroGame:
         w = getattr(mod, 'WIDTH', 800)
         h = getattr(mod, 'HEIGHT', 600)
         if w != self.width or h != self.height:
-            self.mod.screen = self.screen = pygame.display.set_mode((w, h))
+            self.mod.screen = self.screen = pygame.display.set_mode((w, h), DISPLAY_FLAGS)
             screen = self.screen     # KILL ME
             self.width = w
             self.height = h
