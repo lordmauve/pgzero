@@ -9,13 +9,13 @@ HEIGHT = alien.get_height() + 20
 x = -50
 
 
-def draw(screen):
+def draw():
     """Clear the screen and draw the alien."""
     screen.fill((0, 0, 0))
     screen.blit(alien, (x, 10))
 
 
-def update(dt):
+def update():
     """Move the alien by one pixel."""
     global x
     x += 1
