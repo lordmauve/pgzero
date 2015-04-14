@@ -151,5 +151,4 @@ class Animation:
         n = self.function(n)
         for k in self.targets:
             v = tween_attr(n, self.initial[k], self.targets[k])
-            print('setting', self.object, k, v)
             setattr(self.object, k, v)
