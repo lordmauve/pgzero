@@ -1,5 +1,6 @@
 import pygame
 import pgzero.clock
+import pgzero.keyboard
 
 
 screen = None
@@ -13,6 +14,7 @@ class PGZeroGame:
         self.height = None
         self.title = None
         self.icon = None
+        self.keyboard = pgzero.keyboard.Keyboard()
         self.handlers = {}
         self.reinit_screen()
 
@@ -117,6 +119,10 @@ class PGZeroGame:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     return
+                if event.type == pygame.KEYDOWN:
+                    self.keyboard[event.key] = True
+                elif event.type == pygame.KEYUP:
+                    self.keyboard[event.key] = False
                 self.dispatch_event(event)
 
             pgzero.clock.tick(dt)
