@@ -1,10 +1,10 @@
 import os.path
 from types import ModuleType
 import pygame.image
+import pygame.mixer
 
 
-class ImageLoaderModule(ModuleType):
-    EXTNS = 'png gif jpg jpeg bmp'.split()
+class BaseLoaderModule(ModuleType):
 
     def __init__(self, path):
         self.path = path
@@ -35,8 +35,22 @@ class ImageLoaderModule(ModuleType):
                 return self.load_(p)
 
         raise KeyError(
-            "No image found like '%s'. Are you sure the image exists?" % name
+            "No {type} found like '{name}'. Are you sure the {type} exists?".format(
+                type=self.TYPE,
+                name=name
+            )
         )
+
+
+class ImageLoaderModule(BaseLoaderModule):
+    EXTNS = ['png', 'gif', 'jpg', 'jpeg', 'bmp']
 
     def load_(self, path):
         return pygame.image.load(path)
+
+
+class SoundLoaderModule(BaseLoaderModule):
+    EXTNS = ['wav', 'ogg']
+
+    def load_(self, path):
+        return pygame.mixer.Sound(path)

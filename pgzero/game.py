@@ -11,7 +11,6 @@ class PGZeroGame:
         self.title = None
         self.icon = None
         self.handlers = {}
-        pygame.init()
         self.reinit_screen()
 
     def reinit_screen(self):

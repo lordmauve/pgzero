@@ -1,4 +1,5 @@
 from images import alien, alien_hurt
+from sounds import eep
 
 TITLE = "Alien walk"
 WIDTH = 500
@@ -41,6 +42,7 @@ def set_alien_hurt():
     """Set the current alien sprite to the "hurt" image."""
     global sprite
     sprite = alien_hurt
+    eep.play()
     # The alien may already be shown as hurt. In this case we need to prolong
     # the time it is shown as hurt. Calling unschedule() will cancel the
     # previous scheduled recovery if there was one. Then we can schedule the
