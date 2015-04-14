@@ -5,3 +5,5 @@ syntax: glob
 build
 dist
 .idea
+doc/_build
+*.egg-info
