@@ -4,3 +4,4 @@ syntax: glob
 *.pyo
 build
 dist
+.idea
