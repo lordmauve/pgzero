@@ -21,6 +21,9 @@ def update():
         alien.x -= 1
     elif keyboard.RIGHT:
         alien.x += 1
+    elif keyboard.SPACE:
+        alien.y = 0
+        Animation(alien, y=10, type='bounce_end', duration=.5)
 
     # If the alien is off the screen,
     # move it back on screen
