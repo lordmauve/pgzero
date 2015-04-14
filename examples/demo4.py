@@ -1,4 +1,4 @@
-alien = Actor('examples/images/alien.png')
+alien = Actor('alien')
 
 TITLE = "Alien walk"
 WIDTH = 500
