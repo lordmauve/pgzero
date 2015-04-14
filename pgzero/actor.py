@@ -1,6 +1,7 @@
 import pygame
 
-from pgzero import game
+from . import game
+from . import loaders
 
 
 class Actor(pygame.rect.Rect):
@@ -20,7 +21,7 @@ class Actor(pygame.rect.Rect):
         return self._image
     @image.setter
     def image(self, image):
-        self._image = pygame.image.load(image)
+        self._image = loaders.images.load(image)
 
     def draw(self):
         game.screen.blit(self.image, self.pos)
