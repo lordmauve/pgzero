@@ -1,19 +1,22 @@
-from pgzero.clock import schedule, unschedule
 from images import alien, alien_hurt
 
 TITLE = "Alien walk"
 WIDTH = 500
 HEIGHT = alien.get_height() + 20
 
+# Define colours we want to use as RGB
+BLACK = 0, 0, 0
 
 # The rectangle in which the alien will be drawn
 alien_rect = alien.get_rect().move((-50, 10))
+
+# The sprite to use to draw the alien
 sprite = alien
 
 
-def draw(screen):
+def draw():
     """Clear the screen and draw the alien."""
-    screen.fill((0, 0, 0))
+    screen.fill(BLACK)
     screen.blit(sprite, alien_rect.topleft)
 
 
@@ -42,8 +45,8 @@ def set_alien_hurt():
     # the time it is shown as hurt. Calling unschedule() will cancel the
     # previous scheduled recovery if there was one. Then we can schedule the
     # alien to recover 1 second from now.
-    unschedule(set_alien_normal)
-    schedule(set_alien_normal, 1.0)
+    clock.unschedule(set_alien_normal)
+    clock.schedule(set_alien_normal, 1.0)
 
 
 def set_alien_normal():

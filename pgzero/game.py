@@ -19,7 +19,7 @@ class PGZeroGame:
         w = getattr(mod, 'WIDTH', 800)
         h = getattr(mod, 'HEIGHT', 600)
         if w != self.width or h != self.height:
-            self.screen = pygame.display.set_mode((w, h))
+            self.mod.screen = self.screen = pygame.display.set_mode((w, h))
             self.width = w
             self.height = h
 
@@ -35,8 +35,10 @@ class PGZeroGame:
 
     EVENT_HANDLERS = {
         pygame.MOUSEBUTTONDOWN: 'on_mouse_down',
+        pygame.MOUSEBUTTONUP: 'on_mouse_up',
         pygame.MOUSEMOTION: 'on_mouse_move',
         pygame.KEYDOWN: 'on_key_down',
+        pygame.KEYUP: 'on_key_up',
     }
 
     def load_handlers(self):
@@ -89,11 +91,17 @@ class PGZeroGame:
 
         """
         try:
-            return self.mod.draw
+            draw = self.mod.draw
         except AttributeError:
             raise AttributeError(
-                "Your game module must define a function 'draw(screen)'"
+                "Your game module must define a function 'draw()'"
             )
+        else:
+            if draw.__code__.co_argcount != 0:
+                raise TypeError(
+                    "draw() must not take any arguments."
+                )
+            return draw
 
     def run(self):
         clock = pygame.time.Clock()
@@ -110,5 +118,5 @@ class PGZeroGame:
             pgzero.clock.tick(dt)
             update(dt)
             self.reinit_screen()
-            draw(self.screen)
+            draw()
             pygame.display.flip()

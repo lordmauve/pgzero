@@ -5,7 +5,7 @@ TITLE = "Fading Green!"
 c = 0
 
 
-def draw(screen):
+def draw():
     screen.fill((0, c, 0))
 
 
