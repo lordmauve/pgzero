@@ -1,6 +1,6 @@
 from sounds import eep
 
-alien = Actor('examples/images/alien.png')
+alien = Actor('alien')
 
 TITLE = "Alien walk"
 WIDTH = 500
@@ -38,7 +38,7 @@ def on_mouse_down(pos):
 
 def set_alien_hurt():
     """Set the current alien sprite to the "hurt" image."""
-    alien.image = 'examples/images/alien_hurt.png'
+    alien.image = 'alien_hurt'
     eep.play()
     # The alien may already be shown as hurt. In this case we need to prolong
     # the time it is shown as hurt. Calling unschedule() will cancel the
@@ -50,4 +50,4 @@ def set_alien_hurt():
 
 def set_alien_normal():
     """Set the current alien sprite to the normal image."""
-    alien.image = 'examples/images/alien.png'
+    alien.image = 'alien'
