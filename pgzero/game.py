@@ -2,6 +2,9 @@ import pygame
 import pgzero.clock
 
 
+screen = None
+
+
 class PGZeroGame:
     def __init__(self, mod):
         self.mod = mod
@@ -14,11 +17,13 @@ class PGZeroGame:
         self.reinit_screen()
 
     def reinit_screen(self):
+        global screen
         mod = self.mod
         w = getattr(mod, 'WIDTH', 800)
         h = getattr(mod, 'HEIGHT', 600)
         if w != self.width or h != self.height:
             self.mod.screen = self.screen = pygame.display.set_mode((w, h))
+            screen = self.screen     # KILL ME
             self.width = w
             self.height = h
 
