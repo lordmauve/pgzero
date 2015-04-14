@@ -1,5 +1,6 @@
 # Expose clock API as a builtin
 from . import clock
+from .actor import Actor
 
 
 def image(name):
