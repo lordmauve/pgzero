@@ -25,3 +25,5 @@ class Keyboard:
 
     def __setitem__(self, key, value):
         self.d[key] = value
+
+keyboard = Keyboard()

@@ -14,7 +14,7 @@ class PGZeroGame:
         self.height = None
         self.title = None
         self.icon = None
-        self.keyboard = pgzero.keyboard.Keyboard()
+        self.keyboard = pgzero.keyboard.keyboard
         self.handlers = {}
         self.reinit_screen()
 
