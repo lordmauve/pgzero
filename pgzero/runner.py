@@ -4,6 +4,7 @@ from optparse import OptionParser
 from types import ModuleType
 from .game import PGZeroGame
 from .imageloader import ImageLoaderModule
+from . import builtins
 
 
 def main():
@@ -24,6 +25,7 @@ def main():
     mod = ModuleType(name)
     mod.__file__ = path
     mod.__name__ = name
+    mod.__dict__.update(builtins.__dict__)
     sys.modules[name] = mod
     exec(src, mod.__dict__)
     PGZeroGame(mod).run()

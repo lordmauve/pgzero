@@ -8,6 +8,7 @@ class ImageLoaderModule(ModuleType):
 
     def __init__(self, path):
         self.path = path
+        self.__path__ = [path]
         super().__init__(os.path.basename(path))
 
     def __getattr__(self, name):
@@ -18,7 +19,7 @@ class ImageLoaderModule(ModuleType):
             try:
                 resource = self.load(name)
             except KeyError as e:
-                raise AttributeError(*e.args)
+                raise ImportError(*e.args) from None
 
         setattr(self, name, resource)
         return resource
@@ -32,7 +33,10 @@ class ImageLoaderModule(ModuleType):
             p = os.path.join(self.path, name + '.' + ext)
             if os.path.exists(p):
                 return self.load_(p)
-        raise KeyError("No image found like '%s'" % name)
+
+        raise KeyError(
+            "No image found like '%s'. Are you sure the image exists?" % name
+        )
 
     def load_(self, path):
         return pygame.image.load(path)
