@@ -18,6 +18,7 @@ Courses:
     :maxdepth: 2
 
     introduction
+    contributing
 
 Indices and tables
 ==================
