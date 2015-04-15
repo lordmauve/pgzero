@@ -1,6 +1,7 @@
 import pygame
 import pgzero.clock
 import pgzero.keyboard
+import pgzero.screen
 
 
 screen = None
@@ -25,7 +26,11 @@ class PGZeroGame:
         w = getattr(mod, 'WIDTH', 800)
         h = getattr(mod, 'HEIGHT', 600)
         if w != self.width or h != self.height:
-            self.mod.screen = self.screen = pygame.display.set_mode((w, h), DISPLAY_FLAGS)
+            self.screen = pygame.display.set_mode((w, h), DISPLAY_FLAGS)
+            if hasattr(self.mod, 'screen'):
+                self.mod.screen.surface = self.screen
+            else:
+                self.mod.screen = pgzero.screen.Screen(self.screen)
             screen = self.screen     # KILL ME
             self.width = w
             self.height = h
