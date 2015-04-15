@@ -1,5 +1,3 @@
-from sounds import eep
-
 alien = Actor('alien')
 
 TITLE = "Alien walk"
@@ -39,7 +37,7 @@ def on_mouse_down(pos):
 def set_alien_hurt():
     """Set the current alien sprite to the "hurt" image."""
     alien.image = 'alien_hurt'
-    eep.play()
+    sounds.eep.play()
     # The alien may already be shown as hurt. In this case we need to prolong
     # the time it is shown as hurt. Calling unschedule() will cancel the
     # previous scheduled recovery if there was one. Then we can schedule the
