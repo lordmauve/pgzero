@@ -24,8 +24,6 @@ def main():
         src = f.read()
 
     loaders.root = os.path.dirname(os.path.abspath(path))
-    sys.modules['images'] = loaders.LoaderModule(loaders.images)
-    sys.modules['sounds'] = loaders.LoaderModule(loaders.sounds)
 
     pygame.display.set_mode((100, 100), DISPLAY_FLAGS)
     name, _ = os.path.splitext(os.path.basename(path))
