@@ -5,3 +5,5 @@ from .keyboard import keyboard
 from .animation import Animation
 
 from .loaders import images, sounds
+
+from pygame import Rect

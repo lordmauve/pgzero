@@ -3,14 +3,27 @@ Built-in Objects
 
 Pygame Zero provides useful built-in objects to help you make games easily.
 
+
 Screen
 ------
 
 The ``screen`` object represents your game screen.
 
-It is a Pygame Surface object; you'll typically use methods like these:
+It is a thin wrapper around a Pygame surface that allows you to easily
+draw images to the screen ("blit" them).
 
-.. class:: Surface
+.. class:: Screen
+
+    .. attribute:: surface
+
+        The raw `Pygame surface`_ that represents the screen buffer. You can
+        use this for advanced graphics operations.
+
+        .. _`Pygame surface`: https://www.pygame.org/docs/ref/surface.html
+
+    .. method:: clear()
+
+        Reset the screen to black.
 
     .. method:: fill((red, green, blue))
 
@@ -19,6 +32,49 @@ It is a Pygame Surface object; you'll typically use methods like these:
     .. method:: blit(image, (left, top))
 
         Draw an image to the screen at the given position.
+
+    .. method:: draw.line(start, end, (r, g, b))
+
+        Draw a line from start to end.
+
+    .. method:: draw.circle(pos, radius, (r, g, b))
+
+        Draw the outline of a circle.
+
+    .. method:: draw.filled_circle(pos, radius, (r, g, b))
+
+        Draw a filled circle.
+
+    .. method:: draw.rect(rect, (r, g, b))
+
+        Draw the outline of a rectangle.
+
+        Takes a :ref:`Rect <rect>`.
+
+    .. method:: draw.filled_rect(pos, radius, (r, g, b))
+
+        Draw a filled rectangle.
+
+
+.. _rect:
+
+Rect
+----
+
+The `Pygame Rect`_ class is available as a built in. This can be used in a
+variety of ways, from detecting clicks within a region to drawing a box onto
+the screen:
+
+For example, you can draw a box with::
+
+    RED = 200, 0, 0
+    BOX = Rect((20, 20), (100, 100))
+
+    def draw():
+        screen.draw.rect(BOX, RED)
+
+
+.. _`Pygame Rect`: https://www.pygame.org/docs/ref/rect.html
 
 
 Resource Loading
@@ -60,7 +116,7 @@ following files::
 Then ``space_game.py`` could draw the alien to the screen with this code::
 
     def draw():
-        screen.fill((0, 0, 0))
+        screen.clear()
         screen.blit(images.alien, (10, 10))
 
 Each loaded image is a Pygame ``Surface``. You will typically use
@@ -88,13 +144,13 @@ to query the size of the image in pixels:
         Get a :class:`Rect` that is pre-populated with the bounds of the image
         if the image was located at the origin.
 
-        Effectively this is equivalent to:
+        Effectively this is equivalent to::
 
             Rect((0, 0), image.get_size())
 
 
 Sounds
-------
+''''''
 
 Pygame Zero can load sounds in ``.wav`` and ``.ogg`` formats. WAV is great for
 small sound effects, while OGG is a compressed format that is more suited to
