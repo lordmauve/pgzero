@@ -27,6 +27,7 @@ Reference
 .. toctree::
     :maxdepth: 2
 
+    hooks
     builtins
 
 Indices and tables
