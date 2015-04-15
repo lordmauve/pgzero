@@ -1,6 +1,8 @@
+TITLE = 'Flappy Ball'
 WIDTH = 800
 HEIGHT = 600
 
+BLUE = 0, 128, 255
 GRAVITY = 2000.0  # pixels per second per second
 
 
@@ -14,7 +16,7 @@ class Ball:
 
     def draw(self):
         pos = (self.x, self.y)
-        screen.draw.circle(pos, self.radius)
+        screen.draw.filled_circle(pos, self.radius, BLUE)
 
 
 ball = Ball(50, 100)
@@ -36,6 +38,7 @@ def update(dt):
         ball.y = HEIGHT - ball.radius  # fix the position
         ball.vy = -ball.vy * 0.9  # inelastic collision
 
+    # X component doesn't have acceleration
     ball.x += ball.vx * dt
     if ball.x > WIDTH - ball.radius or ball.x < ball.radius:
         ball.vx = -ball.vx
@@ -43,4 +46,4 @@ def update(dt):
 
 def on_key_down():
     """Pressing a key will kick the ball upwards."""
-    ball.vy -= 500
+    ball.vy = -500

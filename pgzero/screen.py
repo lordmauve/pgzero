@@ -13,45 +13,38 @@ class SurfacePainter:
 
     def __init__(self, screen):
         self._screen = screen
-        self.stroke = (128, 0, 0)
-        self.stroke_width = 1
-        self.fill = (255, 128, 128)
 
     @property
     def _surf(self):
         return self._screen.surface
 
-    @property
-    def draw_strokes(self):
-        return bool(self.stroke and self.stroke_width)
-
-    @property
-    def fill_shapes(self):
-        return bool(self.fill)
-
-    def line(self, start, end):
+    def line(self, start, end, color):
         """Draw a line from start to end."""
         start = round_pos(start)
         end = round_pos(end)
-        if self.draw_strokes:
-            pygame.draw.line(self._surf, self.stroke, start, end, self.stroke_width)
+        pygame.draw.line(self._surf, color, start, end, 1)
 
-    def circle(self, pos, radius):
+    def circle(self, pos, radius, color):
         """Draw a circle."""
         pos = round_pos(pos)
-        if self.fill_shapes:
-            pygame.draw.circle(self._surf, self.fill, pos, radius, 0)
-        if self.draw_strokes:
-            pygame.draw.circle(self._surf, self.stroke, pos, radius, self.stroke_width)
+        pygame.draw.circle(self._surf, color, pos, radius, 1)
 
-    def rect(self, rect):
+    def filled_circle(self, pos, radius, color):
+        """Draw a filled circle."""
+        pos = round_pos(pos)
+        pygame.draw.circle(self._surf, color, pos, radius, 0)
+
+    def rect(self, rect, color):
         """Draw a rectangle."""
         if not isinstance(rect, pygame.Rect):
             raise TypeError("screen.draw.rect() requires a rect to draw")
-        if self.fill_shapes:
-            pygame.draw.rect(self._surf, self.fill, rect, 0)
-        if self.draw_strokes:
-            pygame.draw.rect(self._surf, self.stroke, rect, self.stroke_width)
+        pygame.draw.rect(self._surf, color, rect, 1)
+
+    def filled_rect(self, rect, color):
+        """Draw a filled rectangle."""
+        if not isinstance(rect, pygame.Rect):
+            raise TypeError("screen.draw.filled_rect() requires a rect to draw")
+        pygame.draw.rect(self._surf, color, rect, 0)
 
 
 class Screen:
