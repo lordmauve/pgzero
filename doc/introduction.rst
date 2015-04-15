@@ -1,6 +1,9 @@
 Introduction to Pygame Zero
 ===========================
 
+.. highlight:: python
+    :linenothreshold: 5
+
 Creating a window
 -----------------
 
@@ -79,9 +82,9 @@ released.
 This code doesn't work in Python. If you try it, you will not see the screen
 change to green. Why?
 
-When you assign with the ``=`` operator inside a function, you create a "local"
-variable called ``bg`` that exists only with the function. The ``bg`` we want
-to change is in the global scope.
+When you assign with the ``=`` operator inside a function, as at line 10 (and
+line 13), you create a "local" variable called ``bg`` that exists only with the
+function. The ``bg`` we want to change is in the global scope.
 
 The fix is to declare in ``on_mouse_down()`` and ``on_mouse_up()`` that we
 want to modify the global variable, not create a new local variable. We do

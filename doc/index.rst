@@ -12,13 +12,22 @@ It is intended for use in education, so that teachers can teach basic
 programming without needing to explain the Pygame API or write an event loop.
 
 
-Courses:
+Courses
+-------
 
 .. toctree::
     :maxdepth: 2
 
     introduction
     contributing
+
+Reference
+---------
+
+.. toctree::
+    :maxdepth: 2
+
+    builtins
 
 Indices and tables
 ==================
