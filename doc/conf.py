@@ -49,7 +49,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'PGZero'
+project = 'Pygame Zero'
 copyright = '2015, Daniel Pope'
 author = 'Daniel Pope'
 
@@ -111,7 +111,13 @@ todo_include_todos = False
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'default'
+import pkg_resources
+try:
+    pkg_resources.get_distribution('Sphinx>=1.3')
+except pkg_resources.VersionConflict:
+    html_theme = 'default'
+else:
+    html_theme = 'alabaster'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -225,7 +231,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  (master_doc, 'PGZero.tex', 'PGZero Documentation',
+  (master_doc, 'PGZero.tex', 'Pygame Zero Documentation',
    'Daniel Pope', 'manual'),
 ]
 
@@ -255,7 +261,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'pgzero', 'PGZero Documentation',
+    (master_doc, 'pgzero', 'Pygame Zero Documentation',
      [author], 1)
 ]
 
@@ -269,7 +275,7 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  (master_doc, 'PGZero', 'PGZero Documentation',
+  (master_doc, 'PGZero', 'Pygame Zero Documentation',
    author, 'PGZero', 'One line description of project.',
    'Miscellaneous'),
 ]
