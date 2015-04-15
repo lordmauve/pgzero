@@ -3,6 +3,24 @@ Built-in Objects
 
 Pygame Zero provides useful built-in objects to help you make games easily.
 
+Screen
+------
+
+The ``screen`` object represents your game screen.
+
+It is a Pygame Surface object; you'll typically use methods like these:
+
+.. class:: Surface
+
+    .. method:: fill((red, green, blue))
+
+        Fill the screen with a solid color.
+
+    .. method:: blit(image, (left, top))
+
+        Draw an image to the screen at the given position.
+
+
 Resource Loading
 ----------------
 
@@ -94,3 +112,88 @@ with this code::
 
     def on_mouse_down():
         sounds.drum_kit.play()
+
+Each loaded sound is a Pygame ``Sound``, and has various methods to play and
+stop the sound as well as query its length in seconds:
+
+.. class:: Sound
+
+    .. method:: play()
+
+        Play the sound.
+
+    .. method:: play(loops)
+
+        Play the sound, but loop it a number of times.
+
+        :param loops: The number of times to loop. If you pass ``-1`` as the
+                      number of times to loop, the sound will loop forever (or
+                      until you call :meth:`.stop()`
+
+    .. method:: stop()
+
+        Stop playing the sound.
+
+    .. method:: get_length()
+
+        Get the duration of the sound in seconds.
+
+
+Clock
+-----
+
+Often when writing a game, you will want to schedule some game event to occur
+at a later time. For example, we may want a big boss alien to appear after 60
+seconds. Or perhaps a power-up will appear every 20 seconds.
+
+More subtle are the situations when you want to delay some action for a shorter
+period. For example you might have a laser weapon that takes 1 second to charge
+up.
+
+We can use the ``clock`` object to schedule a function to happen in the
+future.
+
+Let's start by defining a function ``fire_laser`` that we want to run in the
+future::
+
+    def fire_laser():
+        lasers.append(player.pos)
+
+Then when the fire button is pressed, we will ask the ``clock`` to call it for
+us after exactly 1 second::
+
+    def on_mouse_down():
+        clock.schedule(fire_laser, 1.0)
+
+Note that ``fire_laser`` is the function itself; without parentheses, it is
+not being called here! The clock will call it for us.
+
+(It is a good habit to write out times in seconds with a decimal point, like
+``1.0``. This makes it more obvious when you are reading it back, that you are
+referring to a time value and not a count of things.)
+
+``clock`` provides the following useful methods:
+
+.. class:: Clock
+
+    .. method:: schedule(callback, delay)
+
+        Schedule `callback` to be called once after the given delay.
+
+        :param callback: A callable that takes no arguments.
+        :param delay: The delay, in seconds, before the function should be
+                      called.
+
+    .. method:: schedule_interval(callback, interval)
+
+        Schedule `callback` to be called repeatedly.
+
+        :param callback: A callable that takes no arguments.
+        :param interval: The interval in seconds between calls to `callback`.
+
+    .. method:: unschedule(callback)
+
+        Unschedule callback if it has been previously scheduled (either because
+        it has been scheduled with ``schedule()`` and has not yet been called,
+        or because it has been scheduled to repeat with
+        ``schedule_interval()``.
