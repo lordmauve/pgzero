@@ -51,7 +51,7 @@ draw images to the screen ("blit" them).
 
         Takes a :ref:`Rect <rect>`.
 
-    .. method:: draw.filled_rect(pos, radius, (r, g, b))
+    .. method:: draw.filled_rect(rect, (r, g, b))
 
         Draw a filled rectangle.
 
@@ -253,3 +253,54 @@ referring to a time value and not a count of things.)
         it has been scheduled with ``schedule()`` and has not yet been called,
         or because it has been scheduled to repeat with
         ``schedule_interval()``.
+
+
+Actors
+------
+
+Once you have many images moving around in a game it can be convenient to have
+something that holds in one place the image and where it is on screen. We'll
+call each moving image on screen an ``Actor``. You can create an actor by supplying
+at least an image name (from the images folder above). To draw the alien talked
+about above::
+
+    alien = Actor('alien', (10, 10))
+
+    def draw():
+        screen.clear()
+        alien.draw()
+
+You can move the actor around by setting its pos attribute in an update::
+
+    def update():
+        if keyboard.LEFT:
+            alien.x -= 1
+        elif keyboard.RIGHT:
+            alien.x += 1
+
+And you may change the image used to draw the actor by setting its image
+attribute to some new image name::
+
+    alien.image = 'alien_hurt'
+
+Actors have all the same attributes as :ref:`Rect <rect>`. If you assign
+a new value to one of those attributes then the actor will be moved. For
+example::
+
+    alien.right = WIDTH
+
+will position the alien so its right-hand side is set to ``WIDTH``.
+
+
+The Keyboard
+------------
+
+You probably noticed that we used the ``keyboard`` in the above code.
+If you'd like to know what keys are pressed on the keyboard, you can look
+up the ``keyboard`` builtin using any of the names defined in the
+`Buttons and Keys`_ documentation.
+
+If a button (say, the left arrow) is held down, then ``keyboard.LEFT`` will
+be ``True``, otherwise it will be ``False``.
+
+.. _`Buttons and Keys`: hooks.html#buttons-and-keys
