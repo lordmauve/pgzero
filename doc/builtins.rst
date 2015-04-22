@@ -255,6 +255,8 @@ referring to a time value and not a count of things.)
         ``schedule_interval()``.
 
 
+.. _actor:
+
 Actors
 ------
 
@@ -304,3 +306,62 @@ If a button (say, the left arrow) is held down, then ``keyboard.LEFT`` will
 be ``True``, otherwise it will be ``False``.
 
 .. _`Buttons and Keys`: hooks.html#buttons-and-keys
+
+
+Animations
+----------
+
+You can animate most things in pygame using the builtin ``animate()``. For
+example, to move an :ref:`Actor <actor>` from its current position on the
+screen to the position ``(100, 100)``::
+
+    animate(alien, pos=(100, 100))
+
+.. function:: animate(object, tween='linear', duration=1, **targets)
+
+    Animate the attributes on object from their current value to that
+    specified in the targets keywords.
+
+    :param tween: The type of *tweening* to use.
+    :param duration: The duration of the animation, in seconds.
+    :param on_complete: Function called when the animation finishes.
+    :param targets: The target values for the attributes to animate.
+
+The tween argument can be one of the following:
+
++--------------------+------------------------------------------------------+
+| 'linear'           | Animate at a constant speed from start to finish     |
+| 'accelerate'       | Start slower and accelerate to finish                |
+| 'decelerate'       | Start fast and decelerate to finish                  |
+| 'accel_decel'      | Accelerate to mid point and decelerate to finish     |
+| 'end_elastic'      | Give a little wobble at the end                      |
+| 'start_elastic'    | Have a little wobble at the start                    |
+| 'both_elastic'     | Have a wobble at both ends                           |
+| 'bounce_end'       | Accelerate to the finish and bounce there            |
+| 'bounce_start'     | Bounce at the start                                  |
+| 'bounce_start_end' | Bounce at both ends                                  |
++--------------------+------------------------------------------------------+
+
+The ``animate()`` function returns an ``Animation`` instance:
+
+.. class:: Animation
+
+    .. method:: stop(complete=False)
+
+        Stop the animation, optionally completing the transition to the final
+        property values.
+
+        :param complete: Set the animated attribute to the target value.
+
+    .. attribute:: running
+
+        This will be True if the animation is running. It will be False
+        when the duration has run or the ``stop()`` method was called before
+        then.
+
+    .. attribute:: on_finished
+
+        You may set this attribute to a function which will be called
+        when the animation duration runs out. The ``on_finished`` argument
+        to ``animate()`` also sets this attribute. It is not called when
+        ``stop()`` is called. This function takes no arguments.
