@@ -123,15 +123,31 @@ def tween_attr(n, start, end):
 
 
 class Animation:
+    """An animation manager for object attribute animations.
+
+    Each keyword argument given to the Animation on creation (except
+    "type" and "duration") will be *tweened* from their current value
+    on the object to the target value specified.
+
+    If the value is a list or tuple, then each value inside that will
+    be tweened.
+
+    The update() method is automatically scheduled with the clock for
+    the duration of the animation.
+
+    """
     animations = []
 
-    def __init__(self, object, type='linear', duration=1, **kw):
-        self.targets = kw
-        self.function = TWEEN_FUNCTIONS[type]
+    def __init__(self, object, tween='linear', duration=1, on_finished=None,
+                 **targets):
+        self.targets = targets
+        self.function = TWEEN_FUNCTIONS[tween]
         self.duration = duration
+        self.on_finished = on_finished
         self.t = 0
         self.object = object
         self.initial = {}
+        self.running = True
         for k in self.targets:
             try:
                 a = getattr(object, k)
@@ -146,9 +162,32 @@ class Animation:
         n = self.t / self.duration
         if n > 1:
             n = 1
-            unschedule(self.update)
-            self.animations.remove(self)
+            self.stop(complete=True)
+            if self.on_finished is not None:
+                self.on_finished()
+            return
         n = self.function(n)
         for k in self.targets:
             v = tween_attr(n, self.initial[k], self.targets[k])
             setattr(self.object, k, v)
+
+    def stop(self, complete=False):
+        """Stop the animation, optionally completing the transition to the final
+        property values.
+
+        :param complete: If True, the object will have its targets
+            set to their final values for the animation. If not, the
+            targets will be set to some value between the start and
+            end values.
+        """
+        self.running = False
+        if complete:
+            for k in self.targets:
+                setattr(self.object, k, self.targets[k])
+        unschedule(self.update)
+        self.animations.remove(self)
+
+
+def animate(object, tween='linear', duration=1, on_finished=None, **targets):
+    return Animation(object, tween, duration, on_finished=on_finished,
+                     **targets)
