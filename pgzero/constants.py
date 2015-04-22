@@ -20,7 +20,7 @@ for k, v in vars(pygame.locals).items():
             k = k[2:]
         srclines.append("    %s = %d" % (k.upper(), v))
 
-srclines = ["class keymods(IntEnum):"]
+srclines.append("class keymods(IntEnum):")
 for k, v in vars(pygame.locals).items():
     if k.startswith('KMOD_'):
         srclines.append("    %s = %d" % (k[5:].upper(), v))
