@@ -184,7 +184,7 @@ stop the sound as well as query its length in seconds:
 
         :param loops: The number of times to loop. If you pass ``-1`` as the
                       number of times to loop, the sound will loop forever (or
-                      until you call :meth:`.stop()`
+                      until you call :meth:`.Sound.stop()`
 
     .. method:: stop()
 
@@ -331,14 +331,23 @@ The tween argument can be one of the following:
 
 +--------------------+------------------------------------------------------+
 | 'linear'           | Animate at a constant speed from start to finish     |
++--------------------+------------------------------------------------------+
 | 'accelerate'       | Start slower and accelerate to finish                |
++--------------------+------------------------------------------------------+
 | 'decelerate'       | Start fast and decelerate to finish                  |
++--------------------+------------------------------------------------------+
 | 'accel_decel'      | Accelerate to mid point and decelerate to finish     |
++--------------------+------------------------------------------------------+
 | 'end_elastic'      | Give a little wobble at the end                      |
++--------------------+------------------------------------------------------+
 | 'start_elastic'    | Have a little wobble at the start                    |
++--------------------+------------------------------------------------------+
 | 'both_elastic'     | Have a wobble at both ends                           |
++--------------------+------------------------------------------------------+
 | 'bounce_end'       | Accelerate to the finish and bounce there            |
++--------------------+------------------------------------------------------+
 | 'bounce_start'     | Bounce at the start                                  |
++--------------------+------------------------------------------------------+
 | 'bounce_start_end' | Bounce at both ends                                  |
 +--------------------+------------------------------------------------------+
 
