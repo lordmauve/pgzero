@@ -19,7 +19,7 @@ Courses
     :maxdepth: 2
 
     introduction
-    contributing
+    learn-programming
 
 Reference
 ---------
@@ -29,6 +29,7 @@ Reference
 
     hooks
     builtins
+    contributing
 
 Indices and tables
 ==================
