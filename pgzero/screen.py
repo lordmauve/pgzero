@@ -52,6 +52,7 @@ class Screen:
     def __init__(self, surface):
         self.surface = surface
         self.width, self.height = surface.get_size()
+        self.background = None
 
     def clear(self):
         """Clear the screen to black."""
@@ -76,3 +77,17 @@ class Screen:
     @property
     def draw(self):
         return SurfacePainter(self)
+
+    def _set_background(self, cls):
+        if not isinstance(self.background, cls):
+            self.background = cls(self.surface)
+
+    def draw_water_background(self):
+        from .backgrounds import WaterBackground
+        self._set_background(WaterBackground)
+        self.background.draw()
+
+    def draw_space_background(self):
+        from .backgrounds import SpaceBackground
+        self._set_background(SpaceBackground)
+        self.background.draw()
