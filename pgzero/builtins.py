@@ -9,3 +9,5 @@ from .loaders import images, sounds
 from pygame import Rect
 
 from .constants import mouse, keys, keymods
+
+from sys import exit
