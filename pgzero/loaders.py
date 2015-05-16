@@ -3,9 +3,13 @@ from types import ModuleType
 import pygame.image
 import pygame.mixer
 
+from . import ptext
+
 
 # Root directory for loaders
 root = '.'
+
+ptext.FONT_NAME_TEMPLATE = os.path.join(root, 'fonts', '%s.ttf')
 
 
 class ResourceLoader:

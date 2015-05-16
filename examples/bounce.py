@@ -44,8 +44,7 @@ def update(dt):
         ball.vx = -ball.vx
 
 
-def on_key_down(key, mod, unicode):
+def on_key_down(key):
     """Pressing a key will kick the ball upwards."""
-    print(mod, repr(unicode))
     if key == keys.SPACE:
         ball.vy = -500
