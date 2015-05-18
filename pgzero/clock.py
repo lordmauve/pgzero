@@ -88,6 +88,18 @@ class Clock:
         """
         heapq.heappush(self.events, Event(self.t + delay, callback, None))
 
+    def schedule_unique(self, callback, delay):
+        """Schedule callback to be called once, at `delay` seconds from now.
+
+        If it was already scheduled, postpone its firing.
+
+        :param callback: A parameterless callable to be called.
+        :param delay: The delay before the call (in clock time / seconds).
+
+        """
+        self.unschedule(callback)
+        self.schedule(callback, delay)
+
     def schedule_interval(self, callback, delay):
         """Schedule callback to be called every `delay` seconds.
 
@@ -159,5 +171,6 @@ clock = Clock()
 tick = clock.tick
 schedule = clock.schedule
 schedule_interval = clock.schedule_interval
+schedule_unique = clock.schedule_unique
 unschedule = clock.unschedule
 each_tick = clock.each_tick
