@@ -19,7 +19,9 @@ Courses
     :maxdepth: 2
 
     introduction
-    learn-programming
+
+.. This one is not yet complete
+.. learn-programming
 
 Reference
 ---------
