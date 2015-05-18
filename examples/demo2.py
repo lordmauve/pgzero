@@ -17,7 +17,7 @@ def draw():
 
 def update():
     """Move the alien by one pixel."""
-    alien.x += 2
+    alien.x += 1
 
     # If the alien is off the right hand side of the screen,
     # move it back off screen to the left-hand side
