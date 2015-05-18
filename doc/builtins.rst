@@ -4,6 +4,8 @@ Built-in Objects
 Pygame Zero provides useful built-in objects to help you make games easily.
 
 
+.. _screen:
+
 Screen
 ------
 
@@ -54,6 +56,20 @@ draw images to the screen ("blit" them).
     .. method:: draw.filled_rect(rect, (r, g, b))
 
         Draw a filled rectangle.
+
+    .. method:: draw.text(text, [pos], **kwargs)
+
+        Draw text.
+
+        There's an extremely rich API for positioning and formatting text; see
+        :doc:`ptext` for full details.
+
+    .. method:: draw.textbox(text, rect, **kwargs)
+
+        Draw text, sized to fill the given :ref:`Rect`.
+
+        There's an extremely rich API for formatting text; see
+        :doc:`ptext` for full details.
 
 
 .. _rect:
