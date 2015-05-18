@@ -285,6 +285,15 @@ referring to a time value and not a count of things.)
         ``schedule_interval()``.
 
 
+Note that the Pygame Zero clock only holds weak references to each callback
+you give it. It will not fire scheduled events if the objects and methods are
+not referenced elsewhere. This can help prevent the clock keeping objects
+alive and continuing to fire unexpectedly after they are otherwise dead.
+
+The downside to the weak references is that you won't be able to schedule
+lambdas or any other object that has been created purely to be scheduled. You
+will have to keep a reference to the object.
+
 .. _actor:
 
 Actors
