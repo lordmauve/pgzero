@@ -68,6 +68,7 @@ class ResourceLoader:
     """
     def __init__(self, subpath):
         self.subpath = subpath
+        self.cache = {}
         self.have_root = False
 
     def validate_root(self, name):
@@ -86,28 +87,37 @@ class ResourceLoader:
     def _root(self):
         return os.path.join(root, self.subpath)
 
+    @staticmethod
+    def cache_key(name, args, kwargs):
+        kwpairs = sorted(kwargs.items())
+        return (name, args, tuple(kwpairs))
+
     def load(self, name, *args, **kwargs):
+        key = self.cache_key(name, args, kwargs)
+        if key in self.cache:
+            return self.cache[key]
+
         if not self.have_root:
             self.validate_root(name)
         p = os.path.join(self._root(), name)
 
-        if os.path.isfile(p):
-            validate_compatible_path(p)
-            return self._load(p, *args, **kwargs)
-
-        for ext in self.EXTNS:
-            p = os.path.join(self._root(), name + '.' + ext)
-            if os.path.exists(p):
-                validate_compatible_path(p)
-                return self._load(p, *args, **kwargs)
-
-        raise KeyError(
-            "No {type} found like '{name}'. "
-            "Are you sure the {type} exists?".format(
-                type=self.TYPE,
-                name=name
+        if not os.path.isfile(p):
+            for ext in self.EXTNS:
+                p = os.path.join(self._root(), name + '.' + ext)
+                if os.path.exists(p):
+                    break
+        else:
+            raise KeyError(
+                "No {type} found like '{name}'. "
+                "Are you sure the {type} exists?".format(
+                    type=self.TYPE,
+                    name=name
+                )
             )
-        )
+
+        validate_compatible_path(p)
+        res = self.cache[key] = self._load(p, *args, **kwargs)
+        return res
 
     def __getattr__(self, name):
         p = os.path.join(self._root(), name)
@@ -143,8 +153,8 @@ class FontLoader(ResourceLoader):
     EXTNS = ['ttf']
     TYPE = 'font'
 
-    def _load(self, path, fontsize):
-        return pygame.font.Font(path, fontsize)
+    def _load(self, path, fontsize=None):
+        return pygame.font.Font(path, fontsize or ptext.DEFAULT_FONT_SIZE)
 
 
 images = ImageLoader('images')
@@ -155,22 +165,22 @@ fonts = FontLoader('fonts')
 def getfont(fontname, fontsize):
     """Monkey-patch for ptext.getfont().
 
-    This will use our loader and therefore obey our case validation and so
-    on.
+    This will use our loader and therefore obey our case validation, caching
+    and so on.
 
     """
     fontname = fontname or ptext.DEFAULT_FONT_NAME
     fontsize = fontsize or ptext.DEFAULT_FONT_SIZE
 
-    key = fontname, fontsize
-    f = ptext._font_cache.get(key)
-    if f:
-        return f
     if fontname is None:
+        key = fontname, fontsize
+        f = ptext._font_cache.get(key)
+        if f:
+            return f
         f = pygame.font.Font(fontname, fontsize)
+        ptext._font_cache[key] = f
     else:
         f = fonts.load(fontname, fontsize)
-    ptext._font_cache[key] = f
     return f
 
 ptext.getfont = getfont
