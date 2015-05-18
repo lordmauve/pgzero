@@ -250,7 +250,21 @@ referring to a time value and not a count of things.)
 
     .. method:: schedule(callback, delay)
 
+        Schedule `callback` to be called after the given delay.
+
+        Repeated calls will schedule the callback repeatedly.
+
+        :param callback: A callable that takes no arguments.
+        :param delay: The delay, in seconds, before the function should be
+                      called.
+
+    .. method:: schedule_unique(callback, delay)
+
         Schedule `callback` to be called once after the given delay.
+
+        If `callback` was already scheduled, cancel and reschedule it. This
+        applies also if it was scheduled multiple times: after calling
+        ``schedule_unique``, it will be scheduled exactly once.
 
         :param callback: A callable that takes no arguments.
         :param delay: The delay, in seconds, before the function should be
