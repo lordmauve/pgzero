@@ -80,7 +80,7 @@ def draw():
         box = rect.inflate(-16, -16)
         screen.draw.textbox(
             text, box,
-            fontname="Bubblegum_Sans",
+            fontname="bubblegum_sans",
             lineheight=0.9,
             color=color,
             owidth=0.5
@@ -96,7 +96,7 @@ def draw():
     screen.draw.text(hudtext,
         right=sx - 10,
         top=120,
-        fontname="Roboto_Condensed",
+        fontname="roboto_condensed",
         fontsize=32,
         color=(0, 200, 0),
         scolor=(0, 50, 0),
@@ -108,7 +108,7 @@ def draw():
     screen.draw.text(
         "Clooky Clunker",
         midtop=(sx / 2, 10),
-        fontname="CherryCreamSoda",
+        fontname="cherrycreamsoda",
         fontsize=64,
         owidth=1.2,
         color="#884400",
@@ -136,7 +136,7 @@ def draw():
         screen.draw.text(
             buytext, pos,
             anchor=(0.5, 0.9),
-            fontname="Bubblegum_Sans",
+            fontname="bubblegum_sans",
             fontsize=fontsize,
             alpha=1 - dt,
             shadow=(1, 1)
@@ -148,7 +148,7 @@ def draw():
         alpha = min(2 - (t - tgoal), 1)
         screen.draw.text(
             goaltext,
-            fontname="Boogaloo",
+            fontname="boogaloo",
             fontsize=48,
             bottom=sy - 20,
             right=sx - 40,
