@@ -124,3 +124,55 @@ So we created a recipe that includes two steps:
       and ``255`` is the most you can have.
 
 You can play with all of these numbers.
+
+
+Diversion: Local and Global Variables
+-------------------------------------
+
+Suppose we wrote the following code::
+
+    RED = 150, 0, 0
+    GREEN = 0, 128, 0
+
+    bg = RED
+
+    def draw():
+        screen.fill(bg)
+
+    def on_mouse_down():
+        bg = GREEN
+
+    def on_mouse_up():
+        bg = RED
+
+In some languages, this would work: the screen would change to green
+when the mouse button was pressed, and change back to red when the button is
+released.
+
+This code doesn't work in Python. If you try it, you will not see the screen
+change to green. Why?
+
+When you assign with the ``=`` operator inside a function, as at line 10 (and
+line 13), you create a "local" variable called ``bg`` that exists only with the
+function. The ``bg`` we want to change is in the global scope. It's actually
+a very sensible feature; you don't want to
+
+The fix is to declare in ``on_mouse_down()`` and ``on_mouse_up()`` that we
+want to modify the global variable, not create a new local variable. We do
+this with the ``global`` statement. The correct code in Pygame Zero is::
+
+    RED = 150, 0, 0
+    GREEN = 0, 128, 0
+
+    bg = RED
+
+    def draw():
+        screen.fill(bg)
+
+    def on_mouse_down():
+        global bg
+        bg = GREEN
+
+    def on_mouse_up():
+        global bg
+        bg = RED
