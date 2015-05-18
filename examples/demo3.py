@@ -8,7 +8,7 @@ HEIGHT = alien.height + 20
 BLACK = 0, 0, 0
 
 # The initial position of the alien
-alien.pos = -alien.width, 10
+alien.topright = 0, 10
 
 
 def draw():
@@ -38,12 +38,7 @@ def set_alien_hurt():
     """Set the current alien sprite to the "hurt" image."""
     alien.image = 'alien_hurt'
     sounds.eep.play()
-    # The alien may already be shown as hurt. In this case we need to prolong
-    # the time it is shown as hurt. Calling unschedule() will cancel the
-    # previous scheduled recovery if there was one. Then we can schedule the
-    # alien to recover 1 second from now.
-    clock.unschedule(set_alien_normal)
-    clock.schedule(set_alien_normal, 1.0)
+    clock.schedule_unique(set_alien_normal, 1.0)
 
 
 def set_alien_normal():

@@ -6,20 +6,20 @@ HEIGHT = alien.height + 20
 
 
 # The initial position of the alien
-alien.pos = -alien.width, 10
+alien.topright = 0, 10
 
 
 def draw():
     """Clear the screen and draw the alien."""
-    screen.fill((0, 0, 0))
+    screen.clear()
     alien.draw()
 
 
 def update():
     """Move the alien by one pixel."""
-    alien.x += 1
+    alien.x += 2
 
     # If the alien is off the right hand side of the screen,
     # move it back off screen to the left-hand side
-    if alien.x > WIDTH:
-        alien.x = -100
+    if alien.left > WIDTH:
+        alien.right = 0
