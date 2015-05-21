@@ -6,7 +6,7 @@ import pgzero.screen
 
 
 screen = None
-DISPLAY_FLAGS = pygame.HWSURFACE | pygame.DOUBLEBUF
+DISPLAY_FLAGS = 0
 
 
 class PGZeroGame:
