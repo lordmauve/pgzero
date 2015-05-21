@@ -1,3 +1,4 @@
+import sys
 import pygame
 import pgzero.clock
 import pgzero.keyboard
@@ -124,6 +125,9 @@ class PGZeroGame:
                 if event.type == pygame.QUIT:
                     return
                 if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_q and \
+                            event.mod & (pygame.KMOD_CTRL | pygame.KMOD_META):
+                        sys.exit(0)
                     self.keyboard[event.key] = True
                 elif event.type == pygame.KEYUP:
                     self.keyboard[event.key] = False
