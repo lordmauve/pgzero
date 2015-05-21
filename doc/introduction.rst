@@ -16,6 +16,10 @@ Verify that this runs and creates a blank window by running ::
 Everything in Pygame Zero is optional; a blank file is a valid Pygame Zero
 script!
 
+You can quit the game by clicking on the window's close button or by pressing
+``Ctrl-Q`` (``⌘-Q`` on Mac). If the game stops responding for any reason, you
+may need to terminate it by pressing ``Ctrl-C`` in your Terminal window.
+
 
 Drawing a background
 --------------------
