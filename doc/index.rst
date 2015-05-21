@@ -29,6 +29,7 @@ Reference
 .. toctree::
     :maxdepth: 2
 
+    installation
     hooks
     builtins
     contributing
