@@ -1,12 +1,13 @@
-alien = Actor('alien')
+alien = Actor('alien', anchor=('middle', 'bottom'))
 
 TITLE = "Alien walk"
 WIDTH = 500
-HEIGHT = alien.height + 20
-
+HEIGHT = alien.height + 100
+GROUND = HEIGHT - 10
 
 # The initial position of the alien
-alien.pos = 0, 10
+alien.left = 0
+alien.y = GROUND
 
 
 def draw():
@@ -18,12 +19,12 @@ def draw():
 def update():
     """Move the alien around using the keyboard."""
     if keyboard.LEFT:
-        alien.x -= 1
+        alien.x -= 2
     elif keyboard.RIGHT:
-        alien.x += 1
+        alien.x += 2
     elif keyboard.SPACE:
-        alien.y = 0
-        animate(alien, y=10, tween='bounce_end', duration=.5)
+        alien.y = GROUND - 50
+        animate(alien, y=GROUND, tween='bounce_end', duration=.5)
 
     # If the alien is off the screen,
     # move it back on screen

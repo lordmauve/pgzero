@@ -305,7 +305,7 @@ call each moving image on screen an ``Actor``. You can create an actor by supply
 at least an image name (from the images folder above). To draw the alien talked
 about above::
 
-    alien = Actor('alien', (10, 10))
+    alien = Actor('alien', (50, 50))
 
     def draw():
         screen.clear()
@@ -332,6 +332,19 @@ example::
 
 will position the alien so its right-hand side is set to ``WIDTH``.
 
+Actors have an "anchor position", which is a convenient way to position the
+actor in the scene. By default, the anchor position is the center, so the
+``.pos`` attribute refers to the center of the actor (and so do the ``x`` and
+``y`` coordinates). It's common to want to set the anchor point to another
+part of the sprite (perhaps the feet - so that you can easily set the Actor to
+be "standing on" something)::
+
+    alien = Actor('alien', anchor=('center', 'bottom'))
+    spaceship = Actor('spaceship', anchor=(10, 50))
+
+``anchor`` is specified as a tuple ``(xanchor, yanchor)``, where the values can
+be floats or the strings ``left``, ``center``/``middle``, ``right``, ``top`` or
+``bottom`` as appropriate.
 
 The Keyboard
 ------------
