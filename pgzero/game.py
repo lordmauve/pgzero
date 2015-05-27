@@ -1,8 +1,12 @@
 import sys
+import operator
+
 import pygame
 import pgzero.clock
 import pgzero.keyboard
 import pgzero.screen
+
+from . import constants
 
 
 screen = None
@@ -54,6 +58,11 @@ class PGZeroGame:
         pygame.KEYUP: 'on_key_up',
     }
 
+    EVENT_PARAM_MAPPERS = {
+        'button': constants.mouse,
+        'key': constants.keys
+    }
+
     def load_handlers(self):
         self.handlers = {}
         for type, name in self.EVENT_HANDLERS.items():
@@ -62,11 +71,35 @@ class PGZeroGame:
                 self.handlers[type] = self.prepare_handler(handler)
 
     def prepare_handler(self, handler):
+        """Adapt a pgzero game's raw handler function to take a Pygame Event.
+
+        Returns a one-argument function of the form ``handler(event)``.
+        This will ensure that the correct arguments are passed to the raw
+        handler based on its argument spec.
+
+        The wrapped handler will also map certain parameter values using
+        callables from EVENT_PARAM_MAPPERS; this ensures that the value of
+        'button' inside the handler is a real instance of constants.mouse,
+        which means (among other things) that it will print as a symbolic value
+        rather than a naive integer.
+
+        """
         code = handler.__code__
         param_names = code.co_varnames[:code.co_argcount]
 
+        def make_getter(mapper, getter):
+            if mapper:
+                return lambda event: mapper(getter(event))
+            return getter
+
+        param_handlers = []
+        for name in param_names:
+            getter = operator.attrgetter(name)
+            mapper = self.EVENT_PARAM_MAPPERS.get(name)
+            param_handlers.append((name, make_getter(mapper, getter)))
+
         def prep_args(event):
-            return {n: getattr(event, n) for n in param_names}
+            return {name: get(event) for name, get in param_handlers}
         return lambda event: handler(**prep_args(event))
 
     def dispatch_event(self, event):
