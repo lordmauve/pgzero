@@ -1,40 +1,69 @@
 Installing Pygame Zero
 ======================
 
+On Windows
+~~~~~~~~~~
+
+1. Install Pygame for Python 3. This is available as a .msi installer from the
+   `Pygame Bitbucket`_.
+2. Install Pygame Zero with pip::
+
+    pip install pgzero
+
+.. _`Pygame Bitbucket`: https://bitbucket.org/pygame/pygame/downloads
+
+
 On OSX
 ~~~~~~
 
-Homebrew
---------
-homebrew_ is a package manager for OSX. It will allow you to install nearly everything you need to get Pygame Zero up and running.
+homebrew_ is a package manager for OSX. It will allow you to install nearly
+everything you need to get Pygame Zero up and running.
 
-Install homebrew_ using::
+All commands will be entered in a Terminal window.
+
+1. Install homebrew_::
+
     ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 
-Python3
-------
-As Pygame Zero is Python3 only you need to install python3.
+2. Install Python 3::
 
-Run::
     brew install python3
 
-SDL
----
-SDL is the graphics and sound library which Pygame uses. The following components are required for Pygame Zero to work correctly...
+3. Install the following dependencies, needed for compiling Pygame::
 
-Run::
     brew install sdl sdl_mixer sdl_sound sdl_ttf
 
-Pygame
-------
-Once the dependencies are installed pygame can be installed easily using Python's own package manager, pip3.
+4. Now pygame can be installed easily using Python's own package manager,
+   pip3::
 
-Run::
     pip3 install hg+http://bitbucket.org/pygame/pygame
 
-Pygame Zero
------------
-Run::
+5. Finally, install Pygame Zero! ::
+
     pip3 install pgzero
 
 .. _homebrew: http://brew.sh/
+
+
+On Ubuntu Linux
+~~~~~~~~~~~~~~~
+
+There is a .deb package of Pygame for Python 3 available in `this PPA`__.
+
+.. __: https://launchpad.net/~thopiekar/+archive/ubuntu/pygame
+
+1. Add the PPA to your system sources::
+
+    sudo add-apt-repository ppa:thopiekar/pygame
+
+2. Update the package list::
+
+    sudo apt-get update
+
+3. Install the package::
+
+    sudo apt-get install python3-pygame
+
+2. Install Pygame Zero with pip::
+
+    pip3 install pgzero
