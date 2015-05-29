@@ -7,7 +7,7 @@ with open(path, encoding='utf8') as f:
 
 setup(
     name='pgzero',
-    version='1.0beta1',
+    version='1.0',
     description="A zero-boilerplate 2D games framework",
     long_description=LONG_DESCRIPTION,
     author='Daniel Pope',
