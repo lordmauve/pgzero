@@ -67,3 +67,33 @@ There is a .deb package of Pygame for Python 3 available in `this PPA`__.
 2. Install Pygame Zero with pip::
 
     pip3 install pgzero
+
+On Debian 8 (Jessie)
+~~~~~~~~~~~~~~~~~~~~
+
+(There is a .deb package of Pygame for Python 3 in Debian unstable "Sid". On
+Jessie it's relatively simply to compile Pygame yourself.)
+
+1. Install the dependencies::
+
+    sudo apt-get install mercurial python3-dev python3-numpy libav-tools \
+        libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libsmpeg-dev \
+        libsdl1.2-dev  libportmidi-dev libswscale-dev libavformat-dev \
+        libavcodec-dev
+
+2. Grab Pygame source::
+
+    hg clone https://bitbucket.org/pygame/pygame
+
+3. Build Pygame::
+
+    cd pygame
+    python3 setup.py build
+
+4. Install Pygame::
+
+    sudo python3 setup.py install
+
+5. Install Pygame Zero with pip::
+
+    pip3 install pgzero
