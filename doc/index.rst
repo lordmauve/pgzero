@@ -33,6 +33,7 @@ Reference
     hooks
     builtins
     contributing
+    changelog
 
 Indices and tables
 ==================
