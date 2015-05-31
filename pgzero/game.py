@@ -105,6 +105,7 @@ class PGZeroGame:
     def dispatch_event(self, event):
         handler = self.handlers.get(event.type)
         if handler:
+            self.need_redraw = True
             handler(event)
 
     def get_update_func(self):
@@ -124,7 +125,7 @@ class PGZeroGame:
         try:
             update = self.mod.update
         except AttributeError:
-            return lambda dt: None
+            return None
         else:
             if update.__code__.co_argcount == 0:
                 return lambda dt: update()
@@ -152,8 +153,13 @@ class PGZeroGame:
         update = self.get_update_func()
         draw = self.get_draw_func()
         self.load_handlers()
+
+        pgzclock = pgzero.clock.clock
+
+        self.need_redraw = True
         while True:
             dt = clock.tick(60) / 1000.0
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     return
@@ -166,8 +172,13 @@ class PGZeroGame:
                     self.keyboard[event.key] = False
                 self.dispatch_event(event)
 
-            pgzero.clock.tick(dt)
-            update(dt)
-            self.reinit_screen()
-            draw()
-            pygame.display.flip()
+            pgzclock.tick(dt)
+
+            if update:
+                update(dt)
+
+            if update or pgzclock.fired or self.need_redraw:
+                self.reinit_screen()
+                draw()
+                pygame.display.flip()
+                self.need_redraw = False
