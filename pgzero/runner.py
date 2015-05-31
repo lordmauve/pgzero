@@ -23,6 +23,8 @@ def main():
     with open(path) as f:
         src = f.read()
 
+    code = compile(src, os.path.basename(path), 'exec', dont_inherit=True)
+
     loaders.root = os.path.dirname(os.path.abspath(path))
 
     pygame.display.set_mode((100, 100), DISPLAY_FLAGS)
@@ -32,5 +34,5 @@ def main():
     mod.__name__ = name
     mod.__dict__.update(builtins.__dict__)
     sys.modules[name] = mod
-    exec(src, mod.__dict__)
+    exec(code, mod.__dict__)
     PGZeroGame(mod).run()
