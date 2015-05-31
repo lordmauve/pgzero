@@ -156,14 +156,16 @@ class Clock:
             cb = ev.callback
             if not cb:
                 continue
+
+            if ev.repeat is not None:
+                self.schedule_interval(cb, ev.repeat)
+
             try:
                 cb()
             except Exception:
                 import traceback
                 traceback.print_exc()
-            else:
-                if ev.repeat is not None:
-                    self.schedule_interval(cb, ev.repeat)
+                self.unschedule(cb)
 
 
 # One instance of a clock is available by default, to simplify the API
