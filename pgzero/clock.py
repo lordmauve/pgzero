@@ -76,6 +76,7 @@ class Clock:
     """
     def __init__(self):
         self.t = 0
+        self.fired = False
         self.events = []
         self._each_tick = []
 
@@ -135,6 +136,7 @@ class Clock:
         for r in self._each_tick:
             cb = r()
             if cb is not None:
+                self.fired = True
                 try:
                     cb(dt)
                 except Exception:
@@ -149,6 +151,7 @@ class Clock:
         :param dt: The elapsed time in seconds.
 
         """
+        self.fired = False
         self.t += float(dt)
         self._fire_each_tick(dt)
         while self.events and self.events[0].time <= self.t:
@@ -160,6 +163,7 @@ class Clock:
             if ev.repeat is not None:
                 self.schedule_interval(cb, ev.repeat)
 
+            self.fired = True
             try:
                 cb()
             except Exception:
