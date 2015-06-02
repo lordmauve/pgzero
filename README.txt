@@ -43,7 +43,9 @@ the screen::
 Installation
 ------------
 
-See [installation instructions](http://pygame-zero.readthedocs.org/en/latest/installation.html).
+See `installation instructions`__.
+
+.. __: http://pygame-zero.readthedocs.org/en/latest/installation.html
 
 
 Documentation
