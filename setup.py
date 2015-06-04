@@ -5,6 +5,10 @@ path = os.path.join(os.path.dirname(__file__), 'README.txt')
 with open(path, encoding='utf8') as f:
     LONG_DESCRIPTION = f.read()
 
+install_requires = ['pygame>=1.9']
+if sys.version < (3, 4):
+    install_requires.append("enum34")
+    
 setup(
     name='pgzero',
     version='1.0.1',
@@ -19,9 +23,7 @@ setup(
             'pgzrun = pgzero.runner:main'
         ]
     },
-    install_requires=[
-        'pygame>=1.9',
-    ],
+    install_requires=install_requires,
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Education',
