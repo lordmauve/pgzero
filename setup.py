@@ -9,10 +9,10 @@ with open(path, encoding='utf8') as f:
 install_requires = ['pygame>=1.9']
 if sys.version_info < (3, 4):
     install_requires.append("enum34")
-    
+
 setup(
     name='pgzero',
-    version='1.0.1',
+    version='1.0.2',
     description="A zero-boilerplate 2D games framework",
     long_description=LONG_DESCRIPTION,
     author='Daniel Pope',
