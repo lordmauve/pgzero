@@ -43,12 +43,9 @@ the screen::
 Installation
 ------------
 
-1. Install Pygame for Python 3
-   * https://bitbucket.org/pygame/pygame/downloads - Windows
-   * https://launchpad.net/~thopiekar/+archive/ubuntu/pygame - Ubuntu
-2. Install Pygame Zero (``python setup.py install``)
-3. "python3 -m pgzero <pgzero program>" or (if installed correctly)
-   ``pgzrun <program>``
+See `installation instructions`__.
+
+.. __: http://pygame-zero.readthedocs.org/en/latest/installation.html
 
 
 Documentation
