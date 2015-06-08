@@ -31,7 +31,7 @@ All commands will be entered in a Terminal window.
 
 3. Install the following dependencies, needed for compiling Pygame::
 
-    brew install sdl sdl_mixer sdl_sound sdl_ttf
+    brew install sdl sdl_image sdl_mixer sdl_sound sdl_ttf
 
 4. Now pygame can be installed easily using Python's own package manager,
    pip3::
