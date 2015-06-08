@@ -8,6 +8,4 @@ to it
 import pygame
 
 class Rect(pygame.rect.Rect):
-    
-    def __init__(self, *args, **kwargs):
-        super(Rect, self).__init__(*args, **kwargs)
+    pass
