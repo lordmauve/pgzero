@@ -333,8 +333,8 @@ class Rect:
         rect = self.__class__(*other)
         x = min(self.x, rect.x)
         y = min(self.y, rect.y)
-        w = max(self.w, rect.w)
-        h = max(self.h, rect.h)
+        w = max(self.x + self.w, rect.x + rect.w) - x
+        h = max(self.y + self.h, rect.y + rect.h) - y
         return x, y, w, h
 
     def union(self, *other):
@@ -349,8 +349,8 @@ class Rect:
         allrects = [self] + [self.__class__(other) for other in others]
         x = min(r.x for r in allrects)
         y = min(r.y for r in allrects)
-        w = max(r.w for r in allrects)
-        h = max(r.h for r in allrects)
+        w = max(r.x + r.w for r in allrects) - x
+        h = max(r.y + r.h for r in allrects) - y
         return x, y, w, h
 
     def unionall(self, others):
@@ -371,10 +371,10 @@ class Rect:
     def normalize(self):
         if self.w < 0:
             self.x += self.w
-            self.w = -self.w
+            self.w = abs(self.w)
         if self.h < 0:
             self.y += self.h
-            self.h -= self.h
+            self.h = abs(self.h)
     
     def contains(self, *other):
         rect = self.__class__(*other)
