@@ -7,6 +7,7 @@ to implement that change into pygame itself. All pygame functions which
 require a rect allow for an object with a "rect" attribute and whose
 coordinates will be converted to integers implictly.
 """
+from pygame.rect import Rect as PygameRect
 
 class NoIntersect(Exception): 
     pass
@@ -14,25 +15,42 @@ class NoIntersect(Exception):
 class Rect:
 
     _item_mapping = dict(enumerate("xywh"))
-    
-    def __init__(self, *args):
+
+    def __new__(cls, *args):
+        
+        #
+        # If there is only one argument, it should either be a Rect object
+        # (one of these or one from Pygame) or an arbitrary object with a
+        # "rect" attribute. In the former case, just pass it back unchanged;
+        # in the latter case, re-run the check with the object pointed to
+        # by ".rect", calling it first if it is callable.
+        #
+        if len(args) == 1:
+            obj, = args
+            if isinstance(obj, (Rect, PygameRect)):
+                return obj
+            if hasattr(obj, "rect"):
+                rectobj = obj.rect
+                if callable(rectobj):
+                    rectobj = rectobj()
+                return cls(rectobj, *args)
+
+        obj = super().__new__(cls)
         if len(args) == 4:
             left, top, width, height = args
         elif len(args) == 2:
             (left, top), (width, height) = args
+        elif len(args) == 1:
+            left, top, width, height = args[0]
         else:
-            obj, = args
-            obj = getattr(obj, "rect", obj)
-            if callable(obj):
-                obj = obj()
-
-            left, top, width, height = obj.left, obj.top, obj.width, obj.height
-            
-        self.x = left
-        self.y = top
-        self.w = width
-        self.h = height
-        self.rect = self
+            raise TypeError("%s should be called with one, two or four arguments" % (cls.__name__))
+        
+        obj.x = left
+        obj.y = top
+        obj.w = width
+        obj.h = height
+        obj.rect = obj
+        return obj
     
     def __repr__(self):
         return "<%s (x: %s, y: %s, w: %s, h: %s)>" % (self.__class__.__name__, self.x, self.y, self.w, self.h)
@@ -64,26 +82,29 @@ class Rect:
     def __bool__(self):
         return self.w != 0 and self.h != 0
         
-    def __hash__(self):
-        return hash(self.x, self.y, self.w, self.h)
+    def __eq__(self, *other):
+        rect = self.__class__(*other)
+        return (self.x, self.y, self.w, self.h) == (rect.x, rect.y, rect.w, rect.h)
     
-    def __eq__(self, other):
-        return self.x, self.y, self.w, self.h == other.x, other.y, other.w, other.h
+    def __ne__(self, *other):
+        rect = self.__class__(*other)
+        return (self.x, self.y, self.w, self.h) != (rect.x, rect.y, rect.w, rect.h)
     
-    def __ne__(self, other):
-        return self.x, self.y, self.w, self.h == other.x, other.y, other.w, other.h
+    def __lt__(self, *other):
+        rect = self.__class__(*other)
+        return (self.x, self.y, self.w, self.h) < (rect.x, rect.y, rect.w, rect.h)
     
-    def __lt__(self, other):
-        return self.x, self.y, self.w, self.h < other.x, other.y, other.w, other.h
+    def __gt__(self, *other):
+        rect = self.__class__(*other)
+        return (self.x, self.y, self.w, self.h) > (rect.x, rect.y, rect.w, rect.h)
     
-    def __gt__(self, other):
-        return self.x, self.y, self.w, self.h > other.x, other.y, other.w, other.h
+    def __le__(self, *other):
+        rect = self.__class__(*other)
+        return (self.x, self.y, self.w, self.h) <= (rect.x, rect.y, rect.w, rect.h)
     
-    def __le__(self, other):
-        return self.x, self.y, self.w, self.h <= other.x, other.y, other.w, other.h
-    
-    def __ge__(self, other):
-        return self.x, self.y, self.w, self.h >= other.x, other.y, other.w, other.h
+    def __ge__(self, *other):
+        rect = self.__class__(*other)
+        return (self.x, self.y, self.w, self.h) >= (rect.x, rect.y, rect.w, rect.h)
     
     def _get_width(self):
         return self.w
@@ -123,15 +144,15 @@ class Rect:
     
     def _get_centerx(self):
         return self.x + (self.w / 2)
-    def _set_centerx(self, centre):
-        self.x = centre - (self.w / 2)
+    def _set_centerx(self, centerx):
+        self.x = centerx - (self.w / 2)
     centerx = property(_get_centerx, _set_centerx)
     centrex = centerx
 
     def _get_centery(self):
         return self.y + (self.h / 2)
-    def _set_centery(self, centre):
-        self.y = centre - (self.h / w)
+    def _set_centery(self, centery):
+        self.y = centery - (self.h / 2)
     centery = property(_get_centery, _set_centery)
     centrey = centery
     
@@ -210,7 +231,7 @@ class Rect:
         return self.w, self.h
     def _set_size(self, size):
         self.w, self.h = size
-    size = property(_get_size, set_size)
+    size = property(_get_size, _set_size)
     
     def move(self, x, y):
         return self.__class__(self.x + x, self.y + y, self.w, self.h)
@@ -226,7 +247,9 @@ class Rect:
         self.w += x
         self.h += y
 
-    def _clamped(self, rect):
+    def _clamped(self, *other):
+        rect = self.__class__(*other)
+        
         if self.w >= rect.w:    
             x = rect.x + rect.w / 2 - self.w / 2
         elif self.x < rect.x:
@@ -247,90 +270,99 @@ class Rect:
         
         return x, y
     
-    def clamp(self, rect):
+    def clamp(self, *other):
+        rect = self.__class__(*other)
         x, y = self._clamped(rect)    
         return self.__class__(x, y, self.w, self.h)
 
-    def clamp_ip(self, rect):
+    def clamp_ip(self, *other):
+        rect = self.__class__(*other)
         self.x, self.y = self._clamped(rect)
 
-    def _clipped(self, other):
-        if other.x <= self.x < (other.x + other.w):
+    def _clipped(self, *other):
+        rect = self.__class__(*other)
+        if rect.x <= self.x < (rect.x + rect.w):
             x = self.x
-        elif self.x <= other.x < (self.x + self.w):
-            x = other.x
+        elif self.x <= rect.x < (self.x + self.w):
+            x = rect.x
         else:
             raise NoIntersect
         
-        if other.x < (self.x + self.w) <= (other.x + other_w):
+        if rect.x < (self.x + self.w) <= (rect.x + rect.w):
             w = self.x + self.w - x
-        elif self.x <= other.x < (self.x + self.w):
-            w = other.x + other.w - x
+        elif self.x <= rect.x < (self.x + self.w):
+            w = rect.x + rect.w - x
         else:
             raise NoIntersect
         
-        if other.y <= self.y < (other.y + other.h):
+        if rect.y <= self.y < (rect.y + rect.h):
             y = self.y
-        elif self.y <= other.y < (self.y + self.h):
-            y = other.y
+        elif self.y <= rect.y < (self.y + self.h):
+            y = rect.y
         else:
             raise NoIntersect
         
-        if other.y < (self.y + self.h) <= (other.y + other_w):
+        if rect.y < (self.y + self.h) <= (rect.y + rect.w):
             h = self.y + self.h - y
-        elif self.y <= other.y < (self.y + self.h):
-            h = other.y + other.h - y
+        elif self.y <= rect.y < (self.y + self.h):
+            h = rect.y + rect.h - y
         else:
             raise NoIntersect
         
         return x, y, w, h
 
-    def clip(self, rect):
+    def clip(self, *other):
+        rect = self.__class__(*other)
         try:
             x, y, w, h = self._clipped(rect)
         except NoIntersect:
             x, y, w, h = self.x, self.y, 0, 0
         return self.__class__(x, y, w, h)
 
-    def clip_ip(self, rect):
+    def clip_ip(self, *other):
+        rect = self.__class__(*other)
         try:
             self.x, self.y, self.w, self.h = self._clipped(rect)
         except NoIntersect:
             self.x, self.y, self.w, self.h = self.x, self.y, 0, 0
 
-    def _unioned(self, other):
-        x = min(self.x, other.x)
-        y = min(self.y, other.y)
-        w = max(self.w, other.w)
-        h = max(self.h, other.h)
+    def _unioned(self, *other):
+        rect = self.__class__(*other)
+        x = min(self.x, rect.x)
+        y = min(self.y, rect.y)
+        w = max(self.w, rect.w)
+        h = max(self.h, rect.h)
         return x, y, w, h
 
-    def union(self, other):
-        return self.__class__(*self._unioned(other))
+    def union(self, *other):
+        rect = self.__class__(*other)
+        return self.__class__(*self._unioned(rect))
     
-    def union_ip(self, rect):
-        self.x, self.y, self.w, self.h = self._unioned(other)
+    def union_ip(self, *other):
+        rect = self.__class__(*other)
+        self.x, self.y, self.w, self.h = self._unioned(rect)
 
-    def _unionalled(self, rects):
-        allrects = [self] + list(rects)
+    def _unionalled(self, others):
+        allrects = [self] + [self.__class__(other) for other in others]
         x = min(r.x for r in allrects)
         y = min(r.y for r in allrects)
         w = max(r.w for r in allrects)
         h = max(r.h for r in allrects)
         return x, y, w, h
 
-    def unionall(self, rects):
-        return self.__class__(*self._unionalled(rects))
+    def unionall(self, others):
+        return self.__class__(*self._unionalled(others))
     
-    def unionall_ip(self, rects):
-        self.x, self.y, self.w, self.h = self._unionalled(rects)
+    def unionall_ip(self, others):
+        self.x, self.y, self.w, self.h = self._unionalled(others)
     
-    def fit(self, other):
-        ratio = max(self.w / other.w, self.h / other.h)
+    def fit(self, *other):
+        rect = self.__class__(*other)
+        ratio = max(self.w / rect.w, self.h / rect.h)
         w = self.w / ratio
         h = self.h / ratio
-        x = other.x + (other.w - w) / 2
-        y = other.y + (other.h - h) / 2
+        x = rect.x + (rect.w - w) / 2
+        y = rect.y + (rect.h - h) / 2
         return self.__class__(x, y, w, h)
     
     def normalize(self):
@@ -341,14 +373,15 @@ class Rect:
             self.y += self.h
             self.h -= self.h
     
-    def contains(self, other):
+    def contains(self, *other):
+        rect = self.__class__(*other)
         return (
-            self.x <= other.x and 
-            self.y <= other.y and
-            self.x + self.w >= other.x + other.w and
-            self.y + self.h >= other.h + other.h and
-            self.x + self.w > other.x and
-            self.y + self.h > other.y
+            self.x <= rect.x and 
+            self.y <= rect.y and
+            self.x + self.w >= rect.x + rect.w and
+            self.y + self.h >= rect.h + rect.h and
+            self.x + self.w > rect.x and
+            self.y + self.h > rect.y
         )
 
     def collidepoint(self, *args):
@@ -361,12 +394,13 @@ class Rect:
             self.y <= y < (self.y + self.h)
         )
 
-    def colliderect(self, other):
+    def colliderect(self, *other):
+        rect = self.__class__(*other)
         return (
-            self.x < other.x + other.w and
-            self.y < other.y + other.h and
-            self.x + self.w > other.x and
-            self.y + self.h > other.y
+            self.x < rect.x + rect.w and
+            self.y < rect.y + rect.h and
+            self.x + self.w > rect.x and
+            self.y + self.h > rect.y
         )
 
     def collidelist(self, others):
@@ -379,10 +413,10 @@ class Rect:
     def collidelistall(self, others):
         return [n for n, other in enumerate(others) if self.colliderect(other)]
 
-    def collidedict(self, dict, use_values=0):
-        function = dict.values if use_values else dict.keys
-        return self.collidelist(function())        
+    def collidedict(self, dict, use_values=True):
+        for k, v in dict.items():
+            if self.colliderect(v if use_values else k):
+                return k, v
     
-    def collidedictall(self, dict, use_values=0):
-        function = dict.values if use_values else dict.keys
-        return self.collidelistall(function())        
+    def collidedictall(self, dict, use_values=True):
+        return [(k, v) for (k, v) in dict.items() if self.colliderect(v if use_values else k)]
