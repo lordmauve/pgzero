@@ -1,4 +1,5 @@
 import unittest
+import pygame
 from pgzero.rect import Rect
 
 class RectTypeTest( unittest.TestCase ):
@@ -656,5 +657,79 @@ class RectTypeTest( unittest.TestCase ):
         c = r.copy()
         self.assertEqual(c, r)
         
+class PGZeroRectText(unittest.TestCase):
+    
+    def test_constructor_from_tuple(self):
+        "Build a Rect from a 4-item tuple"
+        r = Rect((1, 2, 3, 4))
+        self.assertEqual(r.x, 1)
+        self.assertEqual(r.y, 2)
+        self.assertEqual(r.w, 3)
+        self.assertEqual(r.h, 4)
+    
+    def test_constructor_from_PGZeroRect(self):
+        "Build a rect from another pgzero Rect"
+        r = Rect(1, 2, 3, 4)
+        r1 = Rect(r)
+        self.assertEqual(r, r1)
+        self.assertIsNot(r, r1)
+    
+    def test_constructor_from_PygameRect(self):
+        "Build a rect from a pygame Rect"
+        r = pygame.Rect(1, 2, 3, 4)
+        r1 = Rect(r)
+        self.assertEqual(r, r1)
+        self.assertIsNot(r, r1)
+    
+    def test_constructor_from_rect_tuple(self):
+        "Build a rect from an object with a rect attribute which is a tuple"
+        class Obj: pass
+        obj = Obj()
+        obj.rect = 1, 2, 3, 4
+        r = Rect(obj)
+        self.assertEqual(r, Rect(1, 2, 3, 4))
+    
+    def test_constructor_from_rect_object(self):
+        "Build a rect from an object with a rect attribute which is an object"
+        class Obj: pass
+        obj = Obj()
+        obj.rect = Rect(1, 2, 3, 4)
+        r = Rect(obj)
+        self.assertEqual(r, Rect(1, 2, 3, 4))
+        
+    def test_constructor_from_rect_indirect_tuple(self):
+        """Build a rect from an object with a rect attribute which 
+        is an object which has a rect attribute which is a tuple
+        """
+        class Obj: pass
+        obj = Obj()
+        obj1 = Obj()
+        obj1.rect = Rect(1, 2, 3, 4)
+        obj.rect = obj1
+        r = Rect(obj)
+        self.assertEqual(r, Rect(1, 2, 3, 4))
+
+    def test_float_instance(self):
+        "Create an instance with floating-point co-ordinates"
+        r = Rect(1.2, 3.4, 5.6, 7.8)
+        self.assertEqual(r.x, 1.2)
+        self.assertEqual(r.y, 3.4)
+        self.assertEqual(r.w, 5.6)
+        self.assertEqual(r.h, 7.8)
+    
+    def test_float_instance_as_PygameRect(self):
+        "Create a Pygame Rect from a pgzero floating-point Rect"
+        r = Rect(1.2, 3.4, 5.6, 7.8)
+        r2 = pygame.Rect(r)
+        self.assertEqual([int(i) for i in r], list(r2))
+    
+    def test_float_centre(self):
+        r = Rect(0, 0, 5, 5)
+        self.assertEqual(r.centre, (2.5, 2.5))
+
+    def test_float_inflated(self):
+        r = Rect(0, 0, 5, 5)
+        self.assertEqual(r.inflate(1.5, 1.5), (-0.75, -0.75, 6.5, 6.5))
+
 if __name__ == '__main__':
     unittest.main()
