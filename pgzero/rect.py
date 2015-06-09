@@ -25,7 +25,7 @@ class Rect:
             obj = getattr(obj, "rect", obj)
             if callable(obj):
                 obj = obj()
-                    
+
             left, top, width, height = obj.left, obj.top, obj.width, obj.height
             
         self.x = left
@@ -38,7 +38,7 @@ class Rect:
         return "<%s (x: %s, y: %s, w: %s, h: %s)>" % (self.__class__.__name__, self.x, self.y, self.w, self.h)
     
     def __reduce__(self):
-        raise NotImplementedError
+        return self.__class__, (self.x, self.y, self.w, self.h)
     
     def copy(self):
         return self.__class__(self.x, self.y, self.w, self.h)
@@ -63,6 +63,27 @@ class Rect:
             
     def __bool__(self):
         return self.w != 0 and self.h != 0
+        
+    def __hash__(self):
+        return hash(self.x, self.y, self.w, self.h)
+    
+    def __eq__(self, other):
+        return self.x, self.y, self.w, self.h == other.x, other.y, other.w, other.h
+    
+    def __ne__(self, other):
+        return self.x, self.y, self.w, self.h == other.x, other.y, other.w, other.h
+    
+    def __lt__(self, other):
+        return self.x, self.y, self.w, self.h < other.x, other.y, other.w, other.h
+    
+    def __gt__(self, other):
+        return self.x, self.y, self.w, self.h > other.x, other.y, other.w, other.h
+    
+    def __le__(self, other):
+        return self.x, self.y, self.w, self.h <= other.x, other.y, other.w, other.h
+    
+    def __ge__(self, other):
+        return self.x, self.y, self.w, self.h >= other.x, other.y, other.w, other.h
     
     def _get_width(self):
         return self.w
@@ -144,12 +165,53 @@ class Rect:
         self.y = y - self.h
     bottomright = property(_get_bottomright, _set_bottomright)
     
-    #
-    # TODO: set / get slice
-    # TODO: coerce
-    # TODO: comparison operators
-    #
-
+    def _get_midtop(self):
+        return self.x + self.w / 2, self.y
+    def _set_midtop(self, midtop):
+        x, y = midtop
+        self.x = x - self.w / 2
+        self.y = y
+    midtop = property(_get_midtop, _set_midtop)
+    
+    def _get_midleft(self):
+        return self.x, self.y + self.h / 2
+    def _set_midleft(self, midleft):
+        x, y = midleft
+        self.x = x
+        self.y = y - self.h / 2
+    midleft = property(_get_midleft, _set_midleft)
+    
+    def _get_midbottom(self):
+        return self.x + self.w / 2, self.y + self.h
+    def _set_midbottom(self, midbottom):
+        x, y = midbottom
+        self.x = x - self.w / 2
+        self.y = y - self.h
+    midbottom = property(_get_midbottom, _set_midbottom)
+    
+    def _get_midright(self):
+        return self.x + self.w, self.y + self.h / 2
+    def _set_midright(self, midright):
+        x, y = midright
+        self.x = x - self.w
+        self.y = y - self.h / 2
+    midright = property(_get_midright, _set_midright)
+    
+    def _get_center(self):
+        return self.x + self.w / 2, self.y + self.h / 2
+    def _set_center(self, center):
+        x, y = center
+        self.x = x - self.w / 2
+        self.y = y - self.h / 2
+    center = property(_get_center, _set_center)
+    centre = center
+    
+    def _get_size(self):
+        return self.w, self.h
+    def _set_size(self, size):
+        self.w, self.h = size
+    size = property(_get_size, set_size)
+    
     def move(self, x, y):
         return self.__class__(self.x + x, self.y + y, self.w, self.h)
     
