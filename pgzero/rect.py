@@ -28,12 +28,12 @@ class Rect:
         if len(args) == 1:
             obj, = args
             if isinstance(obj, (Rect, PygameRect)):
-                return obj
-            if hasattr(obj, "rect"):
+                args = obj.x, obj.y, obj.w, obj.h
+            elif hasattr(obj, "rect"):
                 rectobj = obj.rect
                 if callable(rectobj):
                     rectobj = rectobj()
-                return cls(rectobj, *args)
+                return cls(rectobj)
 
         obj = super().__new__(cls)
         if len(args) == 4:
@@ -240,12 +240,14 @@ class Rect:
         self.x += x
         self.y += y
     
+    def _inflated(self, x, y):
+        return self.x - x / 2, self.y - y / 2, self.w + x, self.h + y
+    
     def inflate(self, x, y):
-        return self.__class__(self.x, self.y, self.w + x, self.h + y)
+        return self.__class__(*self._inflated(x, y))
     
     def inflate_ip(self, x, y):
-        self.w += x
-        self.h += y
+        self.x, self.y, self.w, self.h = self._inflated(x, y)
 
     def _clamped(self, *other):
         rect = self.__class__(*other)
@@ -281,30 +283,31 @@ class Rect:
 
     def _clipped(self, *other):
         rect = self.__class__(*other)
-        if rect.x <= self.x < (rect.x + rect.w):
+        
+        if self.x >= rect.x and self.x < (rect.x + rect.w):
             x = self.x
-        elif self.x <= rect.x < (self.x + self.w):
+        elif rect.x >= self.x and rect.x < (self.x + self.w):
             x = rect.x
         else:
             raise NoIntersect
         
-        if rect.x < (self.x + self.w) <= (rect.x + rect.w):
+        if (self.x + self.w) > rect.x and (self.x + self.w) <= (rect.x + rect.w):
             w = self.x + self.w - x
-        elif self.x <= rect.x < (self.x + self.w):
+        elif (rect.x + rect.w) > self.x and (rect.x + rect.w) <= (self.x + self.w):
             w = rect.x + rect.w - x
         else:
             raise NoIntersect
         
-        if rect.y <= self.y < (rect.y + rect.h):
+        if self.y >= rect.y and self.y < (rect.y + rect.h):
             y = self.y
-        elif self.y <= rect.y < (self.y + self.h):
+        elif rect.y >= self.y and rect.y < (self.y + self.h):
             y = rect.y
         else:
             raise NoIntersect
         
-        if rect.y < (self.y + self.h) <= (rect.y + rect.w):
+        if (self.y + self.h) > rect.y and (self.y + self.h) <= (rect.y + rect.h):
             h = self.y + self.h - y
-        elif self.y <= rect.y < (self.y + self.h):
+        elif (rect.y + rect.h) > self.y and (rect.y + rect.h) <= (self.y + self.h):
             h = rect.y + rect.h - y
         else:
             raise NoIntersect
@@ -379,7 +382,7 @@ class Rect:
             self.x <= rect.x and 
             self.y <= rect.y and
             self.x + self.w >= rect.x + rect.w and
-            self.y + self.h >= rect.h + rect.h and
+            self.y + self.h >= rect.y + rect.h and
             self.x + self.w > rect.x and
             self.y + self.h > rect.y
         )
