@@ -1,19 +1,21 @@
+# -*- coding: utf-8 -*-
 """Rect
 
-This is a trivial Python wrapper around the pygame Rect
-implementation so that arbitrary attributes can be added
-to it
-
+This is a Python implementation of the pygame Rect class. Its raison
+d'être is to allow the coordinates to be floating point without having
+to implement that change into pygame itself. All pygame functions which
+require a rect allow for an object with a "rect" attribute and whose
+coordinates will be converted to integers implictly.
 """
-import pygame
 
-class NoIntersect(BaseException): pass
+class NoIntersect(Exception): 
+    pass
 
-class Rect(object):
+class Rect:
 
     _item_mapping = dict(enumerate("xywh"))
     
-    def __init__(cls, *args):
+    def __init__(self, *args):
         if len(args) == 4:
             left, top, width, height = args
         elif len(args) == 2:
@@ -45,7 +47,6 @@ class Rect(object):
     def __len__(self):
         return 4
     
-    
     def __getitem__(self, item):
         try:
             return getattr(self, self._item_mapping[item])
@@ -63,10 +64,90 @@ class Rect(object):
     def __bool__(self):
         return self.w != 0 and self.h != 0
     
+    def _get_width(self):
+        return self.w
+    def _set_width(self, width):
+        self.w = width
+    width = property(_get_width, _set_width)
+    
+    def _get_height(self):
+        return self.h
+    def _set_height(self, height):
+        self.h = height
+    height = property(_get_height, _set_height)
+    
+    def _get_top(self):
+        return self.y
+    def _set_top(self, top):
+        self.y = top
+    top = property(_get_top, _set_top)
+    
+    def _get_left(self):
+        return self.x
+    def _set_left(self, left):
+        self.x = left
+    left = property(_get_left, _set_left)
+
+    def _get_right(self):
+        return self.x + self.w
+    def _set_right(self, right):
+        self.x = right - self.w
+    right = property(_get_right, _set_right)
+
+    def _get_bottom(self):
+        return self.y + self.h
+    def _set_bottom(self, bottom):
+        self.y = bottom - self.h
+    bottom = property(_get_bottom, _set_bottom)
+    
+    def _get_centerx(self):
+        return self.x + (self.w / 2)
+    def _set_centerx(self, centre):
+        self.x = centre - (self.w / 2)
+    centerx = property(_get_centerx, _set_centerx)
+    centrex = centerx
+
+    def _get_centery(self):
+        return self.y + (self.h / 2)
+    def _set_centery(self, centre):
+        self.y = centre - (self.h / w)
+    centery = property(_get_centery, _set_centery)
+    centrey = centery
+    
+    def _get_topleft(self):
+        return self.x, self.y
+    def _set_topleft(self, topleft):
+        self.x, self.y = topleft
+    topleft = property(_get_topleft, _set_topleft)
+    
+    def _get_topright(self):
+        return self.x + self.w, self.y
+    def _set_topright(self, topright):
+        x, y = topright
+        self.x = x - self.w
+        self.y = y
+    topright = property(_get_topright, _set_topright)
+    
+    def _get_bottomleft(self):
+        return self.x, self.y + self.h
+    def _set_bottomleft(self, bottomleft):
+        x, y = bottomleft
+        self.x = x
+        self.y = y - self.h
+    bottomleft = property(_get_bottomleft, _set_bottomleft)
+    
+    def _get_bottomright(self):
+        return self.x + self.w, self.y + self.h
+    def _set_bottomright(self, bottomright):
+        x, y = bottomright
+        self.x = x - self.w
+        self.y = y - self.h
+    bottomright = property(_get_bottomright, _set_bottomright)
+    
     #
     # TODO: set / get slice
     # TODO: coerce
-    # TODO: comparison operator
+    # TODO: comparison operators
     #
 
     def move(self, x, y):
@@ -151,13 +232,9 @@ class Rect(object):
 
     def clip_ip(self, rect):
         try:
-            x, y, w, h = self._clipped(rect)
+            self.x, self.y, self.w, self.h = self._clipped(rect)
         except NoIntersect:
-            x, y, w, h = self.x, self.y, 0, 0
-        self.x = self.x = x
-        self.y = self.y = y
-        self.w = self.w = w
-        self.h = self.h = h
+            self.x, self.y, self.w, self.h = self.x, self.y, 0, 0
 
     def _unioned(self, other):
         x = min(self.x, other.x)
@@ -170,10 +247,10 @@ class Rect(object):
         return self.__class__(*self._unioned(other))
     
     def union_ip(self, rect):
-        self.x, self.y, self.w_, self.h = self._unioned(other)
+        self.x, self.y, self.w, self.h = self._unioned(other)
 
     def _unionalled(self, rects):
-        allrects = [self] + rects
+        allrects = [self] + list(rects)
         x = min(r.x for r in allrects)
         y = min(r.y for r in allrects)
         w = max(r.w for r in allrects)
@@ -204,7 +281,8 @@ class Rect(object):
     
     def contains(self, other):
         return (
-            self.x <= other.x and self.y <= other.y and
+            self.x <= other.x and 
+            self.y <= other.y and
             self.x + self.w >= other.x + other.w and
             self.y + self.h >= other.h + other.h and
             self.x + self.w > other.x and
@@ -216,7 +294,10 @@ class Rect(object):
             x, y = args,
         else:
             x, y = args
-        return self.x <= x < (self.x + self.w) and self.y <= y < (self.y + self.h)
+        return (
+            self.x <= x < (self.x + self.w) and 
+            self.y <= y < (self.y + self.h)
+        )
 
     def colliderect(self, other):
         return (
