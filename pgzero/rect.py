@@ -2,10 +2,14 @@
 """Rect
 
 This is a Python implementation of the pygame Rect class. Its raison
-d'être is to allow the coordinates to be floating point without having
-to implement that change into pygame itself. All pygame functions which
-require a rect allow for an object with a "rect" attribute and whose
-coordinates will be converted to integers implictly.
+d'être is to allow the coordinates to be floating point. All pygame 
+functions which require a rect allow for an object with a "rect" 
+attribute and whose coordinates will be converted to integers implictly.
+
+All functions which require a dict will use the flexible constructor
+to convert from: this (or a subclass); a Pygame Rect; a 4-tuple or a
+pair of 2-tuples. In addition, they'll recognise any object which has
+an (optionally callable) .rect attribute whose value will be used instead.
 """
 from pygame.rect import Rect as PygameRect
 
@@ -21,7 +25,7 @@ class Rect:
         #
         # If there is only one argument, it should either be a Rect object
         # (one of these or one from Pygame) or an arbitrary object with a
-        # "rect" attribute. In the former case, just pass it back unchanged;
+        # "rect" attribute. In the former case, create an equivalent Rect;
         # in the latter case, re-run the check with the object pointed to
         # by ".rect", calling it first if it is callable.
         #
@@ -36,19 +40,26 @@ class Rect:
                 return cls(rectobj)
 
         obj = super().__new__(cls)
+        #
+        # At this point we have one of:
+        #
+        # x, y, w, h
+        # (x, y), (w, h)
+        # (x, y, w, h),
+        #
         if len(args) == 4:
-            left, top, width, height = args
+            obj.x, obj.y, obj.w, obj.h = args
         elif len(args) == 2:
-            (left, top), (width, height) = args
+            (obj.x, obj.y), (obj.w, obj.h) = args
         elif len(args) == 1:
-            left, top, width, height = args[0]
+            obj.x, obj.y, obj.w, obj.h = args[0]
         else:
             raise TypeError("%s should be called with one, two or four arguments" % (cls.__name__))
-        
-        obj.x = left
-        obj.y = top
-        obj.w = width
-        obj.h = height
+
+        #
+        # To allow interoperation with Pygame, set a rect attribute
+        # to point to this instance.
+        #
         obj.rect = obj
         return obj
     
@@ -114,6 +125,15 @@ class Rect:
     def __ge__(self, *other):
         rect = self.__class__(*other)
         return (self.x, self.y, self.w, self.h) >= (rect.x, rect.y, rect.w, rect.h)
+    
+    def __contains__(self, other):
+        """Test whether a point (x, y) or another rectangle
+        (anything accepted by Rect) is contained within this Rect
+        """
+        if len(other) == 2:
+            return self.collidepoint(*other)
+        else:
+            return self.contains(*other)
     
     def _get_width(self):
         return self.w
