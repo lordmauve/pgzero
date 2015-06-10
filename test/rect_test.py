@@ -708,6 +708,17 @@ class PGZeroRectText(unittest.TestCase):
         obj.rect = obj1
         r = Rect(obj)
         self.assertEqual(r, Rect(1, 2, 3, 4))
+    
+    def test_constructor_from_rect_callable(self):
+        """Build a rect from an object with a rect attribute which
+        is called and returns a tuple
+        """
+        class Obj: 
+            def rect(self):
+                return 1, 2, 3, 4
+        obj = Obj()
+        r = Rect(obj)
+        self.assertEqual(r, Rect(1, 2, 3, 4))
 
     def test_float_instance(self):
         "Create an instance with floating-point co-ordinates"
@@ -730,6 +741,16 @@ class PGZeroRectText(unittest.TestCase):
     def test_float_inflated(self):
         r = Rect(0, 0, 5, 5)
         self.assertEqual(r.inflate(1.5, 1.5), (-0.75, -0.75, 6.5, 6.5))
+    
+    def test_contains_point(self):
+        r = Rect(0, 0, 100, 100)
+        self.assertTrue((50, 50) in r)
+        self.assertFalse((150, 150) in r)
+    
+    def test_contains_rect(self):
+        r = Rect(0, 0, 100, 100)
+        self.assertTrue((20, 20, 50, 50) in r)
+        self.assertFalse((20, 20, 100, 100) in r)
     
     def test_hashable(self):
         r1 = Rect(1, 2, 3, 4)
