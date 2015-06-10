@@ -730,6 +730,18 @@ class PGZeroRectText(unittest.TestCase):
     def test_float_inflated(self):
         r = Rect(0, 0, 5, 5)
         self.assertEqual(r.inflate(1.5, 1.5), (-0.75, -0.75, 6.5, 6.5))
+    
+    def test_hashable(self):
+        r1 = Rect(1, 2, 3, 4)
+        r2 = Rect(r1)
+        self.assertEqual(r1, r2)
+        self.assertIsNot(r1, r2)
+        self.assertEqual({r1}, {r2})
+    
+    def test_as_tuple(self):
+        t = 1, 2, 3, 4
+        r1 = Rect(t)
+        self.assertEqual(tuple(r1), t)
 
 if __name__ == '__main__':
     unittest.main()

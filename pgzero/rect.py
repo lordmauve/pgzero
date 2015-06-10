@@ -82,6 +82,15 @@ class Rect:
     def __bool__(self):
         return self.w != 0 and self.h != 0
         
+    def __iter__(self):
+        yield self.x
+        yield self.y
+        yield self.w
+        yield self.h
+        
+    def __hash__(self):
+        return hash((self.x, self.y, self.w, self.h))
+    
     def __eq__(self, *other):
         rect = self.__class__(*other)
         return (self.x, self.y, self.w, self.h) == (rect.x, rect.y, rect.w, rect.h)
@@ -423,3 +432,4 @@ class Rect:
     
     def collidedictall(self, dict, use_values=True):
         return [(k, v) for (k, v) in dict.items() if self.colliderect(v if use_values else k)]
+
