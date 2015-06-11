@@ -3,7 +3,7 @@ from . import clock
 from .actor import Actor
 from .keyboard import keyboard
 from .animation import animate
-from .rect import Rect
+from pygame import Rect
 
 from .loaders import images, sounds
 
