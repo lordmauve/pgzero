@@ -12,7 +12,7 @@ if sys.version_info < (3, 4):
 
 setup(
     name='pgzero',
-    version='1.0.2',
+    version='1.1pre1',
     description="A zero-boilerplate 2D games framework",
     long_description=LONG_DESCRIPTION,
     author='Daniel Pope',
