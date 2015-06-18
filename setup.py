@@ -32,5 +32,6 @@ setup(
         'Programming Language :: Python :: 3 :: Only',
         'Topic :: Education',
         'Topic :: Games/Entertainment',
-    ]
+    ],
+    test_suite='test'
 )
