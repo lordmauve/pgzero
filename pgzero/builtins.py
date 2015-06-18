@@ -9,4 +9,4 @@ from .loaders import images, sounds
 
 from .constants import mouse, keys, keymods
 
-from sys import exit
+from .game import exit

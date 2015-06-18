@@ -1,5 +1,6 @@
 import sys
 import operator
+import time
 
 import pygame
 import pgzero.clock
@@ -12,6 +13,16 @@ from . import constants
 screen = None
 DISPLAY_FLAGS = 0
 
+def exit():
+    """Wait for up to a second for all sounds to play out
+    and then exit
+    """
+    t0 = time.time()
+    while pygame.mixer.get_busy():
+        time.sleep(0.1)
+        if time.time() - t0 > 1.0:
+            break
+    sys.exit()
 
 class PGZeroGame:
     def __init__(self, mod):
