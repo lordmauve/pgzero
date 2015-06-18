@@ -1,6 +1,6 @@
 import unittest
 import pygame
-from pgzero.rect import Rect
+from pgzero.rect import ZRect as Rect
 
 class RectTypeTest( unittest.TestCase ):
     def testConstructionXYWidthHeight( self ):

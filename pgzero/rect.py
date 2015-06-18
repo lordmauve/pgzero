@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Rect
+"""ZRect
 
 This is a Python implementation of the pygame Rect class. Its raison
 d'être is to allow the coordinates to be floating point. All pygame 
@@ -11,12 +11,12 @@ to convert from: this (or a subclass); a Pygame Rect; a 4-tuple or a
 pair of 2-tuples. In addition, they'll recognise any object which has
 an (optionally callable) .rect attribute whose value will be used instead.
 """
-from pygame.rect import Rect as PygameRect
+from pygame.rect import Rect
 
 class NoIntersect(Exception): 
     pass
 
-class Rect:
+class ZRect:
 
     _item_mapping = dict(enumerate("xywh"))
 
@@ -31,7 +31,7 @@ class Rect:
         #
         if len(args) == 1:
             obj, = args
-            if isinstance(obj, (Rect, PygameRect)):
+            if isinstance(obj, (ZRect, Rect)):
                 args = obj.x, obj.y, obj.w, obj.h
             elif hasattr(obj, "rect"):
                 rectobj = obj.rect
@@ -128,7 +128,7 @@ class Rect:
     
     def __contains__(self, other):
         """Test whether a point (x, y) or another rectangle
-        (anything accepted by Rect) is contained within this Rect
+        (anything accepted by ZRect) is contained within this ZRect
         """
         if len(other) == 2:
             return self.collidepoint(*other)
