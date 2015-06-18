@@ -1,7 +1,7 @@
 import pygame
 import pygame.draw
 from . import ptext
-
+from .rect import Rect, ZRect
 
 def round_pos(pos):
     """Round a tuple position so it can be used for drawing."""
@@ -43,13 +43,13 @@ class SurfacePainter:
 
     def rect(self, rect, color):
         """Draw a rectangle."""
-        if not isinstance(rect, pygame.Rect):
+        if not isinstance(rect, (ZRect, Rect)):
             raise TypeError("screen.draw.rect() requires a rect to draw")
         pygame.draw.rect(self._surf, make_color(color), rect, 1)
 
     def filled_rect(self, rect, color):
         """Draw a filled rectangle."""
-        if not isinstance(rect, pygame.Rect):
+        if not isinstance(rect, (ZRect, Rect)):
             raise TypeError("screen.draw.filled_rect() requires a rect to draw")
         pygame.draw.rect(self._surf, make_color(color), rect, 0)
 

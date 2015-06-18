@@ -2,6 +2,7 @@ import pygame
 
 from . import game
 from . import loaders
+from . import rect
 
 
 ANCHORS = {
@@ -34,7 +35,7 @@ def calculate_anchor(value, dim, total):
 TOPLEFT = None  # symbolic name for the default positioning of the Actor
 
 
-class Actor(pygame.rect.Rect):
+class Actor(rect.ZRect):
     _anchor = _anchor_value = (0, 0)
 
     def __init__(self, image, pos=TOPLEFT, anchor=('center', 'center')):
