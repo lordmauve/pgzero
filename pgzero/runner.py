@@ -4,6 +4,7 @@ pygame.init()
 
 import os.path
 import sys
+import warnings
 from optparse import OptionParser
 from types import ModuleType
 
@@ -18,6 +19,9 @@ def main():
 
     if len(args) != 1:
         parser.error("You must specify which module to run.")
+
+    if __debug__:
+        warnings.simplefilter('default', DeprecationWarning)
 
     path = args[0]
     with open(path) as f:

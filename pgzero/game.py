@@ -13,6 +13,7 @@ from . import constants
 screen = None
 DISPLAY_FLAGS = 0
 
+
 def exit():
     """Wait for up to a second for all sounds to play out
     and then exit
@@ -23,6 +24,7 @@ def exit():
         if time.time() - t0 > 1.0:
             break
     sys.exit()
+
 
 class PGZeroGame:
     def __init__(self, mod):
@@ -178,9 +180,9 @@ class PGZeroGame:
                     if event.key == pygame.K_q and \
                             event.mod & (pygame.KMOD_CTRL | pygame.KMOD_META):
                         sys.exit(0)
-                    self.keyboard[event.key] = True
+                    self.keyboard._press(event.key)
                 elif event.type == pygame.KEYUP:
-                    self.keyboard[event.key] = False
+                    self.keyboard._release(event.key)
                 self.dispatch_event(event)
 
             pgzclock.tick(dt)
