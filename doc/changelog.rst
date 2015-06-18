@@ -1,6 +1,16 @@
 Changelog
 =========
 
+1.1 - pending
+-------------
+
+* New ZRect built-in class, API compatible with Rect, but which accepts
+  coordinates with floating point precision.
+* Refactor of built-in ``keyboard`` object to fix attribute case consistency.
+  This also allows querying key state by ``keys`` constants, eg.
+  ``keyboard[keys.LEFT]``.
+
+
 1.0.2 - 2015-06-04
 ------------------
 

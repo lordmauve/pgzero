@@ -314,9 +314,9 @@ about above::
 You can move the actor around by setting its pos attribute in an update::
 
     def update():
-        if keyboard.LEFT:
+        if keyboard.left:
             alien.x -= 1
-        elif keyboard.RIGHT:
+        elif keyboard.right:
             alien.x += 1
 
 And you may change the image used to draw the actor by setting its image
@@ -350,14 +350,37 @@ The Keyboard
 ------------
 
 You probably noticed that we used the ``keyboard`` in the above code.
-If you'd like to know what keys are pressed on the keyboard, you can look
-up the ``keyboard`` builtin using any of the names defined in the
-`Buttons and Keys`_ documentation.
+If you'd like to know what keys are pressed on the keyboard, you can query the
+attributes of the ``keyboard`` builtin. If, say, the left arrow is held down,
+then ``keyboard.left`` will be ``True``, otherwise it will be ``False``.
 
-If a button (say, the left arrow) is held down, then ``keyboard.LEFT`` will
-be ``True``, otherwise it will be ``False``.
+There are attributes for every key; some examples::
+
+    keyboard.a  # The 'A' key
+    keyboard.left  # The left arrow key
+    keyboard.rshift  # The right shift key
+    keyboard.kp0  # The '0' key on the keypad
+    keyboard.k_0  # The main '0' key
+
+The full set of key constants is given in the `Buttons and Keys`_
+documentation, but the attributes are lowercase, because these are variables
+not constants.
+
+.. deprecated:: 1.1
+
+    Uppercase and prefixed attribute names (eg. ``keyboard.LEFT`` or
+    ``keyboard.K_a``) are now deprecated; use lowercase attribute names
+    instead.
 
 .. _`Buttons and Keys`: hooks.html#buttons-and-keys
+
+.. versionadded:: 1.1
+
+    You can now also query the state of the keys using the keyboard constants
+    themselves::
+
+        keyboard[keys.A]  # True if the 'A' key is pressed
+        keyboard[keys.SPACE]  # True if the space bar is pressed
 
 
 Animations

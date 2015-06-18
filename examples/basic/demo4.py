@@ -18,11 +18,12 @@ def draw():
 
 def update():
     """Move the alien around using the keyboard."""
-    if keyboard.LEFT:
+    if keyboard.left:
         alien.x -= 2
-    elif keyboard.RIGHT:
+    elif keyboard.right:
         alien.x += 2
-    elif keyboard.SPACE:
+
+    if keyboard.space:
         alien.y = GROUND - 50
         animate(alien, y=GROUND, tween='bounce_end', duration=.5)
 
