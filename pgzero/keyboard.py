@@ -1,29 +1,60 @@
-from collections import defaultdict
+import re
+from warnings import warn
 
-from pygame import locals
+from .constants import keys
+
+DEPRECATED_KEY_RE = re.compile(r'[A-Z]')
+PREFIX_RE = re.compile(r'^K_(?!\d$)')
 
 
 class Keyboard:
-    def __init__(self):
-        self.__dict__['d'] = defaultdict(lambda: False)
+    """The current state of the keyboard.
 
-    def __getattr__(self, key):
-        return self[key]
+    Each attribute represents a key. For example, ::
 
-    def __setattr__(self, key, value):
-        self[key] = value
+        keyboard.a
 
-    def __getitem__(self, key):
+    is True if the 'A' key is depressed, and False otherwise.
+
+    """
+    # The current key state. This may as well be a class attribute - there's
+    # only one keyboard.
+    _pressed = set()
+
+    def __getattr__(self, kname):
+        if DEPRECATED_KEY_RE.match(kname):
+            warn(
+                "Uppercase keyboard attributes (eg. keyboard.%s) are "
+                "deprecated." % kname,
+                DeprecationWarning,
+                2
+            )
+            kname = PREFIX_RE.sub('', kname)
         try:
-            if key.startswith('K_'):
-                key = getattr(locals, key)
-            else:
-                key = getattr(locals, 'K_' + key)
+            key = keys[kname.upper()]
         except AttributeError:
-            raise AttributeError('the key "%s" does not exist' % key)
-        return self.d[key]
+            raise AttributeError('The key "%s" does not exist' % key)
+        return key.value in self._pressed
 
-    def __setitem__(self, key, value):
-        self.d[key] = value
+    def _press(self, key):
+        """Called by Game to mark the key as pressed."""
+        self._pressed.add(key)
+
+    def _release(self, key):
+        """Called by Game to mark the key as released."""
+        self._pressed.discard(key)
+
+    def __getitem__(self, k):
+        if isinstance(k, keys):
+            return k.value in self._pressed
+        else:
+            warn(
+                "String lookup in keyboard (eg. keyboard[%r]) is "
+                "deprecated." % k,
+                DeprecationWarning,
+                2
+            )
+            return getattr(self, k)
+
 
 keyboard = Keyboard()
