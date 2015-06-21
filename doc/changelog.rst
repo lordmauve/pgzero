@@ -9,6 +9,8 @@ Changelog
 * Refactor of built-in ``keyboard`` object to fix attribute case consistency.
   This also allows querying key state by ``keys`` constants, eg.
   ``keyboard[keys.LEFT]``.
+* Provide much better information when sound files are in an unsupported
+  format.
 
 
 1.0.2 - 2015-06-04
