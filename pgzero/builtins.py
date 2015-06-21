@@ -1,5 +1,6 @@
 # Expose clock API as a builtin
 from . import clock
+from . import music
 from .actor import Actor
 from .keyboard import keyboard
 from .animation import animate

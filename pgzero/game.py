@@ -69,6 +69,7 @@ class PGZeroGame:
         pygame.MOUSEMOTION: 'on_mouse_move',
         pygame.KEYDOWN: 'on_key_down',
         pygame.KEYUP: 'on_key_up',
+        constants.MUSIC_END: 'on_music_end'
     }
 
     EVENT_PARAM_MAPPERS = {
