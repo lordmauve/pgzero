@@ -29,7 +29,7 @@ def main():
 
     code = compile(src, os.path.basename(path), 'exec', dont_inherit=True)
 
-    loaders.root = os.path.dirname(os.path.abspath(path))
+    loaders.set_root(path)
 
     pygame.display.set_mode((100, 100), DISPLAY_FLAGS)
     name, _ = os.path.splitext(os.path.basename(path))
