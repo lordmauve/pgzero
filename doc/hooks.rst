@@ -125,6 +125,13 @@ can use, as described below.
     :param mod: A bitmask of modifier keys that were depressed.
 
 
+.. function:: on_music_end()
+
+    Called when a :ref:`music track <music>` finishes.
+
+    Note that this will not be called if the track is configured to loop.
+
+
 .. _buttons-and-keys:
 
 Buttons and Keys

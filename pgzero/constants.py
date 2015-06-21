@@ -3,6 +3,10 @@ from enum import IntEnum
 import pygame.locals
 
 
+# Event type indicating the end of a music track
+MUSIC_END = 99
+
+
 class mouse(IntEnum):
     LEFT = 1
     MIDDLE = 2
