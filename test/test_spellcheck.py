@@ -2,16 +2,8 @@ from unittest import TestCase
 from pgzero import spellcheck
 
 
-class SpellCheckerTest(TestCase):
-    HOOKS = [  # This is the real list of hooks
-        'draw',
-        'update',
-        'on_mouse_down',
-        'on_mouse_up',
-        'on_mouse_move',
-        'on_key_down',
-        'on_key_up',
-    ]
+class SuggestionTest(TestCase):
+    HOOKS = spellcheck.HOOKS
 
     def assert_suggestions(self, w, candidates, expected):
         suggestions = spellcheck.suggest(w, candidates)
@@ -46,3 +38,78 @@ class SpellCheckerTest(TestCase):
 
     def test_misspelled_on_mouse_down4(self):
         self.assert_best_suggestion('on_mouse_don', 'on_mouse_down')
+
+
+class LoggingSpellCheckResult:
+    def __init__(self):
+        self.warnings = []
+        self.errors = []
+
+    def warn(self, msg, found, suggestion):
+        self.warnings.append((found, suggestion))
+
+    def error(self, msg, found, suggestion):
+        self.errors.append((found, suggestion))
+
+    def has_error(self, found, suggestion):
+        return (found, suggestion) in self.errors
+
+    def has_warning(self, found, suggestion):
+        return (found, suggestion) in self.warnings
+
+    def get_report(self):
+        lines = []
+        for type in ('warnings', 'errors'):
+            msgs = getattr(self, type)
+            if msgs:
+                lines += [
+                    'Got %s:' % type,
+                ]
+                lines += ['  %s -> %s' % m for m in msgs]
+            else:
+                lines += ['No %s emitted' % type]
+        return '\n'.join(lines)
+
+
+class SpellCheckerTest(TestCase):
+    def setUp(self):
+        self.result = LoggingSpellCheckResult()
+
+    def assert_has_warning(self, found, suggestion):
+        if self.result.has_warning(found, suggestion):
+            return
+
+        raise AssertionError(
+            'Expected warning (%s -> %s)\n' % (found, suggestion) +
+            self.result.get_report()
+        )
+
+    def assert_has_error(self, found, suggestion):
+        if self.result.has_error(found, suggestion):
+            return
+
+        raise AssertionError(
+            'Expected error (%s -> %s)\n' % (found, suggestion) +
+            self.result.get_report()
+        )
+
+    def spellcheck(self, namespace):
+        spellcheck.spellcheck(namespace, self.result)
+
+    def test_misspelled_mousedown(self):
+        self.spellcheck({
+            'on_moose_down': lambda: None,
+        })
+        self.assert_has_warning('on_moose_down', 'on_mouse_down')
+
+    def test_misspelled_width(self):
+        self.spellcheck({
+            'WIDHT': 640,
+        })
+        self.assert_has_warning('WIDHT', 'WIDTH')
+
+    def test_misspelled_param(self):
+        self.spellcheck({
+            'on_mouse_down': lambda buton: None,
+        })
+        self.assert_has_error('buton', 'button')
