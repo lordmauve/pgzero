@@ -32,7 +32,7 @@ def distance(a, b):
                 d[i, j - 1] + insertion_cost,  # insertion
                 d[i - 1, j - 1] + subst_cost,  # substitution
             )
-            if i > 1 and j > 1 and ca == b[j - 1] and a[i - 1] == cb:
+            if i > 1 and j > 1 and ca == b[j - 2] and a[i - 2] == cb:
                 d[i, j] = min(
                     d[i, j],
                     d[i - 2, j - 2] + cost  # transposition
@@ -62,16 +62,16 @@ def compare(have, want):
 
     """
     want = set(want)
+    have = set(have)
+    matched = want & have
+    want -= matched
+    have -= matched
     for w in have:
-        if w in want:
-            want.discard(w)
-            continue
-
         suggestions = suggest(w, want)
         if suggestions:
             s = suggestions[0]
             yield w, s
-            want.discard(w)
+            want.discard(s)
 
 
 # The list of hooks we support
@@ -81,6 +81,18 @@ HOOKS = [
 ] + list(PGZeroGame.EVENT_HANDLERS.values())
 
 
+# The list of magic module-level constants
+CONSTS = [
+    'TITLE',
+    'WIDTH',
+    'HEIGHT',
+    'ICON'
+]
+
+# Available parameters for each hook
+# NB. update() takes one or zero positional parameter but we don't constrain
+# the name.
+#
 # FIXME: These are from the documentation; there could be some missing here
 VALID_PARAMS = {
     'on_mouse_down': ['pos', 'button'],
@@ -97,19 +109,47 @@ class InvalidParameter(Exception):
     """A parameter to a hook was invalid."""
 
 
-def spellcheck(mod):
+class SpellCheckResult:
+    def warn(self, msg, found, suggestion):
+        print(msg.format(
+            found=found,
+            suggestion=suggestion
+        ))
+
+    def error(self, msg, found, suggestion):
+        raise InvalidParameter(msg.format(
+            found=found,
+            suggestion=suggestion
+        ))
+
+
+def spellcheck(namespace, result=SpellCheckResult()):
+    """Spell check the names in the given module.
+
+    Where hooks are found, validate their positional parameters and offer
+    suggestions where mispelled.
+
+    """
     funcs = {}
-    for name, val in vars(mod).items():
+    consts = []
+    for name, val in namespace.items():
         if callable(val) and not isinstance(val, type):
             funcs[name] = val
+        elif isinstance(val, (str, int)) and name.isupper():
+            consts.append(name)
 
     for found, suggestion in compare(funcs, HOOKS):
-        print(
-            "Warning: no hook named {found}: "
-            "did you mean {suggestion}?".format(
-                found=found,
-                suggestion=suggestion
-            )
+        result.warn(
+            "Warning: found function named {found}: "
+            "did you mean {suggestion}?",
+            found, suggestion
+        )
+
+    for found, suggestion in compare(consts, CONSTS):
+        result.warn(
+            "Warning: found constant named {found}: "
+            "did you mean {suggestion}?",
+            found, suggestion
         )
 
     for name, handler in funcs.items():
@@ -124,15 +164,14 @@ def spellcheck(mod):
                     continue
                 suggestions = suggest(param, valid)
                 if suggestions:
-                    raise InvalidParameter(
-                        "%s() hook accepts no parameter %r; "
-                        "did you mean %r?" % (
-                            name, param, suggestions[0]
-                        )
+                    result.error(
+                        "%s() hook accepts no parameter {found}; "
+                        "did you mean {suggestion}?" % name,
+                        param,
+                        suggestions[0]
                     )
                 else:
-                    raise InvalidParameter(
-                        "%s() hook accepts no parameter %r" % (
-                            name, param
-                        )
+                    result.error(
+                        "%s() hook accepts no parameter {found}" % name,
+                        param, None
                     )
