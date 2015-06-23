@@ -26,6 +26,12 @@ def exit():
     sys.exit()
 
 
+def positional_parameters(handler):
+    """Get the positional parameters of the given function."""
+    code = handler.__code__
+    return code.co_varnames[:code.co_argcount]
+
+
 class PGZeroGame:
     def __init__(self, mod):
         self.mod = mod
@@ -78,6 +84,8 @@ class PGZeroGame:
     }
 
     def load_handlers(self):
+        from .spellcheck import spellcheck
+        spellcheck(self.mod)
         self.handlers = {}
         for type, name in self.EVENT_HANDLERS.items():
             handler = getattr(self.mod, name, None)
