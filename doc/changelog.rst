@@ -4,6 +4,8 @@ Changelog
 1.1 - pending
 -------------
 
+* Added a spell checker that will point out hook or parameter names that have
+  been misspelled when the program starts.
 * New ZRect built-in class, API compatible with Rect, but which accepts
   coordinates with floating point precision.
 * Refactor of built-in ``keyboard`` object to fix attribute case consistency.
