@@ -1,7 +1,7 @@
 Pygame Zero
 ===========
 
-A zero-boilerplate games programming framework based on Pygame.
+A zero-boilerplate games programming framework for Python 3, based on Pygame.
 
 Some examples
 -------------
