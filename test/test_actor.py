@@ -29,7 +29,6 @@ class ActorTest(unittest.TestCase):
     def test_setting_absolute_initial_pos(self):
         a = Actor("alien", pos=(100, 200), anchor=("right", "bottom"))
 
-        # Relies on knowing the alien sprite is 
         self.assertEqual(
             a.topleft,
             (100 - a.width, 200 - a.height),
@@ -49,19 +48,19 @@ class ActorTest(unittest.TestCase):
 
     def test_setting_absolute_pos_and_relative_raises_typeerror(self):
         with self.assertRaises(TypeError):
-            a = Actor("alien", pos=(0, 0), bottomright=(500, 500))
+            Actor("alien", pos=(0, 0), bottomright=(500, 500))
 
     def test_setting_anchor_and_relative_raises_typeerror(self):
         with self.assertRaises(TypeError):
-            a = Actor("alien", anchor=("left", "bottom"), topleft=(500, 500))
+            Actor("alien", anchor=("left", "bottom"), topleft=(500, 500))
 
     def test_setting_multiple_relative_pos_raises_typeerror(self):
         with self.assertRaises(TypeError):
-            a = Actor("alien", topleft=(500, 500), bottomright=(600, 600))
+            Actor("alien", topleft=(500, 500), bottomright=(600, 600))
 
     def test_unexpected_kwargs(self):
         with patch("builtins.print") as mock_print:
-            a = Actor("alien", toplift=(0, 0))
+            Actor("alien", toplift=(0, 0))
 
         mock_print.assert_called_once_with(
             "Unexpected keyword argument 'toplift', did you mean 'topleft'")
