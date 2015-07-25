@@ -40,7 +40,8 @@ ALLOWED_POSITIONS = set((
 ))
 
 
-TOPLEFT = None
+POS_TOPLEFT = None
+ANCHOR_CENTER = None
 
 
 class Actor(pygame.Rect):
@@ -48,7 +49,7 @@ class Actor(pygame.Rect):
 
     _anchor = _anchor_value = (0, 0)
 
-    def __init__(self, image, pos=None, anchor=None, **kwargs):
+    def __init__(self, image, pos=POS_TOPLEFT, anchor=ANCHOR_CENTER, **kwargs):
         self._handle_unexpected_kwargs(kwargs)
 
         self.image = image
@@ -69,34 +70,30 @@ class Actor(pygame.Rect):
                     found, suggested))
 
     def _init_position(self, pos, anchor, **kwargs):
-        got_abs_pos_args = pos or anchor
-        rel_pos_args = {k: kwargs[k] for k in kwargs if k in ALLOWED_POSITIONS}
-
-        if not got_abs_pos_args and not rel_pos_args:
-            # No positional information given, use sensible top-left default
-            self.topleft = (0, 0)
-        elif got_abs_pos_args and rel_pos_args:
-            raise TypeError("pos and anchor arguments cannot be mixed with 'topleft', 'topright' etc. arguments.")
-        elif got_abs_pos_args:
-            self._set_abs_pos(pos, anchor)
-        else:
-            self._set_relative_pos(rel_pos_args)
-
-    def _set_abs_pos(self, pos, anchor=None):
         if anchor is None:
             anchor = ("center", "center")
         self.anchor = anchor
 
-        self.pos = pos
+        symbolic_pos_args = {
+            k: kwargs[k] for k in kwargs if k in ALLOWED_POSITIONS}
 
-    def _set_relative_pos(self, relative_pos_dict):
-        if len(relative_pos_dict) == 0:
+        if not pos and not symbolic_pos_args:
+            # No positional information given, use sensible top-left default
+            self.topleft = (0, 0)
+        elif pos and symbolic_pos_args:
+            raise TypeError("'pos' argument cannot be mixed with 'topleft', 'topright' etc. argument.")
+        elif pos:
+            self.pos = pos
+        else:
+            self._set_symbolic_pos(symbolic_pos_args)
+
+    def _set_symbolic_pos(self, symbolic_pos_dict):
+        if len(symbolic_pos_dict) == 0:
             raise TypeError("No position-setting keyword arguments ('topleft', 'topright' etc) found.")
-        if len(relative_pos_dict) > 1:
+        if len(symbolic_pos_dict) > 1:
             raise TypeError("Only one 'topleft', 'topright' etc. argument is allowed.")
 
-        setter_name, position = relative_pos_dict.popitem()
-
+        setter_name, position = symbolic_pos_dict.popitem()
         setattr(self, setter_name, position)
 
     @property
