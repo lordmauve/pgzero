@@ -59,8 +59,10 @@ class ActorTest(unittest.TestCase):
             Actor("alien", topleft=(500, 500), bottomright=(600, 600))
 
     def test_unexpected_kwargs(self):
-        with patch("builtins.print") as mock_print:
+        with self.assertRaises(TypeError) as cm:
             Actor("alien", toplift=(0, 0))
 
-        mock_print.assert_called_once_with(
-            "Unexpected keyword argument 'toplift', did you mean 'topleft'")
+        self.assertEqual(
+            cm.exception.args[0],
+            "Unexpected keyword argument 'toplift' (did you mean 'topleft'?)",
+        )
