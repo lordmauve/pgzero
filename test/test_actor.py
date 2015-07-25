@@ -50,10 +50,6 @@ class ActorTest(unittest.TestCase):
         with self.assertRaises(TypeError):
             Actor("alien", pos=(0, 0), bottomright=(500, 500))
 
-    def test_setting_anchor_and_relative_raises_typeerror(self):
-        with self.assertRaises(TypeError):
-            Actor("alien", anchor=("left", "bottom"), topleft=(500, 500))
-
     def test_setting_multiple_relative_pos_raises_typeerror(self):
         with self.assertRaises(TypeError):
             Actor("alien", topleft=(500, 500), bottomright=(600, 600))
