@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import patch
 
 import pygame
 
@@ -6,6 +7,7 @@ from pgzero.actor import Actor
 from pgzero.loaders import set_root
 
 
+TEST_MODULE = "pgzero.actor"
 TEST_DISP_W, TEST_DISP_H = (200, 100)
 
 
@@ -56,3 +58,10 @@ class ActorTest(unittest.TestCase):
     def test_setting_multiple_relative_pos_raises_typeerror(self):
         with self.assertRaises(TypeError):
             a = Actor("alien", topleft=(500, 500), bottomright=(600, 600))
+
+    def test_unexpected_kwargs(self):
+        with patch("builtins.print") as mock_print:
+            a = Actor("alien", toplift=(0, 0))
+
+        mock_print.assert_called_once_with(
+            "Unexpected keyword argument 'toplift', did you mean 'topleft'")
