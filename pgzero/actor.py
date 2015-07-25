@@ -2,7 +2,7 @@ import pygame
 
 from . import game
 from . import loaders
-from . import rect
+from . import spellcheck
 
 
 ANCHORS = {
@@ -38,14 +38,15 @@ ALLOWED_POSITIONS = set((
     "midtop", "midleft", "midbottom", "midright",
     "center",
 ))
-DEFAULT_POS = "topleft"
 
 
 class Actor(pygame.Rect):
+    EXPECTED_INIT_KWARGS = ALLOWED_POSITIONS
+
     _anchor = _anchor_value = (0, 0)
 
     def __init__(self, image, pos=None, anchor=None, **kwargs):
-        # TODO Add mistake-detection for the named keyword args
+        self._handle_unexpected_kwargs(kwargs)
 
         self.image = image
         # Initialise it at (0,0). We'll move it to the right place later
@@ -53,10 +54,20 @@ class Actor(pygame.Rect):
 
         self._init_position(pos, anchor, **kwargs)
 
+    def _handle_unexpected_kwargs(self, kwargs):
+        unexpected_kwargs = set(kwargs.keys()) - self.EXPECTED_INIT_KWARGS
+        if not unexpected_kwargs:
+            return
+
+        for found, suggested in spellcheck.compare(
+                unexpected_kwargs, self.EXPECTED_INIT_KWARGS):
+            print("Unexpected keyword argument '{}', did you mean '{}'".format(
+                found, suggested))
+
     def _init_position(self, pos, anchor, **kwargs):
         got_abs_pos_args = pos or anchor
         rel_pos_args = {k: kwargs[k] for k in kwargs if k in ALLOWED_POSITIONS}
-        
+
         if not got_abs_pos_args and not rel_pos_args:
             # No positional information given, use sensible top-left default
             self.topleft = (0, 0)
@@ -67,13 +78,13 @@ class Actor(pygame.Rect):
         else:
             self._set_relative_pos(rel_pos_args)
 
-    def _set_abs_pos(self, pos, anchor=None):        
+    def _set_abs_pos(self, pos, anchor=None):
         if anchor is None:
             anchor = ("center", "center")
         self.anchor = anchor
 
         self.pos = pos
-        
+
     def _set_relative_pos(self, relative_pos_dict):
         if len(relative_pos_dict) == 0:
             raise TypeError("No position-setting keyword arguments ('topleft', 'topright' etc) found.")
