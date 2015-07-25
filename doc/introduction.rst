@@ -84,7 +84,7 @@ your images.
 There's a built-in class called :class:`Actor` that you can use to represent a
 graphic to be drawn to the screen.
 
-Let's define one now. Change the file to read::
+Let's define one now. Change the ``intro.py`` file to read::
 
     alien = Actor('alien')
     alien.pos = 10, 10
