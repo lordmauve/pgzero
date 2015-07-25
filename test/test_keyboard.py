@@ -11,6 +11,7 @@ from pgzero.keyboard import keyboard
 @contextmanager
 def assert_warning():
     with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("always")
         yield
     assert len(w) > 0, \
         "Expected a warning, but no warnings received."
