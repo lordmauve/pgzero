@@ -33,19 +33,19 @@ def calculate_anchor(value, dim, total):
 
 
 # These are methods (of the same name) on pygame.Rect
-ALLOWED_POSITIONS = set((
+SYMBOLIC_POSITIONS = set((
     "topleft", "bottomleft", "topright", "bottomright",
     "midtop", "midleft", "midbottom", "midright",
     "center",
 ))
 
-
+# Provides more meaningful default-arguments e.g. for display in IDEs etc.
 POS_TOPLEFT = None
 ANCHOR_CENTER = None
 
 
 class Actor(pygame.Rect):
-    EXPECTED_INIT_KWARGS = ALLOWED_POSITIONS
+    EXPECTED_INIT_KWARGS = SYMBOLIC_POSITIONS
 
     _anchor = _anchor_value = (0, 0)
 
@@ -75,7 +75,7 @@ class Actor(pygame.Rect):
         self.anchor = anchor
 
         symbolic_pos_args = {
-            k: kwargs[k] for k in kwargs if k in ALLOWED_POSITIONS}
+            k: kwargs[k] for k in kwargs if k in SYMBOLIC_POSITIONS}
 
         if not pos and not symbolic_pos_args:
             # No positional information given, use sensible top-left default

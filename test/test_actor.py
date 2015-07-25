@@ -1,9 +1,8 @@
 import unittest
-from unittest.mock import patch
 
 import pygame
 
-from pgzero.actor import Actor
+from pgzero.actor import calculate_anchor, Actor
 from pgzero.loaders import set_root
 
 
@@ -13,6 +12,26 @@ TEST_DISP_W, TEST_DISP_H = (200, 100)
 
 pygame.init()
 pygame.display.set_mode((TEST_DISP_W, TEST_DISP_H))
+
+
+class ModuleTest(unittest.TestCase):
+    def test_calculate_anchor_with_float(self):
+        self.assertEqual(
+            calculate_anchor(1.23, "x", 12345),
+            1.23
+        )
+
+    def test_calculate_anchor_centre(self):
+        self.assertEqual(
+            calculate_anchor("center", "x", 100),
+            50
+        )
+
+    def test_calculate_anchor_bottom(self):
+        self.assertEqual(
+            calculate_anchor("bottom", "y", 100),
+            100
+        )
 
 
 class ActorTest(unittest.TestCase):
