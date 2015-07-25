@@ -2,7 +2,7 @@ import pygame
 pygame.init()
 
 
-import os.path
+import os
 import sys
 import warnings
 from optparse import OptionParser
@@ -14,6 +14,12 @@ from . import builtins
 
 
 def main():
+    print(sys.executable)
+
+    os.execv('')
+    assert 5 == 6
+
+
     parser = OptionParser()
     options, args = parser.parse_args()
 
