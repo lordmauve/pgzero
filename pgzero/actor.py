@@ -32,12 +32,15 @@ def calculate_anchor(value, dim, total):
     return float(value)
 
 
-# These are methods (of the same name) on pygame.Rect 
+# These are methods (of the same name) on pygame.Rect
 ALLOWED_POSITIONS = set((
     "topleft", "bottomleft", "topright", "bottomright",
     "midtop", "midleft", "midbottom", "midright",
     "center",
 ))
+
+
+TOPLEFT = None
 
 
 class Actor(pygame.Rect):
@@ -61,8 +64,9 @@ class Actor(pygame.Rect):
 
         for found, suggested in spellcheck.compare(
                 unexpected_kwargs, self.EXPECTED_INIT_KWARGS):
-            print("Unexpected keyword argument '{}', did you mean '{}'".format(
-                found, suggested))
+            raise TypeError(
+                "Unexpected keyword argument '{}' (did you mean '{}'?)".format(
+                    found, suggested))
 
     def _init_position(self, pos, anchor, **kwargs):
         got_abs_pos_args = pos or anchor
