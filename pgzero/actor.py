@@ -32,20 +32,57 @@ def calculate_anchor(value, dim, total):
     return float(value)
 
 
-TOPLEFT = None  # symbolic name for the default positioning of the Actor
+# These are methods (of the same name) on pygame.Rect 
+ALLOWED_POSITIONS = set((
+    "topleft", "bottomleft", "topright", "bottomright",
+    "midtop", "midleft", "midbottom", "midright",
+    "center",
+))
+DEFAULT_POS = "topleft"
 
 
 class Actor(pygame.Rect):
     _anchor = _anchor_value = (0, 0)
 
-    def __init__(self, image, pos=TOPLEFT, anchor=('center', 'center')):
+    def __init__(self, image, pos=None, anchor=None, **kwargs):
+        # TODO Add mistake-detection for the named keyword args
+
         self.image = image
-        super(Actor, self).__init__(pos or (0, 0), self._surf.get_size())
-        self.anchor = anchor
-        if pos == TOPLEFT:
-            self.topleft = 0, 0
+        # Initialise it at (0,0). We'll move it to the right place later
+        super(Actor, self).__init__((0, 0), self._surf.get_size())
+
+        self._init_position(pos, anchor, **kwargs)
+
+    def _init_position(self, pos, anchor, **kwargs):
+        got_abs_pos_args = pos or anchor
+        rel_pos_args = {k: kwargs[k] for k in kwargs if k in ALLOWED_POSITIONS}
+        
+        if not got_abs_pos_args and not rel_pos_args:
+            # No positional information given, use sensible top-left default
+            self.topleft = (0, 0)
+        elif got_abs_pos_args and rel_pos_args:
+            raise TypeError("pos and anchor arguments cannot be mixed with 'topleft', 'topright' etc. arguments.")
+        elif got_abs_pos_args:
+            self._set_abs_pos(pos, anchor)
         else:
-            self.pos = pos
+            self._set_relative_pos(rel_pos_args)
+
+    def _set_abs_pos(self, pos, anchor=None):        
+        if anchor is None:
+            anchor = ("center", "center")
+        self.anchor = anchor
+
+        self.pos = pos
+        
+    def _set_relative_pos(self, relative_pos_dict):
+        if len(relative_pos_dict) == 0:
+            raise TypeError("No position-setting keyword arguments ('topleft', 'topright' etc) found.")
+        if len(relative_pos_dict) > 1:
+            raise TypeError("Only one 'topleft', 'topright' etc. argument is allowed.")
+
+        setter_name, position = relative_pos_dict.popitem()
+
+        setattr(self, setter_name, position)
 
     @property
     def anchor(self):
