@@ -81,3 +81,8 @@ class ActorTest(unittest.TestCase):
             cm.exception.args[0],
             "Unexpected keyword argument 'toplift' (did you mean 'topleft'?)",
         )
+
+    def test_set_pos_relative_to_anchor(self):
+        a = Actor("alien", anchor=(10, 10))
+        a.pos = (100, 100)
+        self.assertEqual(a.topleft, (90, 90))
