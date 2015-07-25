@@ -100,7 +100,7 @@ class ZRect:
         yield self.h
         
     def __hash__(self):
-        return hash((self.x, self.y, self.w, self.h))
+        raise TypeError("ZRect instances may not be used as dictionary keys")
     
     def __eq__(self, *other):
         rect = self.__class__(*other)
