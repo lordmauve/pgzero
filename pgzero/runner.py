@@ -43,10 +43,14 @@ def _substitute_full_framework_python():
     PYVER = '3.4'
     base_fw = '/Library/Frameworks/Python.framework/Versions/'
     framework_python = base_fw + '{pv}/bin/python{pv}'.format(pv=PYVER)
-    venv_paths = [p for p in sys.path
-                  if p.startswith(os.environ['VIRTUAL_ENV'])]
+    venv_base = os.environ.get('VIRTUAL_ENV')
+    if not venv_base:
+        # Do nothing if virtual env hasn't been set up
+        return
+    venv_paths = [p for p in sys.path if p.startswith(venv_base)]
+    # Need to allow for PYTHONPATH not already existing in environment
     os.environ['PYTHONPATH'] = ':'.join(venv_paths + [
-        os.environ['PYTHONPATH']])
+        os.environ.get('PYTHONPATH', '')]).rstrip(':')
     # Pass command line args to the new process
     os.execv(framework_python, ['python', '-m', 'pgzero'] + sys.argv[1:])
 
