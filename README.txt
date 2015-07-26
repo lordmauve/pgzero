@@ -18,7 +18,7 @@ Draw graphics (assuming there's  a file like ``images/dog.png`` or
 
     def draw():
         screen.clear()
-        screen.blit(images.dog, (10, 50))
+        screen.blit('dog', (10, 50))
 
 Play the sound ``sounds/eep.wav`` when you click the mouse::
 

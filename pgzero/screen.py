@@ -2,6 +2,8 @@ import pygame
 import pygame.draw
 from . import ptext
 from .rect import Rect, ZRect
+from . import loaders
+
 
 def round_pos(pos):
     """Round a tuple position so it can be used for drawing."""
@@ -87,7 +89,15 @@ class Screen:
 
         .. __: http://en.wikipedia.org/wiki/Bit_blit
 
+        :param image: A Surface or the name of an image object to load.
+        :param pos: The coordinates at which the top-left corner of the sprite
+                    will be positioned. This may be given as a pair of
+                    coordinates or as a Rect. If a Rect is given the sprite
+                    will be drawn at ``rect.topleft``.
+
         """
+        if isinstance(image, str):
+            image = loaders.images.load(image)
         self.surface.blit(image, pos)
 
     @property

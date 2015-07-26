@@ -33,7 +33,11 @@ draw images to the screen ("blit" them).
 
     .. method:: blit(image, (left, top))
 
-        Draw an image to the screen at the given position.
+        Draw the image to the screen at the given position.
+
+        ``blit()`` accepts either a Surface or a string as its ``image``
+        parameter. If ``image`` is a ``str`` then the named image will be
+        loaded from the ``images/`` directory.
 
     .. method:: draw.line(start, end, (r, g, b))
 
@@ -129,16 +133,44 @@ following files::
     space_game.py
     images/alien.png
 
-Then ``space_game.py`` could draw the alien to the screen with this code::
+Then ``space_game.py`` could draw the 'alien' sprite to the screen with this
+code::
 
     def draw():
         screen.clear()
-        screen.blit(images.alien, (10, 10))
+        screen.blit('alien', (10, 10))
+
+The name passed to ``blit()`` is the name of the image file within the images
+directory, without the file extension.
+
+Or using the :ref:`actor` API, ::
+
+    alien = Actor('alien')
+
+    def draw():
+        alien.draw()
+
+There are some restrictions on the file names in both cases: they may only
+contain lowercase latin letters, numbers and underscores. This is to prevent
+compatibility problems when your game is played on a different operating system
+that has different case sensitivity.
+
+Image Surfaces
+''''''''''''''
+
+You can also load images from the ``images`` directory using the ``images``
+object. This allows you to work with the image data itself, query its
+dimensions and so on::
+
+    forest = []
+    for i in range(5):
+        forest.append(
+            Actor('tree', topleft=(images.tree.width * i, 0))
+        )
 
 Each loaded image is a Pygame ``Surface``. You will typically use
 ``screen.blit(...)`` to draw this to the screen. It also provides handy methods
 to query the size of the image in pixels:
-
 
 .. class:: Surface
 
@@ -215,6 +247,7 @@ Because the sounds sytem will fully load the music into memory before playing
 it, this can use a lot of memory, as well as introducing a delay while the
 music is loaded.
 
+.. _music:
 
 Music
 -----
