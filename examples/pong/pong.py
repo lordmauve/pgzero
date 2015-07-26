@@ -6,6 +6,7 @@
 # back and forth. The aim is for each player to reach eleven points
 # before the opponent; points are earned when one fails to return
 # the ball to the other.
+import random
 
 WIDTH = 800
 HEIGHT = 600
@@ -21,33 +22,33 @@ PADDLE_HEIGHT = 100
 # radius of the tennis ball
 TENNIS_BALL_RADIUS = 10
 
-class Score():
-
-    def __init__(self):
-        self.left = 0
-        self.right = 0
-
-score = Score()
+LEFT_PLAYER = "left"
+RIGHT_PLAYER = "right"
 
 
-# TODO: extend Rect and use center...
-class Paddle():
+class Paddle(Rect):
+    """
+    Paddle represents one player on the screen.
+
+    It is drawn like a long rectangle and positioned either left or
+    right on the screen.
+
+    Two helper methods move the paddle up or down.
+    """
 
     def __init__(self, start_x, start_y):
-        self.pos_x = start_x
-        self.pos_y = start_y
+        super().__init__(start_x, start_y, PADDLE_WIDTH, PADDLE_HEIGHT)
 
-    @property
-    def pos(self):
-        return (self.pos_x, self.pos_y)
+    def up(self):
+        if self.y - 5 > 40:
+            self.y -= 5
+
+    def down(self):
+        if self.y + self.height + 5 < HEIGHT - 40:
+            self.y += 5
 
     def draw(self):
-        rect = Rect(self.pos, (PADDLE_WIDTH, PADDLE_HEIGHT))
-        screen.draw.filled_rect(rect, MAIN_COLOR)
-
-
-class GameFinished(Exception):
-    """The game is finished"""
+        screen.draw.filled_rect(self, MAIN_COLOR)
 
 
 class TennisBall():
@@ -55,95 +56,133 @@ class TennisBall():
     Represents a tennis ball on the screen
     """
 
-    def __init__(self, start_pos):
-        self.pos_x = start_pos[0]
-        self.pos_y = start_pos[1]
-
-        self.dx = 5
-        self.dy = 5
+    def __init__(self, start_pos, dt):
+        """
+        Initialize the tennis ball position and set the movement rate
+        """
+        self.x, self.y = start_pos
+        self.dx = self.dy = dt
 
     @property
     def pos(self):
-        return (self.pos_x, self.pos_y)
+        return (self.x, self.y)
 
     def move(self):
-        self.pos_x += self.dx
-        self.pos_y += self.dy
-
-        if self.pos_x >= WIDTH:
-            score.left += 1
-
-        if self.pos_x <= 0:
-            score.right += 1
-
-        if self.pos_y >= HEIGHT:
-            score.left += 1
-
-        if self.pos_y <= 0:
-            score.right += 1
-
-        if score.left == 11 or score.right == 11:
-            raise GameFinished()
+        self.x += self.dx
+        self.y += self.dy
 
     def draw(self):
-        screen.draw.filled_circle(
-            (self.pos_x, self.pos_y),
-            TENNIS_BALL_RADIUS,
-            MAIN_COLOR)
+        screen.draw.filled_circle(self.pos, TENNIS_BALL_RADIUS, MAIN_COLOR)
 
 
 class Game():
 
-    def __init__(self):
-        self.started = False
-        self.finished = False
+    def __init__(self, player):
+        self.active_player = player
+        self.score_left = 0
+        self.score_right = 0
 
-        self.left_paddle = Paddle(20, HEIGHT/2 - PADDLE_HEIGHT/2)
-        self.right_paddle = Paddle(WIDTH-40, HEIGHT/2 - PADDLE_HEIGHT/2)
+        self.in_progress = False
 
-        tennis_ball_pos = (20 + PADDLE_WIDTH + 10,
-            self.left_paddle.pos_y + PADDLE_HEIGHT / 2)
-        self.tennis_ball = TennisBall(tennis_ball_pos)
+        # position paddles in the middle of the screen
+        middle = HEIGHT/2 - PADDLE_HEIGHT/2
+        self.left_paddle = Paddle(20, middle)
+        self.right_paddle = Paddle(WIDTH-40, middle)
+
+        self.set_ball(self.ball_pos)
+
+    @property
+    def ball_pos(self):
+        if self.active_player == LEFT_PLAYER:
+            return (20 + PADDLE_WIDTH + 10, self.left_paddle.centery)
+        else:
+            return (WIDTH - 35 - PADDLE_WIDTH, self.right_paddle.centery)
+
+    def set_ball(self, pos):
+        # a ball is set on the paddle of last player that got a point
+        dt = 5 if self.active_player == LEFT_PLAYER else -5
+        self.tennis_ball = TennisBall(pos, dt)
+
+    def position_ball(self):
+        # used when the player moves tha paddle and
+        # game is not in progress
+        self.tennis_ball.x, self.tennis_ball.y = self.ball_pos
+
+    def score_for_left(self):
+        self.in_progress = False
+        self.score_left += 1
+        self.set_ball(self.ball_pos)
+
+    def score_for_right(self):
+        self.in_progress = False
+        self.score_right += 1
+        self.set_ball(self.ball_pos)
 
     def proceed(self):
-        try:
-            self.tennis_ball.move()
+        self.tennis_ball.move()
 
-            # check for end game conditions
-            if self.tennis_ball.pos == self.left_paddle.pos:
-                self.tennis_ball.dx = -self.tennis_ball.dx
+        # bounce from the walls
+        if self.tennis_ball.y <= 40:
+            self.tennis_ball.dy = -self.tennis_ball.dy
 
-            if self.tennis_ball.pos == self.right_paddle.pos:
-                self.tennis_ball.dx = -self.tennis_ball.dx
+        if self.tennis_ball.y >= HEIGHT - 40:
+            self.tennis_ball.dy = -self.tennis_ball.dy
 
+        # bounce from the paddles
+        if self.left_paddle.collidepoint(self.tennis_ball.pos):
+            self.tennis_ball.dx = -self.tennis_ball.dx
 
-        except GameFinished:
-            self.finished = True
+        if self.right_paddle.collidepoint(self.tennis_ball.pos):
+            self.tennis_ball.dx = -self.tennis_ball.dx
+
+        # if we didn't bounce, then that is a score
+        if self.tennis_ball.x <= 0:
+            self.score_for_right()
+
+        if self.tennis_ball.x >= WIDTH:
+            self.score_for_left()
+
+        if self.score_left == 11 or self.score_right == 11:
+            self.in_progress = False
 
     def draw(self):
         # slightly gray background
         screen.fill((64, 64, 64))
 
         screen.draw.text(
-            '({}, {})'.format(self.tennis_ball.pos_x, self.tennis_ball.pos_y),
+            '({}, {})'.format(self.tennis_ball.x, self.tennis_ball.y),
             color=MAIN_COLOR,
             center=(WIDTH/2, HEIGHT - 20),
             fontsize=24
         )
 
+        screen.draw.text(
+            '({}, {})'.format(self.left_paddle.x, self.left_paddle.y),
+            color=MAIN_COLOR,
+            center=(40, HEIGHT - 20),
+            fontsize=24
+        )
+
+        screen.draw.text(
+            '({}, {})'.format(self.right_paddle.x, self.right_paddle.y),
+            color=MAIN_COLOR,
+            center=(WIDTH-80, HEIGHT - 20),
+            fontsize=24
+        )
+
         # show the score for the left player
         screen.draw.text(
-            '{}'.format(score.left),
+            'Computer: {}'.format(self.score_left),
             color=MAIN_COLOR,
-            center=(WIDTH/4, 20),
+            center=(WIDTH/4 - 20, 20),
             fontsize=64
         )
 
         # show the score for the right player
         screen.draw.text(
-            '{}'.format(score.right),
+            'Player: {}'.format(self.score_right),
             color=MAIN_COLOR,
-            center=(WIDTH/2 + WIDTH/4, 20),
+            center=(WIDTH/2 + WIDTH/4 - 20, 20),
             fontsize=64
         )
 
@@ -157,7 +196,8 @@ class Game():
         self.right_paddle.draw()
         self.tennis_ball.draw()
 
-game = Game()
+player = LEFT_PLAYER if random.randint(0, 1000) % 2 == 0 else RIGHT_PLAYER
+game = Game(player)
 
 
 def draw():
@@ -165,17 +205,22 @@ def draw():
 
 
 def update():
-    if not game.started:
-        return
+    if keyboard.up:
+        game.right_paddle.up()
+    elif keyboard.down:
+        game.right_paddle.down()
 
-    if game.finished:
-        return
+    # set the position of the ball to be in the middle of the paddle
+    if not game.in_progress:
+        game.position_ball()
 
-    game.proceed()
+    if game.in_progress:
+        game.proceed()
+
 
 
 def on_key_down(key):
-    if key == keys.space:
-        if not game.started:
-            game.started = True
-
+    # pressing SPACE launches the ball
+    if key == keys.SPACE:
+        if not game.in_progress:
+            game.in_progress = True
