@@ -190,7 +190,7 @@ class Game():
         # move the paddle randomly during one second before launching the ball
         target_y = random.randint(40, HEIGHT - PADDLE_HEIGHT - 80)
         distance = abs(self.left_paddle.y - target_y)
-        duration = distance / 200.0
+        duration = max(0.1, distance / 200.0)
         self.computer_total_duration += duration
 
         if self.computer_total_duration + duration < 1.0:
@@ -217,33 +217,12 @@ class Game():
         # slightly gray background
         screen.fill((64, 64, 64))
 
-        screen.draw.text(
-            '({}, {})'.format(self.tennis_ball.x, self.tennis_ball.y),
-            color=MAIN_COLOR,
-            center=(WIDTH/2, HEIGHT - 20),
-            fontsize=24
-        )
-
-        screen.draw.text(
-            '({}, {})'.format(self.left_paddle.x, self.left_paddle.y),
-            color=MAIN_COLOR,
-            center=(40, HEIGHT - 20),
-            fontsize=24
-        )
-
-        screen.draw.text(
-            '({}, {})'.format(self.right_paddle.x, self.right_paddle.y),
-            color=MAIN_COLOR,
-            center=(WIDTH-80, HEIGHT - 20),
-            fontsize=24
-        )
-
         # show the score for the left player
         screen.draw.text(
             'Computer: {}'.format(self.score_left),
             color=MAIN_COLOR,
             center=(WIDTH/4 - 20, 20),
-            fontsize=64
+            fontsize=48
         )
 
         # show the score for the right player
@@ -251,7 +230,7 @@ class Game():
             'Player: {}'.format(self.score_right),
             color=MAIN_COLOR,
             center=(WIDTH/2 + WIDTH/4 - 20, 20),
-            fontsize=64
+            fontsize=48
         )
 
         # a dividing line
@@ -260,9 +239,24 @@ class Game():
             (WIDTH/2, HEIGHT-40),
             color=MAIN_COLOR)
 
-        self.left_paddle.draw()
-        self.right_paddle.draw()
-        self.tennis_ball.draw()
+        if self.score_left == 11:
+            screen.draw.text(
+                'COMPUTER WINS!!!',
+                color=MAIN_COLOR,
+                center=(WIDTH/2, HEIGHT/2),
+                fontsize=96
+            )
+        elif self.score_right == 11:
+            screen.draw.text(
+                'PLAYER WINS!!!',
+                color=MAIN_COLOR,
+                center=(WIDTH/2, HEIGHT/2),
+                fontsize=96
+            )
+        else:
+            self.left_paddle.draw()
+            self.right_paddle.draw()
+            self.tennis_ball.draw()
 
 
 # first player is chosen randomly
@@ -296,5 +290,8 @@ def update():
 def on_key_down(key):
     # pressing SPACE launches the ball
     if key == keys.SPACE:
-        if not game.in_progress:
+        if game.score_left == 11 or game.score_right == 11:
+            game.score_left = game.score_right = 0
+
+        if not game.in_progress and game.active_player == RIGHT_PLAYER:
             game.in_progress = True
