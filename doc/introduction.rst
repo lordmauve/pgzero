@@ -189,7 +189,7 @@ Now when you click on the alien, you should hear a sound, and the sprite will
 change to an unhappy alien.
 
 There's a bug in this game though; the alien doesn't ever change back to a
-happy alien (but the sound will play repeatedly). Let's fix this next.
+happy alien (but the sound will play on each click). Let's fix this next.
 
 
 Clock
