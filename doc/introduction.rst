@@ -87,7 +87,7 @@ graphic to be drawn to the screen.
 Let's define one now. Change the ``intro.py`` file to read::
 
     alien = Actor('alien')
-    alien.pos = 10, 10
+    alien.pos = 100, 56
 
     WIDTH = 500
     HEIGHT = alien.height + 20
