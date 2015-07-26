@@ -21,13 +21,39 @@ module.
 
 .. function:: draw()
 
-    Called by Pygame Zero to redraw your game window.
+    Called by Pygame Zero when it needs to redraw your game window.
 
     ``draw()`` must take no arguments.
 
+    Pygame Zero attempts to work out when the game screen needs to be redrawn
+    to avoid redrawing if nothing has changed. On each step of the game loop
+    it will draw the screen in the following situations:
+
+    * If you have defined an ``update()`` function (see below).
+    * If a clock event fires.
+    * If an input event has been triggered.
+
+    One way this can catch you out is if you attempt to modify or animate
+    something within the draw function. For example, this code is wrong: the
+    alien is not guaranteed to continue moving across the screen::
+
+        def draw():
+            alien.left += 1
+            alien.draw()
+
+    The correct code uses ``update()`` to modify or animate things and draw
+    simply to paint the screen::
+
+        def draw():
+            alien.draw()
+
+        def update():
+            alien.left += 1
+
 .. function:: update() or update(dt)
 
-    Called by Pygame Zero to step your game logic.
+    Called by Pygame Zero to step your game logic. This will be called
+    repeatedly, 60 times a second.
 
     There are two different approaches to writing an update function.
 
