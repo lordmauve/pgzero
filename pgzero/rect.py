@@ -3,7 +3,29 @@ import pygame.rect
 
 
 class Rect(pygame.rect.Rect):
-    pass
+    __slots__ = ()
+
+    # From Pygame docs
+    VALID_ATTRIBUTES = """
+        x y
+        top  left  bottom  right
+        topleft  bottomleft  topright  bottomright
+        midtop  midleft  midbottom  midright
+        center  centerx  centery
+        size  width  height
+        w h
+    """.split()
+
+    def __setattr__(self, key, value):
+        try:
+            pygame.rect.Rect.__setattr__(self, key, value)
+        except AttributeError as e:
+            from .spellcheck import suggest
+            suggestions = suggest(key, self.VALID_ATTRIBUTES)
+            msg = e.args[0]
+            if suggestions:
+                msg += "; did you mean {!r}?".format(suggestions[0])
+            raise AttributeError(msg) from None
 
 Rect.__doc__ = pygame.rect.Rect.__doc__
 
