@@ -21,15 +21,6 @@ everything you need to get Pygame Zero up and running.
 
 All commands will be entered in a Terminal window.
 
-.. important::
-
-    Do not attempt to install Pygame into a virtualenv. Pygame currently
-    encounters `problems focusing windows`__ when running out of a virtualenv.
-
-    .. __: https://bitbucket.org/lordmauve/pgzero
-           /issues/1/osx-pgzero-window-cant-get-focus
-
-
 1. Install homebrew_::
 
     ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
