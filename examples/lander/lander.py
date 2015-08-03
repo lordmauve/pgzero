@@ -278,19 +278,19 @@ def update(detlatime):
         game.blink = not game.blink # Invert blink so True becomes False or False becomes True
 
     # Start the game if the player presses space when the game is not on
-    if keyboard.SPACE and game.game_on == False:
+    if keyboard.space and game.game_on == False:
         game.game_on = True
         game.reset()
     elif game.game_on == False:
         return
 
     # If the game is on, update the movement and the physics
-    if keyboard.LEFT: # Change space ship rotation
+    if keyboard.left: # Change space ship rotation
         game.ship.rotate("left")
-    elif keyboard.RIGHT:
+    elif keyboard.right:
         game.ship.rotate("right")
 
-    if keyboard.UP and game.ship.fuel > 0: # Fire boosters if the player has enough fuel
+    if keyboard.up and game.ship.fuel > 0: # Fire boosters if the player has enough fuel
         game.ship.booster_on()
     else:
         game.ship.booster_off()
