@@ -1,7 +1,7 @@
 import pygame
 import pygame.draw
 from . import ptext
-from .rect import Rect, ZRect
+from .rect import RECT_CLASSES
 from . import loaders
 
 
@@ -45,13 +45,13 @@ class SurfacePainter:
 
     def rect(self, rect, color):
         """Draw a rectangle."""
-        if not isinstance(rect, (ZRect, Rect)):
+        if not isinstance(rect, RECT_CLASSES):
             raise TypeError("screen.draw.rect() requires a rect to draw")
         pygame.draw.rect(self._surf, make_color(color), rect, 1)
 
     def filled_rect(self, rect, color):
         """Draw a filled rectangle."""
-        if not isinstance(rect, (ZRect, Rect)):
+        if not isinstance(rect, RECT_CLASSES):
             raise TypeError("screen.draw.filled_rect() requires a rect to draw")
         pygame.draw.rect(self._surf, make_color(color), rect, 0)
 
