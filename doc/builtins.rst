@@ -463,6 +463,16 @@ example::
 
 will position the alien so its right-hand side is set to ``WIDTH``.
 
+Similarly, you can also set the initial position of the actor in the
+constructor, by passing one of these as a keyword argument: ``pos``,
+``topleft``, ``topright``, ``bottomleft``, ``bottomright``, ``midtop``,
+``midleft``, ``midright``, ``midbottom`` or ``center``. For example::
+
+    alien = Actor('alien', midbottom=(100, 300))
+
+If you don't specify an initial position, the actor will initially be
+positioned in the top-left corner (equivalent to ``topleft=(0, 0)``).
+
 Actors have an "anchor position", which is a convenient way to position the
 actor in the scene. By default, the anchor position is the center, so the
 ``.pos`` attribute refers to the center of the actor (and so do the ``x`` and
