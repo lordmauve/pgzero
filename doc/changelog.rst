@@ -13,6 +13,13 @@ Changelog
   ``keyboard[keys.LEFT]``.
 * Provide much better information when sound files are in an unsupported
   format.
+* It is now possible to assign arbitrary attibutes on the built-in Rect object.
+* ``screen.blit()`` now accepts an image name string as well as a Surface
+  object, for consistency with Actor.
+* Fixed a bug with non-focusable windows and other event bugs when running in
+  a virtualenv on Mac OS X.
+* Actor can now be positioned by any of its border points (eg. ``topleft``,
+  ``midright``) directly in the constructor.
 
 
 1.0.2 - 2015-06-04
