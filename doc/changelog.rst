@@ -1,8 +1,8 @@
 Changelog
 =========
 
-1.1 - pending
--------------
+1.1 - 2015-08-03
+----------------
 
 * Added a spell checker that will point out hook or parameter names that have
   been misspelled when the program starts.
