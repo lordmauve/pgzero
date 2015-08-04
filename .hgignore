@@ -8,3 +8,4 @@ dist
 doc/_build
 *.egg-info
 .DS_Store
+examples_dev

@@ -1,4 +1,4 @@
 include README.txt COPYING AUTHORS
 recursive-include doc *.rst *.png *.wav
-recursive-include examples *.py *.png *.wav *.ttf *.txt
+recursive-include examples *
 prune doc/_build
