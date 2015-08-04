@@ -19,7 +19,7 @@ Changelog
   a virtualenv on Mac OS X.
 * Actor can now be positioned by any of its border points (eg. ``topleft``,
   ``midright``) directly in the constructor.
-
+* Added additional example games in the ``examples/`` directory.
 
 1.0.2 - 2015-06-04
 ------------------
