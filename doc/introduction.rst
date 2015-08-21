@@ -171,6 +171,7 @@ Your project should now look like this::
     .
     ├── images/
     │   └── alien.png
+    │   └── alien_hurt.png
     ├── sounds/
     │   └── eep.wav
     └── intro.py
