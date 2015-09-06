@@ -1,0 +1,11 @@
+syntax: glob
+*.swp
+*.pyc
+*.pyo
+build
+dist
+.idea
+doc/_build
+*.egg-info
+.DS_Store
+examples_dev
