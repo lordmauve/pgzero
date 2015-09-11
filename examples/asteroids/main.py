@@ -1,6 +1,5 @@
 from enum import Enum
 import json
-import math
 import operator
 
 from pygame.math import Vector2
@@ -32,7 +31,10 @@ class GameState():
     leader_board = {}
 
 
-p = Player(pos=(WIDTH / 2, HEIGHT / 2))
+game = GameState()
+game.player = Player(pos=(WIDTH / 2, HEIGHT / 2))
+stars = create_star_scape(WIDTH, HEIGHT)
+max_distance = min(WIDTH, HEIGHT) * .95
 
 life_pos = 10
 life_icons = []
@@ -41,16 +43,11 @@ for _ in range(3):
     life_pos += 32
     life_icons.append(icon)
 
-max_distance = min(WIDTH, HEIGHT) * .95
-game = GameState()
-game.player = p
-stars = create_star_scape(WIDTH, HEIGHT)
-
 
 def create_asteroids():
     game.asteroids = []
     for i in range(2 + game.level):
-        game.asteroids.append(Asteroid(space=(WIDTH, HEIGHT)))
+        game.asteroids.append(Asteroid((WIDTH, HEIGHT)))
 
 
 def make_vulnerable():
@@ -63,7 +60,7 @@ def make_invulnerable():
     game.player.invulnerable = True
     clock.schedule_unique(make_vulnerable, 3.0)
     game.player.show = True
-    clock.schedule_interval(blink, 0.3)
+    clock.schedule_interval(blink, 0.2)
 
 
 def update(dt):
@@ -74,50 +71,31 @@ def update(dt):
         bullet.exact_pos = bullet.exact_pos - (bullet.velocity * dt)
         c = bullet.collidelist(game.asteroids)
         if c > -1:
-            sounds.explosion2.play()
+            sounds.asteroid_explosion.play()
             game.bullets.remove(bullet)
             asteroid = game.asteroids.pop(c)
             game.score += 120.0 / asteroid.mass
-            if asteroid.mass <= 1:
-                if len(game.asteroids) == 0:
-                    game.stage = GameStage.level_complete
-                    clock.schedule(next_level, 3.0)
-                    return
-                continue
-            else:
-                for i in range(3):
-                    a = Asteroid(parent=asteroid)
-                    game.asteroids.append(a)
+            chunks = asteroid.destroy()
+            game.asteroids.extend(chunks)
+            if len(game.asteroids) == 0:
+                game.stage = GameStage.level_complete
+                clock.schedule(next_level, 3.0)
+                return
             continue
         if bullet.exact_pos.distance_to(bullet.start_pos) > max_distance:
             game.bullets.remove(bullet)
         bullet.pos = bullet.exact_pos.x % WIDTH, bullet.exact_pos.y % HEIGHT
 
     if game.stage is GameStage.game:
-        if game.player.turn:
-            game.player.angle += game.player.turn * dt * 270
-
-        if game.player.thrust:
-            ang = math.radians(game.player.angle)
-            game.player.velocity += math.sin(ang) * game.player.speed, math.cos(ang) * game.player.speed
-        else:
-            game.player.velocity *= 0.99
-        game.player.exact_pos = game.player.exact_pos - game.player.velocity
-        game.player.exact_pos.x %= WIDTH
-        game.player.exact_pos.y %= HEIGHT
-        game.player.pos = game.player.exact_pos
+        game.player.move(dt, (WIDTH, HEIGHT))
 
         if game.lives and not game.player.invulnerable and game.player.collidelist(game.asteroids) > -1:
-            sounds.explosion.play()
+            sounds.player_explosion.play()
             game.lives -= 1
-            game.player.pos = (WIDTH / 2, HEIGHT / 2)
-            game.player.angle = 0
-            game.player.velocity = Vector2()
+            game.player.destroy((WIDTH / 2, HEIGHT / 2))
+            game.player.show = False
             game.player.invulnerable = True
-            game.player.thrust = False
-            # rotate_player()
-            game.player.exact_pos = game.player.pos
-            make_invulnerable()
+            clock.schedule_unique(respawn, 2.0)
 
         if not game.lives:
             game.stage = GameStage.game_over
@@ -130,6 +108,11 @@ def update(dt):
             max_leaders[initial] = max(score, max_leaders.get(initial, 0))
         game.leader_board['max_leaders'] = sorted(max_leaders.items(), key=operator.itemgetter(1), reverse=True)[:15]
         game.leader_board['leader_board'] = sorted(leader_board, key=operator.itemgetter(1), reverse=True)[:15]
+
+
+def respawn():
+    game.player.show = True
+    make_invulnerable()
 
 
 def next_level():
@@ -225,9 +208,9 @@ def draw():
     elif game.stage is GameStage.leader_board:
         top = 60
         screen.draw.text('High Scores', midtop=(WIDTH / 2, top), fontsize=40)
-        top += 40
-        max_top = top
         if game.leader_board:
+            top += 40
+            max_top = top
             for initial, score in game.leader_board['leader_board']:
                 screen.draw.text('%s %s' % (initial, round(score)), midtop=((WIDTH / 2) - 60, top))
                 top += 24
@@ -242,4 +225,3 @@ def draw():
         bullet.draw()
     for asteroid in game.asteroids:
         asteroid.draw()
-
