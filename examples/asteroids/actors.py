@@ -34,6 +34,7 @@ class Player(Actor2):
         self.speed = 0.2
         self.velocity = Vector2(0, 0)
         self.exact_pos = Vector2(self.center)
+        self.frozen = False
 
     def fire(self):
         bullet = Actor('bullet', pos=self.pos)
