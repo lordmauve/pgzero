@@ -87,7 +87,8 @@ def update(dt):
         bullet.pos = bullet.exact_pos.x % WIDTH, bullet.exact_pos.y % HEIGHT
 
     if game.stage is GameStage.game:
-        game.player.move(dt, (WIDTH, HEIGHT))
+        if not game.player.frozen:
+            game.player.move(dt, (WIDTH, HEIGHT))
 
         if game.lives and not game.player.invulnerable and game.player.collidelist(game.asteroids) > -1:
             sounds.player_explosion.play()
@@ -95,6 +96,7 @@ def update(dt):
             game.player.destroy((WIDTH / 2, HEIGHT / 2))
             game.player.show = False
             game.player.invulnerable = True
+            game.player.frozen = True
             clock.schedule_unique(respawn, 2.0)
 
         if not game.lives:
@@ -112,6 +114,7 @@ def update(dt):
 
 def respawn():
     game.player.show = True
+    game.player.frozen = False
     make_invulnerable()
 
 
