@@ -100,6 +100,7 @@ def update(dt):
             clock.schedule_unique(respawn, 2.0)
 
         if not game.lives:
+            game.player.frozen = True
             game.stage = GameStage.game_over
 
     if game.stage is GameStage.leader_board and not game.leader_board:
@@ -138,19 +139,20 @@ def on_key_down(key):
             game.player.turn += 1
         if key == keys.RIGHT:
             game.player.turn -= 1
-        if key == keys.SPACE and game.lives:
+        if key == keys.SPACE and not game.player.frozen:
             sounds.fire.play()
             game.bullets.append(game.player.fire())
     elif game.stage is GameStage.game_over:
         if key == keys.BACKSPACE:
             game.initials = game.initials[:-1]
         elif key == keys.RETURN and game.initials:
-            with open('leaderboard.json', 'w+') as lb:
+            with open('leaderboard.json', 'r') as lb:
                 try:
                     leader_board = json.load(lb)
                 except ValueError:
                     leader_board = []
-                leader_board.append((game.initials, game.score))
+            leader_board.append((game.initials, game.score))
+            with open('leaderboard.json', 'w') as lb:
                 json.dump(leader_board, lb)
             game.leader_board = {}
             game.stage = GameStage.leader_board
