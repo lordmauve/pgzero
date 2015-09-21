@@ -752,12 +752,13 @@ class PGZeroRectText(unittest.TestCase):
         self.assertTrue((20, 20, 50, 50) in r)
         self.assertFalse((20, 20, 100, 100) in r)
     
-    def test_hashable(self):
+    def test_not_hashable(self):
         r1 = Rect(1, 2, 3, 4)
         r2 = Rect(r1)
         self.assertEqual(r1, r2)
         self.assertIsNot(r1, r2)
-        self.assertEqual({r1}, {r2})
+        with self.assertRaises(TypeError):
+            self.assertEqual({r1}, {r2})
     
     def test_as_tuple(self):
         t = 1, 2, 3, 4

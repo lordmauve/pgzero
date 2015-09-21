@@ -26,6 +26,12 @@ def exit():
     sys.exit()
 
 
+def positional_parameters(handler):
+    """Get the positional parameters of the given function."""
+    code = handler.__code__
+    return code.co_varnames[:code.co_argcount]
+
+
 class PGZeroGame:
     def __init__(self, mod):
         self.mod = mod
@@ -36,7 +42,6 @@ class PGZeroGame:
         self.icon = None
         self.keyboard = pgzero.keyboard.keyboard
         self.handlers = {}
-        self.reinit_screen()
 
     def reinit_screen(self):
         global screen
@@ -69,6 +74,7 @@ class PGZeroGame:
         pygame.MOUSEMOTION: 'on_mouse_move',
         pygame.KEYDOWN: 'on_key_down',
         pygame.KEYUP: 'on_key_up',
+        constants.MUSIC_END: 'on_music_end'
     }
 
     EVENT_PARAM_MAPPERS = {
@@ -77,6 +83,8 @@ class PGZeroGame:
     }
 
     def load_handlers(self):
+        from .spellcheck import spellcheck
+        spellcheck(vars(self.mod))
         self.handlers = {}
         for type, name in self.EVENT_HANDLERS.items():
             handler = getattr(self.mod, name, None)
@@ -113,7 +121,21 @@ class PGZeroGame:
 
         def prep_args(event):
             return {name: get(event) for name, get in param_handlers}
-        return lambda event: handler(**prep_args(event))
+
+        def new_handler(event):
+            try:
+                prepped = prep_args(event)
+            except ValueError:
+                # If we couldn't construct the keys/mouse objects representing
+                # the button that was pressed, then skip the event handler.
+                #
+                # This happens because Pygame can generate key codes that it
+                # does not have constants for.
+                return
+            else:
+                return handler(**prepped)
+
+        return new_handler
 
     def dispatch_event(self, event):
         handler = self.handlers.get(event.type)
@@ -163,6 +185,8 @@ class PGZeroGame:
 
     def run(self):
         clock = pygame.time.Clock()
+        self.reinit_screen()
+
         update = self.get_update_func()
         draw = self.get_draw_func()
         self.load_handlers()
