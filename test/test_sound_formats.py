@@ -1,4 +1,5 @@
-from unittest import TestCase, expectedFailure
+import sys
+from unittest import TestCase, expectedFailure, skipIf
 import pygame
 from pgzero.loaders import sounds, set_root, UnsupportedFormat
 
@@ -43,9 +44,11 @@ class SoundFormatsTest(TestCase):
     def test_load_8kadpcm(self):
         self.assert_loadable('wav8kadpcm')
 
+    @skipIf(sys.platform == "win32", "This will crash on Windows")
     def test_load_11kgsm(self):
         self.assert_errmsg('wav22kgsm', 'WAV audio encoded as GSM')
 
+    @skipIf(sys.platform == "win32", "This will crash on Windows")
     def test_load_11kulaw(self):
         self.assert_errmsg('wav22kulaw', 'WAV audio encoded as .* µ-law')
 
