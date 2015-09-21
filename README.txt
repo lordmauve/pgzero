@@ -1,7 +1,7 @@
 Pygame Zero
 ===========
 
-A zero-boilerplate games programming framework based on Pygame.
+A zero-boilerplate games programming framework for Python 3, based on Pygame.
 
 Some examples
 -------------
@@ -18,7 +18,7 @@ Draw graphics (assuming there's  a file like ``images/dog.png`` or
 
     def draw():
         screen.clear()
-        screen.blit(images.dog, (10, 50))
+        screen.blit('dog', (10, 50))
 
 Play the sound ``sounds/eep.wav`` when you click the mouse::
 
@@ -55,3 +55,15 @@ The full documentation is at http://pygame-zero.readthedocs.org/.
 
 Read the tutorial at http://pygame-zero.readthedocs.org/en/latest/introduction.html
 for a taste of the other things that Pygame Zero can do.
+
+Contributing
+------------
+
+The project is hosted on BitBucket:
+
+https://bitbucket.org/lordmauve/pgzero
+
+If you want to help out with the development of Pygame Zero, you can find some
+instructions on setting up a development version in the docs:
+
+http://pygame-zero.readthedocs.org/en/latest/contributing.html

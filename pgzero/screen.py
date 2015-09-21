@@ -1,7 +1,9 @@
 import pygame
 import pygame.draw
 from . import ptext
-from .rect import Rect, ZRect
+from .rect import RECT_CLASSES
+from . import loaders
+
 
 def round_pos(pos):
     """Round a tuple position so it can be used for drawing."""
@@ -43,13 +45,13 @@ class SurfacePainter:
 
     def rect(self, rect, color):
         """Draw a rectangle."""
-        if not isinstance(rect, (ZRect, Rect)):
+        if not isinstance(rect, RECT_CLASSES):
             raise TypeError("screen.draw.rect() requires a rect to draw")
         pygame.draw.rect(self._surf, make_color(color), rect, 1)
 
     def filled_rect(self, rect, color):
         """Draw a filled rectangle."""
-        if not isinstance(rect, (ZRect, Rect)):
+        if not isinstance(rect, RECT_CLASSES):
             raise TypeError("screen.draw.filled_rect() requires a rect to draw")
         pygame.draw.rect(self._surf, make_color(color), rect, 0)
 
@@ -87,7 +89,15 @@ class Screen:
 
         .. __: http://en.wikipedia.org/wiki/Bit_blit
 
+        :param image: A Surface or the name of an image object to load.
+        :param pos: The coordinates at which the top-left corner of the sprite
+                    will be positioned. This may be given as a pair of
+                    coordinates or as a Rect. If a Rect is given the sprite
+                    will be drawn at ``rect.topleft``.
+
         """
+        if isinstance(image, str):
+            image = loaders.images.load(image)
         self.surface.blit(image, pos)
 
     @property

@@ -2,7 +2,7 @@ import pygame
 
 from . import game
 from . import loaders
-from . import rect
+from . import spellcheck
 
 
 ANCHORS = {
@@ -32,20 +32,69 @@ def calculate_anchor(value, dim, total):
     return float(value)
 
 
-TOPLEFT = None  # symbolic name for the default positioning of the Actor
+# These are methods (of the same name) on pygame.Rect
+SYMBOLIC_POSITIONS = set((
+    "topleft", "bottomleft", "topright", "bottomright",
+    "midtop", "midleft", "midbottom", "midright",
+    "center",
+))
+
+# Provides more meaningful default-arguments e.g. for display in IDEs etc.
+POS_TOPLEFT = None
+ANCHOR_CENTER = None
 
 
 class Actor(pygame.Rect):
+    EXPECTED_INIT_KWARGS = SYMBOLIC_POSITIONS
+
     _anchor = _anchor_value = (0, 0)
 
-    def __init__(self, image, pos=TOPLEFT, anchor=('center', 'center')):
+    def __init__(self, image, pos=POS_TOPLEFT, anchor=ANCHOR_CENTER, **kwargs):
+        self._handle_unexpected_kwargs(kwargs)
+
         self.image = image
-        super(Actor, self).__init__(pos or (0, 0), self._surf.get_size())
+        # Initialise it at (0,0). We'll move it to the right place later
+        super(Actor, self).__init__((0, 0), self._surf.get_size())
+
+        self._init_position(pos, anchor, **kwargs)
+
+    def _handle_unexpected_kwargs(self, kwargs):
+        unexpected_kwargs = set(kwargs.keys()) - self.EXPECTED_INIT_KWARGS
+        if not unexpected_kwargs:
+            return
+
+        for found, suggested in spellcheck.compare(
+                unexpected_kwargs, self.EXPECTED_INIT_KWARGS):
+            raise TypeError(
+                "Unexpected keyword argument '{}' (did you mean '{}'?)".format(
+                    found, suggested))
+
+    def _init_position(self, pos, anchor, **kwargs):
+        if anchor is None:
+            anchor = ("center", "center")
         self.anchor = anchor
-        if pos == TOPLEFT:
-            self.topleft = 0, 0
-        else:
+
+        symbolic_pos_args = {
+            k: kwargs[k] for k in kwargs if k in SYMBOLIC_POSITIONS}
+
+        if not pos and not symbolic_pos_args:
+            # No positional information given, use sensible top-left default
+            self.topleft = (0, 0)
+        elif pos and symbolic_pos_args:
+            raise TypeError("'pos' argument cannot be mixed with 'topleft', 'topright' etc. argument.")
+        elif pos:
             self.pos = pos
+        else:
+            self._set_symbolic_pos(symbolic_pos_args)
+
+    def _set_symbolic_pos(self, symbolic_pos_dict):
+        if len(symbolic_pos_dict) == 0:
+            raise TypeError("No position-setting keyword arguments ('topleft', 'topright' etc) found.")
+        if len(symbolic_pos_dict) > 1:
+            raise TypeError("Only one 'topleft', 'topright' etc. argument is allowed.")
+
+        setter_name, position = symbolic_pos_dict.popitem()
+        setattr(self, setter_name, position)
 
     @property
     def anchor(self):

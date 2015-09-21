@@ -1,15 +1,25 @@
 Changelog
 =========
 
-1.1 - pending
--------------
+1.1 - 2015-08-03
+----------------
 
+* Added a spell checker that will point out hook or parameter names that have
+  been misspelled when the program starts.
 * New ZRect built-in class, API compatible with Rect, but which accepts
   coordinates with floating point precision.
 * Refactor of built-in ``keyboard`` object to fix attribute case consistency.
   This also allows querying key state by ``keys`` constants, eg.
   ``keyboard[keys.LEFT]``.
-
+* Provide much better information when sound files are in an unsupported
+  format.
+* ``screen.blit()`` now accepts an image name string as well as a Surface
+  object, for consistency with Actor.
+* Fixed a bug with non-focusable windows and other event bugs when running in
+  a virtualenv on Mac OS X.
+* Actor can now be positioned by any of its border points (eg. ``topleft``,
+  ``midright``) directly in the constructor.
+* Added additional example games in the ``examples/`` directory.
 
 1.0.2 - 2015-06-04
 ------------------
