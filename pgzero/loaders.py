@@ -7,7 +7,23 @@ from . import ptext
 
 
 # Root directory for loaders
+# This is modified by calling set_root(), which is called by the game runner.
 root = '.'
+
+
+def set_root(path):
+    """Configure all loaders to load from the given root.
+
+    path may be a file (such as a Python source file), in which case the root
+    is set to its containing directory.
+
+    """
+    global root
+    path = os.path.abspath(path)
+    if os.path.isdir(path):
+        root = path
+    else:
+        root = os.path.dirname(path)
 
 
 class InvalidCase(Exception):
@@ -141,12 +157,37 @@ class ImageLoader(ResourceLoader):
         return pygame.image.load(path).convert_alpha()
 
 
+class UnsupportedFormat(Exception):
+    """The resource was not in a supported format."""
+
+
 class SoundLoader(ResourceLoader):
-    EXTNS = ['wav', 'ogg']
+    EXTNS = ['wav', 'ogg', 'oga']
     TYPE = 'sound'
 
     def _load(self, path):
-        return pygame.mixer.Sound(path)
+        try:
+            return pygame.mixer.Sound(path)
+        except pygame.error:
+            from .soundfmt import identify
+            try:
+                fmt = identify(path)
+            except Exception:
+                pass
+            else:
+                raise UnsupportedFormat("""
+'{0}' is not in a supported audio format.
+
+It appears to be:
+
+    {1}
+
+Pygame supports only uncompressed WAV files (PCM or ADPCM) and compressed
+Ogg Vorbis files. Try re-encoding the sound file, for example using Audacity:
+
+    http://audacityteam.org/
+""".format(path, fmt).strip()) from None
+            raise
 
 
 class FontLoader(ResourceLoader):

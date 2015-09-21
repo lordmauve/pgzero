@@ -84,10 +84,10 @@ your images.
 There's a built-in class called :class:`Actor` that you can use to represent a
 graphic to be drawn to the screen.
 
-Let's define one now. Change the file to read::
+Let's define one now. Change the ``intro.py`` file to read::
 
     alien = Actor('alien')
-    alien.pos = 10, 10
+    alien.pos = 100, 56
 
     WIDTH = 500
     HEIGHT = alien.height + 20
@@ -171,6 +171,7 @@ Your project should now look like this::
     .
     ├── images/
     │   └── alien.png
+    │   └── alien_hurt.png
     ├── sounds/
     │   └── eep.wav
     └── intro.py
@@ -189,7 +190,7 @@ Now when you click on the alien, you should hear a sound, and the sprite will
 change to an unhappy alien.
 
 There's a bug in this game though; the alien doesn't ever change back to a
-happy alien (but the sound will play repeatedly). Let's fix this next.
+happy alien (but the sound will play on each click). Let's fix this next.
 
 
 Clock
