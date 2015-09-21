@@ -50,7 +50,7 @@ class ZRect:
 
     _item_mapping = dict(enumerate("xywh"))
 
-    def __new__(cls, *args):
+    def __init__(self, *args):
 
         #
         # If there is only one argument, it should either be a Rect object
@@ -60,16 +60,8 @@ class ZRect:
         # by ".rect", calling it first if it is callable.
         #
         if len(args) == 1:
-            obj, = args
-            if isinstance(obj, RECT_CLASSES):
-                args = obj.x, obj.y, obj.w, obj.h
-            elif hasattr(obj, "rect"):
-                rectobj = obj.rect
-                if callable(rectobj):
-                    rectobj = rectobj()
-                return cls(rectobj)
+            args = self._handle_one_arg(args[0])
 
-        obj = super().__new__(cls)
         #
         # At this point we have one of:
         #
@@ -78,20 +70,29 @@ class ZRect:
         # (x, y, w, h),
         #
         if len(args) == 4:
-            obj.x, obj.y, obj.w, obj.h = args
+            self.x, self.y, self.w, self.h = args
         elif len(args) == 2:
-            (obj.x, obj.y), (obj.w, obj.h) = args
+            (self.x, self.y), (self.w, self.h) = args
         elif len(args) == 1:
-            obj.x, obj.y, obj.w, obj.h = args[0]
+            self.x, self.y, self.w, self.h = args[0]
         else:
             raise TypeError("%s should be called with one, two or four arguments" % (cls.__name__))
+        
+        self.rect = self
 
-        #
-        # To allow interoperation with Pygame, set a rect attribute
-        # to point to this instance.
-        #
-        obj.rect = obj
-        return obj
+    def _handle_one_arg(self, arg):
+        if isinstance(arg, RECT_CLASSES):
+            args = arg.x, arg.y, arg.w, arg.h
+        elif hasattr(arg, "rect"):
+            rectobj = arg.rect
+            if callable(rectobj):
+                rectobj = rectobj()
+                args = self._handle_one_arg(rectobj)
+            else:
+                args = rectobj.x, rectobj.y, rectobj.w, rectobj.h
+        else:
+            args = arg
+        return args
 
     def __repr__(self):
         return "<%s (x: %s, y: %s, w: %s, h: %s)>" % (self.__class__.__name__, self.x, self.y, self.w, self.h)
@@ -206,14 +207,12 @@ class ZRect:
     def _set_centerx(self, centerx):
         self.x = centerx - (self.w / 2)
     centerx = property(_get_centerx, _set_centerx)
-    centrex = centerx
 
     def _get_centery(self):
         return self.y + (self.h / 2)
     def _set_centery(self, centery):
         self.y = centery - (self.h / 2)
     centery = property(_get_centery, _set_centery)
-    centrey = centery
 
     def _get_topleft(self):
         return self.x, self.y

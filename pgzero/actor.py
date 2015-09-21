@@ -2,6 +2,7 @@ import pygame
 
 from . import game
 from . import loaders
+from . import rect
 from . import spellcheck
 
 
@@ -44,19 +45,38 @@ POS_TOPLEFT = None
 ANCHOR_CENTER = None
 
 
-class Actor(pygame.Rect):
+class Actor:
     EXPECTED_INIT_KWARGS = SYMBOLIC_POSITIONS
+    DELEGATED_ATTRIBUTES = [
+        "width", "height", "top", "left", "right", "bottom",
+        "centerx", "centery", "topleft", "topright",
+        "bottomleft", "bottomright", "midtop", "midleft", "midbottom", "midright",
+        "center", "size"
+    ]
 
     _anchor = _anchor_value = (0, 0)
-
+    
     def __init__(self, image, pos=POS_TOPLEFT, anchor=ANCHOR_CENTER, **kwargs):
         self._handle_unexpected_kwargs(kwargs)
 
-        self.image = image
-        # Initialise it at (0,0). We'll move it to the right place later
-        super(Actor, self).__init__((0, 0), self._surf.get_size())
+        self.__dict__["_rect"] = rect.ZRect((0, 0), (0, 0))
+        # Initialise it at (0, 0) for size (0, 0). 
+        # We'll move it to the right place and resize it later
 
         self._init_position(pos, anchor, **kwargs)
+        self.image = image
+
+    def __getattr__(self, attr):
+        if attr in self.__class__.DELEGATED_ATTRIBUTES:
+            return getattr(self._rect, attr)
+        else:
+            raise AttributeError
+    
+    def __setattr__(self, attr, value):
+        if attr in self.__class__.DELEGATED_ATTRIBUTES:
+            setattr(self._rect, attr, value)
+        else:
+            raise AttributeError
 
     def _handle_unexpected_kwargs(self, kwargs):
         unexpected_kwargs = set(kwargs.keys()) - self.EXPECTED_INIT_KWARGS
