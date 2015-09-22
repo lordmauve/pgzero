@@ -296,7 +296,6 @@ class ZRect:
         self.x = x - self.w / 2
         self.y = y - self.h / 2
     center = property(_get_center, _set_center)
-    centre = center
 
     def _get_size(self):
         return self.w, self.h
