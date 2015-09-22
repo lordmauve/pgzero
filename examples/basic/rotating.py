@@ -1,6 +1,6 @@
 WIDTH = HEIGHT = 400
 
-alien = Actor('alien', center=(300, 300), anchor=('center', 0.25))
+alien = Actor('alien', center=(200, 200), anchor=('center', 30))
 
 
 def update():

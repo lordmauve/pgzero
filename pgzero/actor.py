@@ -3,6 +3,7 @@ from math import radians, sin, cos
 
 from . import game
 from . import loaders
+from . import rect
 from . import spellcheck
 
 
@@ -70,8 +71,9 @@ def transform_anchor(ax, ay, w, h, angle):
     )
 
 
-class Actor(pygame.Rect):
+class Actor:
     EXPECTED_INIT_KWARGS = SYMBOLIC_POSITIONS
+    DELEGATED_ATTRIBUTES = [a for a in dir(rect.ZRect) if not a.startswith("_")]
 
     _anchor = _anchor_value = (0, 0)
     _angle = 0.0
@@ -79,11 +81,29 @@ class Actor(pygame.Rect):
     def __init__(self, image, pos=POS_TOPLEFT, anchor=ANCHOR_CENTER, **kwargs):
         self._handle_unexpected_kwargs(kwargs)
 
-        self.image = image
-        # Initialise it at (0,0). We'll move it to the right place later
-        super(Actor, self).__init__((0, 0), self._surf.get_size())
+        self.__dict__["_rect"] = rect.ZRect((0, 0), (0, 0))
+        # Initialise it at (0, 0) for size (0, 0).
+        # We'll move it to the right place and resize it later
 
+        self.image = image
         self._init_position(pos, anchor, **kwargs)
+
+    def __getattr__(self, attr):
+        if attr in self.__class__.DELEGATED_ATTRIBUTES:
+            return getattr(self._rect, attr)
+        else:
+            return object.__getattribute__(self, attr)
+
+    def __setattr__(self, attr, value):
+        """Hand off rect attributes to
+        """
+        if attr in self.__class__.DELEGATED_ATTRIBUTES:
+            return setattr(self._rect, attr, value)
+        else:
+            #
+            # Ensure data descriptors are set normally
+            #
+            return object.__setattr__(self, attr, value)
 
     def _handle_unexpected_kwargs(self, kwargs):
         unexpected_kwargs = set(kwargs.keys()) - self.EXPECTED_INIT_KWARGS
