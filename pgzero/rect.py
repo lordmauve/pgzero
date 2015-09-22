@@ -53,7 +53,7 @@ class ZRect:
     def __init__(self, *args):
 
         if len(args) == 1:
-            args = self._handle_one_arg(args[0])
+            args = tuple(self._handle_one_arg(args[0]))
 
         #
         # At this point we have one of:
@@ -76,31 +76,36 @@ class ZRect:
     def _handle_one_arg(self, arg):
         """Handle -- possibly recursively -- the case of one parameter
         
-        If there is only one argument, it should either be a Rect object
-        (one of these or one from Pygame) or an arbitrary object with a
-        "rect" attribute. In the former case, return its attributes;
-        in the latter case, re-run the check with the object pointed to
-        by ".rect", calling it first if it is callable.
+        Pygame -- and consequently pgzero -- is very accommodating when constructing
+        a rect. You can pass four integers, two pairs of 2-tuples, or one 4-tuple.
+
+        Also, you can pass an existing Rect-like object, or an object with a .rect 
+        attribute. The object named by the .rect attribute is either one of the above,
+        or it's a callable object which returns one of the above.
+
+        This is evidently a recursive solution where an object with a .rect
+        attribute can yield an object with a .rect attribute, and so ad infinitum.
         """
         #
         # If the arg is an existing rect, return its elements
         #
         if isinstance(arg, RECT_CLASSES):
             return arg.x, arg.y, arg.w, arg.h
+        
         #
         # If it's something with a .rect attribute, start again with
         # that attribute, calling it first if it's callable
         #
-        elif hasattr(arg, "rect"):
+        if hasattr(arg, "rect"):
             rectobj = arg.rect
             if callable(rectobj):
                 rectobj = rectobj()
             return self._handle_one_arg(rectobj)
+        
         #
         # Otherwise, we assume it's an iterable of four elements
         #
-        else:
-            return arg
+        return arg
 
     def __repr__(self):
         return "<%s (x: %s, y: %s, w: %s, h: %s)>" % (self.__class__.__name__, self.x, self.y, self.w, self.h)
