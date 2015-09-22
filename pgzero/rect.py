@@ -70,16 +70,16 @@ class ZRect:
             self.x, self.y, self.w, self.h = args[0]
         else:
             raise TypeError("%s should be called with one, two or four arguments" % (cls.__name__))
-        
+
         self.rect = self
 
     def _handle_one_arg(self, arg):
         """Handle -- possibly recursively -- the case of one parameter
-        
+
         Pygame -- and consequently pgzero -- is very accommodating when constructing
         a rect. You can pass four integers, two pairs of 2-tuples, or one 4-tuple.
 
-        Also, you can pass an existing Rect-like object, or an object with a .rect 
+        Also, you can pass an existing Rect-like object, or an object with a .rect
         attribute. The object named by the .rect attribute is either one of the above,
         or it's a callable object which returns one of the above.
 
@@ -91,7 +91,7 @@ class ZRect:
         #
         if isinstance(arg, RECT_CLASSES):
             return arg.x, arg.y, arg.w, arg.h
-        
+
         #
         # If it's something with a .rect attribute, start again with
         # that attribute, calling it first if it's callable
@@ -101,7 +101,7 @@ class ZRect:
             if callable(rectobj):
                 rectobj = rectobj()
             return self._handle_one_arg(rectobj)
-        
+
         #
         # Otherwise, we assume it's an iterable of four elements
         #
@@ -459,7 +459,7 @@ class ZRect:
 
     def collidepoint(self, *args):
         if len(args) == 1:
-            x, y = args,
+            x, y = args[0]
         else:
             x, y = args
         return (
