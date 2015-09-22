@@ -47,12 +47,7 @@ ANCHOR_CENTER = None
 
 class Actor:
     EXPECTED_INIT_KWARGS = SYMBOLIC_POSITIONS
-    DELEGATED_ATTRIBUTES = [
-        "width", "height", "top", "left", "right", "bottom",
-        "centerx", "centery", "topleft", "topright",
-        "bottomleft", "bottomright", "midtop", "midleft", "midbottom", "midright",
-        "center", "size"
-    ]
+    DELEGATED_ATTRIBUTES = [a for a in dir(rect.ZRect) if not a.startswith("_")]
 
     _anchor = _anchor_value = (0, 0)
     
@@ -70,13 +65,18 @@ class Actor:
         if attr in self.__class__.DELEGATED_ATTRIBUTES:
             return getattr(self._rect, attr)
         else:
-            raise AttributeError
+            return super().__getattr__(attr)
     
     def __setattr__(self, attr, value):
+        """Hand off rect attributes to 
+        """
         if attr in self.__class__.DELEGATED_ATTRIBUTES:
-            setattr(self._rect, attr, value)
+            return setattr(self._rect, attr, value)
         else:
-            raise AttributeError
+            #
+            # Ensure data descriptors are set normally
+            #
+            return super().__setattr__(attr, value)
 
     def _handle_unexpected_kwargs(self, kwargs):
         unexpected_kwargs = set(kwargs.keys()) - self.EXPECTED_INIT_KWARGS
