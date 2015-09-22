@@ -52,13 +52,6 @@ class ZRect:
 
     def __init__(self, *args):
 
-        #
-        # If there is only one argument, it should either be a Rect object
-        # (one of these or one from Pygame) or an arbitrary object with a
-        # "rect" attribute. In the former case, create an equivalent Rect;
-        # in the latter case, re-run the check with the object pointed to
-        # by ".rect", calling it first if it is callable.
-        #
         if len(args) == 1:
             args = self._handle_one_arg(args[0])
 
@@ -81,18 +74,33 @@ class ZRect:
         self.rect = self
 
     def _handle_one_arg(self, arg):
+        """Handle -- possibly recursively -- the case of one parameter
+        
+        If there is only one argument, it should either be a Rect object
+        (one of these or one from Pygame) or an arbitrary object with a
+        "rect" attribute. In the former case, return its attributes;
+        in the latter case, re-run the check with the object pointed to
+        by ".rect", calling it first if it is callable.
+        """
+        #
+        # If the arg is an existing rect, return its elements
+        #
         if isinstance(arg, RECT_CLASSES):
-            args = arg.x, arg.y, arg.w, arg.h
+            return arg.x, arg.y, arg.w, arg.h
+        #
+        # If it's something with a .rect attribute, start again with
+        # that attribute, calling it first if it's callable
+        #
         elif hasattr(arg, "rect"):
             rectobj = arg.rect
             if callable(rectobj):
                 rectobj = rectobj()
-                args = self._handle_one_arg(rectobj)
-            else:
-                args = rectobj.x, rectobj.y, rectobj.w, rectobj.h
+            return self._handle_one_arg(rectobj)
+        #
+        # Otherwise, we assume it's an iterable of four elements
+        #
         else:
-            args = arg
-        return args
+            return arg
 
     def __repr__(self):
         return "<%s (x: %s, y: %s, w: %s, h: %s)>" % (self.__class__.__name__, self.x, self.y, self.w, self.h)
