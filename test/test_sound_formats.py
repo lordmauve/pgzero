@@ -52,9 +52,11 @@ class SoundFormatsTest(TestCase):
     def test_load_11kulaw(self):
         self.assert_errmsg('wav22kulaw', 'WAV audio encoded as .* µ-law')
 
+    @skipIf(sys.platform == "win32", "This will crash on Windows")
     def test_load_8kmp316(self):
         self.assert_errmsg('wav8kmp316', 'WAV audio encoded as MP3')
 
+    @skipIf(sys.platform == "win32", "This will crash on Windows")
     def test_load_8kmp38(self):
         self.assert_errmsg('wav8kmp38', 'WAV audio encoded as MP3')
 
