@@ -86,3 +86,24 @@ class ActorTest(unittest.TestCase):
         a = Actor("alien", anchor=(10, 10))
         a.pos = (100, 100)
         self.assertEqual(a.topleft, (90, 90))
+
+    def test_right_angle(self):
+        a = Actor("alien")
+        self.assertEqual(a.image, "alien")
+        self.assertEqual(a.topleft, (0, 0))
+        self.assertEqual(a.pos, (33.0, 46.0))
+        self.assertEqual(a.width, 66)
+        self.assertEqual(a.height, 92)
+        a.angle += 90.0
+        self.assertEqual(a.angle, 90.0)
+        self.assertEqual(a.topleft, (-13, 13))
+        self.assertEqual(a.pos, (33.0, 46.0))
+        self.assertEqual(a.width, 92)
+        self.assertEqual(a.height, 66)
+
+    def test_rotation(self):
+        """The pos of the actor must not drift with continued small rotation."""
+        a = Actor('alien', pos=(100.0, 100.0))
+        for _ in range(360):
+            a.angle += 1.0
+        self.assertEqual(a.pos, (100.0, 100.0))
