@@ -1,3 +1,4 @@
+from functools import lru_cache
 import pygame
 import numpy
 import pygame.sndarray
@@ -170,7 +171,7 @@ def sine_array_onecycle(hz):
     xvalues = numpy.arange(int(length)) * omega
     return (numpy.sin(xvalues) * (2 ** 15)).astype(numpy.int16)
 
-
+@lru_cache
 def create(hz, length):
     """Creates a tone of a certain length from a note or frequency in hertz"""
     if isinstance(hz, str):
