@@ -215,7 +215,7 @@ Then ``drum_kit.py`` could play the drum sound whenever the mouse is clicked
 with this code::
 
     def on_mouse_down():
-        sounds.drum_kit.play()
+        sounds.drum.play()
 
 Each loaded sound is a Pygame ``Sound``, and has various methods to play and
 stop the sound as well as query its length in seconds:
