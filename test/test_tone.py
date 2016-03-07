@@ -3,8 +3,19 @@ from unittest import TestCase
 import numpy
 
 from pgzero.tone import sine_array_onecycle, note_value
-from tone import note_to_hertz
+from tone import note_to_hertz, validate_note, InvalidNote
 
+import re
+
+TEST_NOTES = {
+    'A4': dict(val = 0, hertz = 440, parts = ('A', '', 4)),
+    'C4': dict(val = -9, hertz = 261.63, parts = ('C', '', 4)),
+    'C0': dict(val = -57, hertz = 16.35, parts = ('C', '', 0)),
+    'B8': dict(val = 50, hertz = 7902.13, parts = ('B', '', 8)),
+    'A#4': dict(val = 1, hertz = 466.16, parts = ('A', '#', 4)),
+    'Ab4': dict(val = -1, hertz = 415.30, parts = ('A', 'b', 4)),
+    'Bb4': dict(val = 1, hertz = 466.16, parts = ('B', 'b', 4)),
+}
 
 class ToneTest(TestCase):
     def test_sine_array(self):
@@ -16,20 +27,20 @@ class ToneTest(TestCase):
             )
         )
 
+    def test_validate_note(self):
+        for note, val in TEST_NOTES.items():
+            self.assertEqual(validate_note(note), val['parts'])
+
+        for note in ['A9', 'H4', '4A', 'a4', 'Az4']:
+            with self.assertRaisesRegex(InvalidNote, re.escape('%s is not a valid note, notes are A-F, are either normal, flat (b) or sharp (#) and of octave 0-8' % note)):
+                validate_note(note)
+
     def test_note_value(self):
-        self.assertEqual(note_value('A4'), 0)
-        self.assertEqual(note_value('C4'), -9)
-        self.assertEqual(note_value('C0'), -57)
-        self.assertEqual(note_value('B8'), 50)
-        self.assertEqual(note_value('A#4'), 1)
-        self.assertEqual(note_value('Bb4'), 1)
+        for note, val in TEST_NOTES.items():
+            self.assertEqual(note_value(*val['parts']), val['val'])
 
 
     def test_note_to_hertz(self):
-        self.assertAlmostEqual(note_to_hertz('A4'), 440, 2)
-        self.assertAlmostEqual(note_to_hertz('C4'), 261.63, 2)
-        self.assertAlmostEqual(note_to_hertz('C0'), 16.35, 2)
-        self.assertAlmostEqual(note_to_hertz('B8'), 7902.13, 2)
-        self.assertAlmostEqual(note_to_hertz('A#4'), 466.16, 2)
-        self.assertAlmostEqual(note_to_hertz('Bb4'), 466.16, 2)
+        for note, val in TEST_NOTES.items():
+            self.assertAlmostEqual(note_to_hertz(note), val['hertz'], 2)
 
