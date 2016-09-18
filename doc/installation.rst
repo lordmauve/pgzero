@@ -33,12 +33,16 @@ All commands will be entered in a Terminal window.
 
     brew install sdl sdl_image sdl_mixer sdl_sound sdl_ttf
 
-4. Now pygame can be installed easily using Python's own package manager,
+4. Install Mercurial::
+
+    brew install hg
+
+5. Now pygame can be installed easily using Python's own package manager,
    pip3::
 
     pip3 install hg+http://bitbucket.org/pygame/pygame
 
-5. Finally, install Pygame Zero! ::
+6. Finally, install Pygame Zero! ::
 
     pip3 install pgzero
 
