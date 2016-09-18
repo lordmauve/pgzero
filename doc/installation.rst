@@ -101,14 +101,5 @@ Jessie it's relatively simply to compile Pygame yourself.)
 On Raspberry Pi
 ~~~~~~~~~~~~~~~
 
-pgzero is likely to make an appearance in the Raspbian repo before long;
-until then...
-
-(Starting from a vanilla noobs-install Raspbian)
-
-1. sudo apt-get update
-
-2. sudo apt-get install python3-setuptools python3-pip
-
-3. sudo pip-3.2 install pgzero
-
+pgzero has been installed by default since the release of Raspbian Jessie in
+Setpember 2015!
