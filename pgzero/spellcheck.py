@@ -97,7 +97,7 @@ CONSTS = [
 VALID_PARAMS = {
     'on_mouse_down': ['pos', 'button'],
     'on_mouse_up': ['pos', 'button'],
-    'on_mouse_move': ['pos', 'button', 'rel'],
+    'on_mouse_move': ['pos', 'buttons', 'rel'],
     'on_key_up': ['key', 'mod'],
     'on_key_down': ['unicode', 'key', 'mod'],
     'draw': [],
