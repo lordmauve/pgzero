@@ -77,7 +77,11 @@ class PGZeroGame:
         constants.MUSIC_END: 'on_music_end'
     }
 
+    def map_buttons(val):
+        return {c for c, pressed in zip(constants.mouse, val) if pressed}
+
     EVENT_PARAM_MAPPERS = {
+        'buttons': map_buttons,
         'button': constants.mouse,
         'key': constants.keys
     }
