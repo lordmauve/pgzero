@@ -122,14 +122,14 @@ class ResourceLoader:
                 p = os.path.join(self._root(), name + '.' + ext)
                 if os.path.exists(p):
                     break
-        else:
-            raise KeyError(
-                "No {type} found like '{name}'. "
-                "Are you sure the {type} exists?".format(
-                    type=self.TYPE,
-                    name=name
+            else:
+                raise KeyError(
+                    "No {type} found like '{name}'. "
+                    "Are you sure the {type} exists?".format(
+                        type=self.TYPE,
+                        name=name
+                    )
                 )
-            )
 
         validate_compatible_path(p)
         res = self.cache[key] = self._load(p, *args, **kwargs)
