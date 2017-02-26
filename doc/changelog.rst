@@ -1,6 +1,14 @@
 Changelog
 =========
 
+1.2 - unreleased
+----------------
+
+* Fix: Error message when resource not found incorrectly names last extension
+  searched.
+* Fix: Crashes when using wrapped text.
+
+
 1.1 - 2015-08-03
 ----------------
 
