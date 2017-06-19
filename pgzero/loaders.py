@@ -219,9 +219,9 @@ def getfont(
     if fontname is not None and sysfontname is not None:
         raise ValueError("Can't set both fontname and sysfontname")
     if fontname is None and sysfontname is None:
-        fontname = DEFAULT_FONT_NAME
+        fontname = ptext.DEFAULT_FONT_NAME
     if fontsize is None:
-        fontsize = DEFAULT_FONT_SIZE
+        fontsize = ptext.DEFAULT_FONT_SIZE
     key = (
         fontname,
         fontsize,
