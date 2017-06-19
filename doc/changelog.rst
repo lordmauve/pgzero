@@ -1,6 +1,15 @@
 Changelog
 =========
 
+1.2 - unreleased
+----------------
+
+* Fix: ``on_mouse_move()`` did not correctly handle the ``buttons`` parameter.
+* Fix: Error message when resource not found incorrectly names last extension
+  searched.
+* Fix: Crashes when using wrapped text.
+
+
 1.1 - 2015-08-03
 ----------------
 
