@@ -75,6 +75,33 @@ draw images to the screen ("blit" them).
         There's an extremely rich API for formatting text; see
         :doc:`ptext` for full details.
 
+Actor
+-----
+
+``Actor`` objects represent your images and sprites.
+
+Actors support being positioned via several anchors, displayed in this image.
+
+.. image:: _static/actor/anchor_points.png
+
+This can be done during creation or by assigning a pair of x,y co-ordinates. For example::
+
+    WIDTH = 200
+    HEIGHT = 200
+
+    alien = Actor('alien', center=(100,100))
+
+    def draw():
+        screen.clear()
+        alien.draw()
+
+.. image:: _static/actor/alien_center.png
+
+Changing ``center=(100, 100)`` to ``midbottom=(100, 200)`` gives you:
+
+.. image:: _static/actor/alien_midbottom.png
+
+As a subclass of ``Rect`` below, it supports all the same methods, such as collision detection.
 
 .. _rect:
 
@@ -215,7 +242,7 @@ Then ``drum_kit.py`` could play the drum sound whenever the mouse is clicked
 with this code::
 
     def on_mouse_down():
-        sounds.drum_kit.play()
+        sounds.drum.play()
 
 Each loaded sound is a Pygame ``Sound``, and has various methods to play and
 stop the sound as well as query its length in seconds:
