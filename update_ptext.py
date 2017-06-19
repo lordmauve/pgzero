@@ -7,6 +7,7 @@ local repository to make it easily installable.
 """
 import json
 import base64
+import subprocess
 from urllib.parse import urljoin
 from urllib.request import build_opener
 
@@ -77,6 +78,13 @@ def update_local():
     with open(DEST, 'w', encoding='utf8') as f:
         f.write(header + data)
     print("Updated", FILE, "to revision", sha[:7])
+    autopep8()
+
+
+def autopep8():
+    """Use autopep8 to fix formatting problems."""
+    print("Running autopep8")
+    subprocess.check_call(['autopep8', '-i', DEST])
 
 
 if __name__ == '__main__':
