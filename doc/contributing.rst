@@ -20,7 +20,7 @@ Alternatively, if you don't want to install it at all, it may be run with:
 
 For example:
 
-   python3 -m pgzero examples/demo1.py
+   python3 -m pgzero examples/basic/demo1.py
 
 Tests
 -----
