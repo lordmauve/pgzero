@@ -1,4 +1,6 @@
 import os.path
+import sys
+
 from types import ModuleType
 import pygame.image
 import pygame.mixer
@@ -24,6 +26,8 @@ def set_root(path):
         root = path
     else:
         root = os.path.dirname(path)
+
+    sys.path.insert(0, root)
 
 
 class InvalidCase(Exception):
@@ -202,7 +206,6 @@ images = ImageLoader('images')
 sounds = SoundLoader('sounds')
 fonts = FontLoader('fonts')
 
-
 def getfont(
         fontname=None,
         fontsize=None,
@@ -216,12 +219,9 @@ def getfont(
     and so on.
 
     """
-    if fontname is not None and sysfontname is not None:
-        raise ValueError("Can't set both fontname and sysfontname")
-    if fontname is None and sysfontname is None:
-        fontname = ptext.DEFAULT_FONT_NAME
-    if fontsize is None:
-        fontsize = ptext.DEFAULT_FONT_SIZE
+    fontname = fontname or ptext.DEFAULT_FONT_NAME
+    fontsize = fontsize or ptext.DEFAULT_FONT_SIZE
+
     key = (
         fontname,
         fontsize,
@@ -230,24 +230,27 @@ def getfont(
         italic,
         underline
     )
+
     if key in ptext._font_cache:
         return ptext._font_cache[key]
-    if sysfontname is not None:
-        font = pygame.font.SysFont(
-            sysfontname,
-            fontsize,
-            bool(bold),
-            bool(italic)
-        )
+
+    if fontname is None:
+        font = ptext._font_cache.get(key)
+        if font:
+            return font
+        font = pygame.font.Font(fontname, fontsize)
     else:
-        font = fonts.load(fontname, fontsize)
+        f = fonts.load(fontname, fontsize)
+
     if bold is not None:
         font.set_bold(bold)
     if italic is not None:
         font.set_italic(italic)
     if underline is not None:
         font.set_underline(underline)
+
     ptext._font_cache[key] = font
     return font
+
 
 ptext.getfont = getfont
