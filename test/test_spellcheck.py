@@ -102,11 +102,23 @@ class SpellCheckerTest(TestCase):
         })
         self.assert_has_warning('on_moose_down', 'on_mouse_down')
 
-    def test_misspelled_width(self):
+    def test_misspelled_width_uppercase(self):
         self.spellcheck({
             'WIDHT': 640,
         })
         self.assert_has_warning('WIDHT', 'WIDTH')
+
+    def test_misspelled_width_lowercase(self):
+        self.spellcheck({
+            'widht': 640,
+        })
+        self.assert_has_warning('widht', 'WIDTH')
+
+    def test_misspelled_width_mixed_lower_and_upper_case(self):
+        self.spellcheck({
+            'WIDht': 640,
+        })
+        self.assert_has_warning('WIDht', 'WIDTH')
 
     def test_misspelled_param(self):
         self.spellcheck({
