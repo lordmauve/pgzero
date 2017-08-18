@@ -15,21 +15,21 @@ bird.dead = False
 bird.score = 0
 bird.vy = 0
 
-wall_top = Actor('top', anchor=('left', 'bottom'), pos=(-100, 0))
-wall_bottom = Actor('bottom', anchor=('left', 'top'), pos=(-100, 0))
+pipe_top = Actor('top', anchor=('left', 'bottom'), pos=(-100, 0))
+pipe_bottom = Actor('bottom', anchor=('left', 'top'), pos=(-100, 0))
 
 
-def reset_walls():
-    wall_gap = random.randint(200, HEIGHT - 200)
-    wall_top.pos = (WIDTH, wall_gap - GAP // 2)
-    wall_bottom.pos = (WIDTH, wall_gap + GAP // 2)
+def reset_pipes():
+    pipe_gap_y = random.randint(200, HEIGHT - 200)
+    pipe_top.pos = (WIDTH, pipe_gap_y - GAP // 2)
+    pipe_bottom.pos = (WIDTH, pipe_gap_y + GAP // 2)
 
 
-def update_walls():
-    wall_top.left -= SPEED
-    wall_bottom.left -= SPEED
-    if wall_top.right < 0:
-        reset_walls()
+def update_pipes():
+    pipe_top.left -= SPEED
+    pipe_bottom.left -= SPEED
+    if pipe_top.right < 0:
+        reset_pipes()
         bird.score += 1
 
 
@@ -45,7 +45,7 @@ def update_bird():
         else:
             bird.image = 'bird1'
 
-    if bird.colliderect(wall_top) or bird.colliderect(wall_bottom):
+    if bird.colliderect(pipe_top) or bird.colliderect(pipe_bottom):
         bird.dead = True
         bird.image = 'birddead'
 
@@ -54,11 +54,11 @@ def update_bird():
         bird.dead = False
         bird.score = 0
         bird.vy = 0
-        reset_walls()
+        reset_pipes()
 
 
 def update():
-    update_walls()
+    update_pipes()
     update_bird()
 
 
@@ -69,8 +69,8 @@ def on_key_down():
 
 def draw():
     screen.blit('background', (0, 0))
-    wall_top.draw()
-    wall_bottom.draw()
+    pipe_top.draw()
+    pipe_bottom.draw()
     bird.draw()
     screen.draw.text(
         str(bird.score),
