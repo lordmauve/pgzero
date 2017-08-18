@@ -22,7 +22,7 @@ def distance(a, b):
         for j, cb in enumerate(b, start=1):
             cost = int(ca != cb)
             if ca.lower() == cb.lower():
-                subst_cost = 0.5 * cost
+                subst_cost = 0
             else:
                 subst_cost = 1.25 * cost
             insertion_cost = 0.7 if cb == '_' else 1.0
@@ -135,7 +135,7 @@ def spellcheck(namespace, result=SpellCheckResult()):
     for name, val in namespace.items():
         if callable(val) and not isinstance(val, type):
             funcs[name] = val
-        elif isinstance(val, (str, int)) and name.isupper():
+        elif isinstance(val, (str, int)):
             consts.append(name)
 
     for found, suggestion in compare(funcs, HOOKS):
