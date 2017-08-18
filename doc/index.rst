@@ -19,9 +19,11 @@ Courses
     :maxdepth: 2
 
     introduction
+    from-scratch
 
 .. This one is not yet complete
 .. learn-programming
+.. flappy-bird
 
 Reference
 ---------

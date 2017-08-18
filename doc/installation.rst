@@ -16,4 +16,4 @@ On Raspberry Pi
 ~~~~~~~~~~~~~~~
 
 pgzero has been installed by default since the release of Raspbian Jessie in
-Setpember 2015!
+September 2015!
