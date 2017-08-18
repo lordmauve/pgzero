@@ -1,4 +1,6 @@
 import os.path
+import sys
+
 from types import ModuleType
 import pygame.image
 import pygame.mixer
@@ -24,6 +26,8 @@ def set_root(path):
         root = path
     else:
         root = os.path.dirname(path)
+
+    sys.path.insert(0, root)
 
 
 class InvalidCase(Exception):
