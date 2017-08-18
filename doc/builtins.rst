@@ -9,6 +9,11 @@ Pygame Zero provides useful built-in objects to help you make games easily.
 Screen
 ------
 
+.. toctree::
+    :hidden:
+
+    ptext
+
 The ``screen`` object represents your game screen.
 
 It is a thin wrapper around a Pygame surface that allows you to easily
