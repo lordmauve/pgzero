@@ -148,12 +148,18 @@ class Animation:
         self.object = object
         self.initial = {}
         self.running = True
+        object_animations = getattr(object, '_pgzero_animations', {})
+        object._pgzero_animations = object_animations
         for k in self.targets:
             try:
                 a = getattr(object, k)
             except AttributeError:
                 raise ValueError('object %r has no attribute %s to animate' % (object, k))
             self.initial[k] = a
+            previous_animation = object_animations.get(k)
+            if previous_animation is not None:
+                previous_animation._remove_target(k)
+            object_animations[k] = self
         each_tick(self.update)
         self.animations.append(self)
 
@@ -184,8 +190,16 @@ class Animation:
         if complete:
             for k in self.targets:
                 setattr(self.object, k, self.targets[k])
+        for k in list(self.targets):
+            self._remove_target(k, stop=False)
         unschedule(self.update)
         self.animations.remove(self)
+
+    def _remove_target(self, target, stop=True):
+        del self.targets[target]
+        del self.object._pgzero_animations[target]
+        if not self.targets and stop:
+            self.stop(complete=True)
 
 
 def animate(object, tween='linear', duration=1, on_finished=None, **targets):
