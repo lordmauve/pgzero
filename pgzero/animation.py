@@ -138,6 +138,16 @@ class Animation:
     """
     animations = []
 
+    # Animations are stored in _animation_dict under (object id, target
+    # attribute) keys. Objects may not be hashable, so the id, rather than
+    # the object itself, is needed.
+    # Animations with multiple targets will appear here multiple times.
+    # Newly scheduled animations will overwrite new ones. Once an animation
+    # ends, it is removed from this dict.
+    # Note that Animation keeps a reference to "its" object, so the id in the
+    # key will be valid as long as the animation lives.
+    _animation_dict = {}
+
     def __init__(self, object, tween='linear', duration=1, on_finished=None,
                  **targets):
         self.targets = targets
@@ -148,18 +158,17 @@ class Animation:
         self.object = object
         self.initial = {}
         self.running = True
-        object_animations = getattr(object, '_pgzero_animations', {})
-        object._pgzero_animations = object_animations
         for k in self.targets:
             try:
                 a = getattr(object, k)
             except AttributeError:
                 raise ValueError('object %r has no attribute %s to animate' % (object, k))
             self.initial[k] = a
-            previous_animation = object_animations.get(k)
+            key = id(object), k
+            previous_animation = self._animation_dict.get(key)
             if previous_animation is not None:
                 previous_animation._remove_target(k)
-            object_animations[k] = self
+            self._animation_dict[key] = self
         each_tick(self.update)
         self.animations.append(self)
 
@@ -197,9 +206,9 @@ class Animation:
 
     def _remove_target(self, target, stop=True):
         del self.targets[target]
-        del self.object._pgzero_animations[target]
+        del self._animation_dict[id(self.object), target]
         if not self.targets and stop:
-            self.stop(complete=True)
+            self.stop()
 
 
 def animate(object, tween='linear', duration=1, on_finished=None, **targets):
