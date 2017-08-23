@@ -1,8 +1,14 @@
 from unittest import TestCase
 from types import SimpleNamespace
+import gc
+import weakref
 
 from pgzero.animation import animate
 from pgzero import clock
+
+
+class TestObject:
+    """A simple object subclass"""
 
 
 class SuggestionTest(TestCase):
@@ -107,3 +113,28 @@ class SuggestionTest(TestCase):
         clock.tick(1)
         self.assertEqual(obj.attr1, 2)
         self.assertEqual(obj.attr2, -3)
+
+    def test_no_linger(self):
+        """Test that deleted animations are garbage-collected"""
+        anim1_alivelist = ['animation 1 alive']
+        anim2_alivelist = ['animation 2 alive']
+        obj_alivelist = ['object alive']
+        # cannot use SimpleNamespace because it doesn't support weakref
+        obj = TestObject()
+        obj.attribute = 0
+        anim1 = animate(obj, attribute=1, duration=5)
+        anim2 = animate(obj, attribute=2, duration=1)
+        weakref.finalize(anim1, anim1_alivelist.clear)
+        weakref.finalize(anim2, anim2_alivelist.clear)
+        weakref.finalize(obj, obj_alivelist.clear)
+
+        del anim1
+        del anim2
+        del obj
+        gc.collect()
+        self.assertEqual(anim1_alivelist, [])
+
+        clock.tick(3)
+        gc.collect()
+        self.assertEqual(anim2_alivelist, [])
+        self.assertEqual(obj_alivelist, [])
