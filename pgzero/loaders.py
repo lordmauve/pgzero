@@ -239,7 +239,7 @@ def getfont(
             return font
         font = pygame.font.Font(fontname, fontsize)
     else:
-        f = fonts.load(fontname, fontsize)
+        font = fonts.load(fontname, fontsize)
 
     if bold is not None:
         font.set_bold(bold)
