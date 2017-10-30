@@ -31,9 +31,17 @@ Reference
 .. toctree::
     :maxdepth: 2
 
-    installation
     hooks
     builtins
+
+User Guide
+----------
+
+.. toctree::
+    :maxdepth: 2
+
+    installation
+    ide-mode
     contributing
     changelog
 

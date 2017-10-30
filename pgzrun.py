@@ -1,12 +1,13 @@
-"""Magic runner system for Pygame Zero.
+"""Runner system for Pygame Zero.
 
-By importing this module, the current program becomes a Pygame Zero program
-even when run with the standard Python interpreter.
+By importing this module, the __main__ module is populated with the builtins
+provided by Pygame Zero.
 
-When run with Pgzrun, this is a no-op.
+When pgzrun.go() is called, the __main__ module is run as a Pygame Zero
+script (we enter the game loop, calling draw() and update() etc as defined in
+__main__).
 
 """
-
 import sys
 import os
 from pgzero.runner import prepare_mod, run_mod
@@ -14,9 +15,17 @@ from pgzero.runner import prepare_mod, run_mod
 
 mod = sys.modules['__main__']
 if not getattr(sys, '_pgzrun', None):
+    if not getattr(mod, '__file__', None):
+        raise ImportError(
+            "You are running from an interactive interpreter.\n"
+            "'import pgzrun' only works when you are running a Python file."
+        )
     prepare_mod(mod)
 
 
 def go():
-    if not getattr(sys, '_pgzrun', None):
-        run_mod(mod)
+    """Run the __main__ module as a Pygame Zero script."""
+    if getattr(sys, '_pgzrun', None):
+        return
+
+    run_mod(mod)
