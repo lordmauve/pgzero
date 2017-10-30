@@ -26,7 +26,6 @@ def set_root(path):
         root = path
     else:
         root = os.path.dirname(path)
-
     sys.path.insert(0, root)
 
 
