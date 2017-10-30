@@ -1,3 +1,4 @@
+import pgzrun
 import random
 
 TITLE = 'Flappy Bird'
@@ -79,3 +80,6 @@ def draw():
         fontsize=70,
         shadow=(1, 1)
     )
+
+
+pgzrun.go()
