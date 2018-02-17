@@ -80,34 +80,6 @@ draw images to the screen ("blit" them).
         There's an extremely rich API for formatting text; see
         :doc:`ptext` for full details.
 
-Actor
------
-
-``Actor`` objects represent your images and sprites.
-
-Actors support being positioned via several anchors, displayed in this image.
-
-.. image:: _static/actor/anchor_points.png
-
-This can be done during creation or by assigning a pair of x,y co-ordinates. For example::
-
-    WIDTH = 200
-    HEIGHT = 200
-
-    alien = Actor('alien', center=(100,100))
-
-    def draw():
-        screen.clear()
-        alien.draw()
-
-.. image:: _static/actor/alien_center.png
-
-Changing ``center=(100, 100)`` to ``midbottom=(100, 200)`` gives you:
-
-.. image:: _static/actor/alien_midbottom.png
-
-As a subclass of ``Rect`` below, it supports all the same methods, such as collision detection.
-
 .. _rect:
 
 Rect
@@ -487,9 +459,18 @@ attribute to some new image name::
 
     alien.image = 'alien_hurt'
 
-Actors have all the same attributes as :ref:`Rect <rect>`. If you assign
-a new value to one of those attributes then the actor will be moved. For
-example::
+Actors have all the same attributes and methods as :ref:`Rect <rect>`,
+including methods like `.colliderect()`__ which can be used to test whether
+two actors have collided.
+
+.. __: https://www.pygame.org/docs/ref/rect.html#pygame.Rect.colliderect
+
+
+Positioning Actors
+''''''''''''''''''
+
+If you assign a new value to one of the position attributes then the actor will
+be moved. For example::
 
     alien.right = WIDTH
 
@@ -498,12 +479,34 @@ will position the alien so its right-hand side is set to ``WIDTH``.
 Similarly, you can also set the initial position of the actor in the
 constructor, by passing one of these as a keyword argument: ``pos``,
 ``topleft``, ``topright``, ``bottomleft``, ``bottomright``, ``midtop``,
-``midleft``, ``midright``, ``midbottom`` or ``center``. For example::
+``midleft``, ``midright``, ``midbottom`` or ``center``:
 
-    alien = Actor('alien', midbottom=(100, 300))
+.. image:: _static/actor/anchor_points.png
+
+This can be done during creation or by assigning a pair of x, y co-ordinates.
+For example::
+
+    WIDTH = 200
+    HEIGHT = 200
+
+    alien = Actor('alien', center=(100,100))
+
+    def draw():
+        screen.clear()
+        alien.draw()
+
+.. image:: _static/actor/alien_center.png
+
+Changing ``center=(100, 100)`` to ``midbottom=(100, 200)`` gives you:
+
+.. image:: _static/actor/alien_midbottom.png
 
 If you don't specify an initial position, the actor will initially be
 positioned in the top-left corner (equivalent to ``topleft=(0, 0)``).
+
+
+Anchor point
+''''''''''''
 
 Actors have an "anchor position", which is a convenient way to position the
 actor in the scene. By default, the anchor position is the center, so the
@@ -518,6 +521,20 @@ be "standing on" something)::
 ``anchor`` is specified as a tuple ``(xanchor, yanchor)``, where the values can
 be floats or the strings ``left``, ``center``/``middle``, ``right``, ``top`` or
 ``bottom`` as appropriate.
+
+
+Rotation
+''''''''
+
+The ``.angle`` attribute of an actor controls the rotation of the sprite.
+
+
+
+
+Actor
+-----
+
+``Actor`` objects represent your images and sprites.
 
 The Keyboard
 ------------
