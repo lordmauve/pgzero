@@ -2,6 +2,7 @@ import unittest
 import pygame
 from pgzero.rect import ZRect as Rect
 
+
 class RectTypeTest( unittest.TestCase ):
     def testConstructionXYWidthHeight( self ):
         r = Rect(1,2,3,4)
@@ -734,9 +735,9 @@ class PGZeroRectText(unittest.TestCase):
         r2 = pygame.Rect(r)
         self.assertEqual([int(i) for i in r], list(r2))
 
-    def test_float_centre(self):
+    def test_float_center(self):
         r = Rect(0, 0, 5, 5)
-        self.assertEqual(r.centre, (2.5, 2.5))
+        self.assertEqual(r.center, (2.5, 2.5))
 
     def test_float_inflated(self):
         r = Rect(0, 0, 5, 5)
