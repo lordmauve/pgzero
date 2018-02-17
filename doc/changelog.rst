@@ -4,6 +4,14 @@ Changelog
 1.2 - unreleased
 ----------------
 
+* New: Actors can be rotated by assigning to ``actor.angle``
+* New: ``pgzrun.go()`` to allow running Pygame Zero from an IDE (see
+  :doc:`ide-mode`).
+* Examples: add Asteroids example game (thanks to Ian Salmons)
+* Examples: add Flappy Bird example game
+* Examples: add Tetra example game (thanks to David Bern)
+* Docs: Documentation for the anchor point system for Actors
+* Docs: Add migrating from scratch example
 * Fix: ``on_mouse_move()`` did not correctly handle the ``buttons`` parameter.
 * Fix: Error message when resource not found incorrectly names last extension
   searched.
