@@ -95,15 +95,15 @@ class Actor:
             return object.__getattribute__(self, attr)
 
     def __setattr__(self, attr, value):
-        """Hand off rect attributes to
-        """
+        """Assign rect attributes to the underlying rect."""
         if attr in self.__class__.DELEGATED_ATTRIBUTES:
             return setattr(self._rect, attr, value)
         else:
-            #
             # Ensure data descriptors are set normally
-            #
             return object.__setattr__(self, attr, value)
+
+    def __iter__(self):
+        return iter(self._rect)
 
     def _handle_unexpected_kwargs(self, kwargs):
         unexpected_kwargs = set(kwargs.keys()) - self.EXPECTED_INIT_KWARGS
