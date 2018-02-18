@@ -72,7 +72,9 @@ Create a directory called ``images`` and save the image into it as
 ``alien.png``. Both of those must be lower case. Pygame Zero will complain
 otherwise, to alert you to a potential cross-platform compatibility pitfall.
 
-If you've done that, your project should look like this::
+If you've done that, your project should look like this:
+
+.. code-block:: none
 
     .
     ├── images/
@@ -167,7 +169,9 @@ Now let's make the alien appear hurt. Save these files:
 * `eep.wav <_static/eep.wav>`_ - create a directory called ``sounds`` and save
   this as ``eep.wav`` in that directory.
 
-Your project should now look like this::
+Your project should now look like this:
+
+.. code-block:: none
 
     .
     ├── images/
