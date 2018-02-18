@@ -227,18 +227,25 @@ class Actor:
     def draw(self):
         game.screen.blit(self._surf, self.topleft)
 
-    def angle_to(self, pos):
-        """Return the angle from this actor's position to pos, in degrees."""
+    def angle_to(self, target):
+        """Return the angle from this actors position to target, in degrees."""
+        if isinstance(target, Actor):
+            tx, ty = target.pos
+        else:
+            tx, ty = target
         myx, myy = self.pos
-        px, py = pos
-        dx = px - myx
-        dy = myy - py   # y axis is inverted from mathematical y in Pygame
+        tx, ty = pos
+        dx = tx - myx
+        dy = myy - ty   # y axis is inverted from mathematical y in Pygame
         return degrees(atan2(dy, dx))
 
-    def distance_to(self, pos):
-        """Return the distance from this actor's position to pos, in pixels."""
+    def distance_to(self, target):
+        """Return the distance from this actor's pos to target, in pixels."""
+        if isinstance(target, Actor):
+            tx, ty = target.pos
+        else:
+            tx, ty = target
         myx, myy = self.pos
-        px, py = pos
-        dx = px - myx
-        dy = py - myy
+        dx = tx - myx
+        dy = ty - myy
         return sqrt(dx * dx + dy * dy)
