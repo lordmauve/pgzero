@@ -1,5 +1,5 @@
 import pygame
-from math import radians, sin, cos
+from math import radians, sin, cos, atan2, degrees, sqrt
 
 from . import game
 from . import loaders
@@ -226,3 +226,19 @@ class Actor:
 
     def draw(self):
         game.screen.blit(self._surf, self.topleft)
+
+    def angle_to(self, pos):
+        """Return the angle from this actor's position to pos, in degrees."""
+        myx, myy = self.pos
+        px, py = pos
+        dx = px - myx
+        dy = myy - py   # y axis is inverted from mathematical y in Pygame
+        return degrees(atan2(dy, dx))
+
+    def distance_to(self, pos):
+        """Return the distance from this actor's position to pos, in pixels."""
+        myx, myy = self.pos
+        px, py = pos
+        dx = px - myx
+        dy = py - myy
+        return sqrt(dx * dx + dy * dy)
