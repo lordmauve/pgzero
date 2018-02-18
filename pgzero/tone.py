@@ -1,12 +1,38 @@
+"""Tone generator for Pygame Zero.
+
+This tone generator uses numpy to generate sounds on demand at a given duration
+and frequency. These are kept in a LRU cache which in typical applications
+will reduce the number of times they need to be regenerated.
+
+The approach we use here, generating sound samples in memory, is memory hungry
+and can introduce pauses when tones are generated. Currently tones generate in
+under 1ms on a 2.4GHz i7.
+
+To minimise the extent that pauses affect gameplay, the ``play()`` function
+offloads tone generation to a separate thread. Because tones are generated
+with numpy operations this should allow at least part of this work to happen
+on another CPU core, if present.
+
+"""
+
+from timeit import default_timer
 import re
 from functools import lru_cache
 
 import math
 import pygame
-import numpy
+try:
+    import numpy as np
+except ImportError:
+    np = None
 import pygame.sndarray
+from threading import Thread
+from queue import Queue
 
-__all__ = ['create', 'play']
+__all__ = (
+    'play',
+    'create',
+)
 
 SAMPLE_RATE = 22050
 
@@ -16,31 +42,59 @@ A4 = 440.0
 
 NOTE_VALUE = dict(C=-9, D=-7, E=-5, F=-4, G=-2, A=0, B=2)
 
-TWELTH_ROOT = math.pow(2, (1/12))
+TWELTH_ROOT = math.pow(2, (1 / 12))
+
+# Number of samples to decay for
+DECAY = 2000
+
+# Longest note to allow
+MAX_DURATION = 4
 
 
 def sine_array_onecycle(hz):
-    """Returns a single sin wave for a given frequency"""
-    length = SAMPLE_RATE / float(hz)
-    omega = numpy.pi * 2 / length
-    xvalues = numpy.arange(int(length)) * omega
-    return (numpy.sin(xvalues) * (2 ** 15)).astype(numpy.int16)
+    """Returns a single sin wave for a given frequency."""
+    length = SAMPLE_RATE / hz
+    omega = np.pi * 2 / length
+    xvalues = np.arange(int(length)) * omega
+    return (np.sin(xvalues) * (2 ** 15)).astype(np.int16)
+
+
+def create(hz, length):
+    """Create a tone of a given duration at a given frequency in hertz.
+
+    Return a Sound which can be played later.
+
+    """
+    return _create(_convert_args(hz, length))
 
 
 @lru_cache()
-def create(hz, length):
-    """Creates a tone of a certain length from a note or frequency in hertz"""
-    if isinstance(hz, str):
-        hz = note_to_hertz(hz)
-    length *= float(SAMPLE_RATE)
+def _create(hz, samples):
+    """Actually create a tone."""
+    end = samples + DECAY
+
+    # Construct a mono tone of the right length
     cycle = sine_array_onecycle(hz)
-    num_cycles = length - length % len(cycle)
-    tone = numpy.resize(cycle, num_cycles)
-    stereo = numpy.array(list(zip(tone, tone)))
+    tone = np.resize(cycle, end)
+
+    # Multiply it with an ADSR envelope
+    # See https://en.wikipedia.org/wiki/Synthesizer#ADSR_envelope
+    if samples < 1000:
+        volumes = [0, 1, 0.9, 0]
+        volume_times = [0, samples * 0.1, samples, end]
+    else:
+        volumes = [0, 1.0, 0.7, 0.7, 0]
+        volume_times = [0, 350, 1000, samples, end]
+    adsr = np.interp(np.arange(end), volume_times, volumes)
+    np.multiply(tone, adsr, out=tone, casting='unsafe')
+
+    stereo = np.repeat(np.expand_dims(tone, axis=1), 2, axis=1)
     return pygame.sndarray.make_sound(stereo)
 
+
 class InvalidNote(Exception):
-    pass
+    """The parameters passed were invalid."""
+
 
 @lru_cache()
 def note_to_hertz(note):
@@ -60,11 +114,65 @@ def validate_note(note):
     match = re.match(NOTE_PATTERN, note)
     if match is None:
         raise InvalidNote(
-            '%s is not a valid note, notes are A-F, are either normal, flat (b) or sharp (#) and of octave 0-8' % note)
+            '%s is not a valid note. '
+            'notes are A-F, are either normal, flat (b) or sharp (#) '
+            'and of octave 0-8' % note
+        )
     note, accidental, octave = match.group(1, 2, 3)
     return note, accidental, int(octave)
 
 
+def _convert_args(hz, length):
+    """Convert the given arguments to _create parameters."""
+    if isinstance(hz, str):
+        hz = note_to_hertz(hz)
+    samples = int(length * SAMPLE_RATE)
+    if not samples:
+        raise InvalidNote("Note has zero duration")
+    return hz, samples
+
+
+def _play_thread():
+    """Play any notes requested by the game thread.
+
+    Multithreading is useful because numpy releases the GIL while performing
+    many C operations.
+
+    """
+    while True:
+        args = note_queue.get()
+        _create(*args).play()
+
+
+note_queue = Queue()
+player_thread = Thread(target=_play_thread)
+player_thread.setDaemon(True)
+
+
 def play(hz, length):
-    """Plays a tone of a certain length from a note or frequency in hertz"""
-    create(hz, length).play()
+    """Plays a tone of a certain length from a note or frequency in hertz.
+
+    Tones have a maximum duration of 4 seconds. This limitation is imposed to
+    avoid accidentally creating sounds that take too long to generate and
+    require a lot of memory.
+
+    To work around this, create the sounds you want to use up-front with
+    create() and hold onto them, perhaps in an array.
+
+    """
+    if length > MAX_DURATION:
+        raise InvalidNote(
+            'Note length %ss is too long: notes may be at most %ss long' %
+            (length, MAX_DURATION)
+        )
+    args = _convert_args(hz, length)
+    if not player_thread.is_alive():
+        player_thread.start()
+    note_queue.put(args)
+
+
+if np is None:
+    def play(hz, length):
+        raise RuntimeError(
+            'Tone generation depends on Numpy, which is not available'
+        )
