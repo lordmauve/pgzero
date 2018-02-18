@@ -116,7 +116,7 @@ can use, as described below.
 
     :param pos: A tuple (x, y) that gives the location of the mouse pointer
                 when the button was released.
-    :param button: A :class:`mouse``enum value indicating the button that was
+    :param button: A :class:`mouse` enum value indicating the button that was
                    released.
 
 .. function:: on_mouse_move([pos], [rel], [buttons])
