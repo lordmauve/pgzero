@@ -504,6 +504,7 @@ Changing ``center=(100, 100)`` to ``midbottom=(100, 200)`` gives you:
 If you don't specify an initial position, the actor will initially be
 positioned in the top-left corner (equivalent to ``topleft=(0, 0)``).
 
+.. _anchor:
 
 Anchor point
 ''''''''''''
@@ -523,18 +524,71 @@ be floats or the strings ``left``, ``center``/``middle``, ``right``, ``top`` or
 ``bottom`` as appropriate.
 
 
+.. _rotation:
+
 Rotation
 ''''''''
 
-The ``.angle`` attribute of an actor controls the rotation of the sprite.
+The ``.angle`` attribute of an Actor controls the rotation of the sprite, in
+degrees, anticlockwise (counterclockwise).
+
+The centre of rotation is the Actor's :ref:`anchor point <anchor>`.
+
+Note that this will change the ``width`` and ``height`` of the Actor.
+
+For example, to make an asteroid sprite spinning slowly anticlockwise in
+space::
+
+    asteroid = Actor('asteroid', center=(300, 300))
+
+    def update():
+        asteroid.angle += 1
+
+To have it spin clockwise, we'd change ``update()`` to::
+
+    def update():
+        asteroid.angle -= 1
+
+As a different example, we could make an actor ``ship`` always face the mouse
+pointer. Because :meth:`~Actor.angle_to()` returns 0 for "right", the sprite we
+use for "ship" should face right::
+
+    ship = Actor('ship')
+
+    def on_mouse_move(pos):
+        ship.angle = ship.angle_to(pos)
+
+.. image:: _static/rotation.svg
+    :alt: Diagram showing how to set up sprites for rotation with angle_to()
+
+Remember that angles loop round, so 0 degrees == 360 degrees == 720 degrees.
+Likewise -180 degrees == 180 degrees.
 
 
+Distance and angle to
+'''''''''''''''''''''
+
+Actors have convenient methods for calculating their distance or angle to other
+Actors or ``(x, y)`` coordinate pairs.
+
+.. method:: Actor.distance_to(target)
+
+    Return the distance from this actor's position to target, in pixels.
 
 
-Actor
------
+.. method:: Actor.angle_to(target)
 
-``Actor`` objects represent your images and sprites.
+    Return the angle from this actor's position to target, in degrees.
+
+    This will return a number between -180 and 180 degrees. Right is 0 degrees
+    and the angles increase going anticlockwise.
+
+    Therefore:
+
+    * Left is 180 degrees.
+    * Up is 90 degrees.
+    * Down is -90 degrees.
+
 
 The Keyboard
 ------------
@@ -582,14 +636,14 @@ screen to the position ``(100, 100)``::
 
     animate(alien, pos=(100, 100))
 
-.. function:: animate(object, tween='linear', duration=1, **targets)
+.. function:: animate(object, tween='linear', duration=1, on_finished=None, **targets)
 
     Animate the attributes on object from their current value to that
     specified in the targets keywords.
 
     :param tween: The type of *tweening* to use.
     :param duration: The duration of the animation, in seconds.
-    :param on_complete: Function called when the animation finishes.
+    :param on_finished: Function called when the animation finishes.
     :param targets: The target values for the attributes to animate.
 
 The tween argument can be one of the following:
