@@ -10,6 +10,7 @@ Changelog
 * New: Actors are no longer subclasses of Rect, though they provide the same
   methods/properties. However they are now provided with floating point
   precision.
+* New: ``tone.play()`` function to allow playing musical notes.
 * New: ``pgzrun.go()`` to allow running Pygame Zero from an IDE (see
   :doc:`ide-mode`).
 * Examples: add Asteroids example game (thanks to Ian Salmons)

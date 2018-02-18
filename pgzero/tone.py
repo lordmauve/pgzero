@@ -4,6 +4,12 @@ This tone generator uses numpy to generate sounds on demand at a given duration
 and frequency. These are kept in a LRU cache which in typical applications
 will reduce the number of times they need to be regenerated.
 
+Rather than generating plain sine waves, tones are shaped by a basic and
+hard-coded `Attack Decay Sustain Release (ADSR) envelope`__, which gives them a
+slightly more sonorous timbre:
+
+.. __: https://en.wikipedia.org/wiki/Synthesizer#ADSR_envelope
+
 The approach we use here, generating sound samples in memory, is memory hungry
 and can introduce pauses when tones are generated. Currently tones generate in
 under 1ms on a 2.4GHz i7.
@@ -59,13 +65,13 @@ def sine_array_onecycle(hz):
     return (np.sin(xvalues) * (2 ** 15)).astype(np.int16)
 
 
-def create(hz, length):
-    """Create a tone of a given duration at a given frequency in hertz.
+def create(pitch, duration):
+    """Create a tone of a given duration at the given pitch.
 
     Return a Sound which can be played later.
 
     """
-    return _create(_convert_args(hz, length))
+    return _create(*_convert_args(pitch, duration))
 
 
 @lru_cache()
@@ -122,11 +128,11 @@ def validate_note(note):
     return note, accidental, int(octave)
 
 
-def _convert_args(hz, length):
+def _convert_args(hz, duration):
     """Convert the given arguments to _create parameters."""
     if isinstance(hz, str):
         hz = note_to_hertz(hz)
-    samples = int(length * SAMPLE_RATE)
+    samples = int(duration * SAMPLE_RATE)
     if not samples:
         raise InvalidNote("Note has zero duration")
     return hz, samples
@@ -149,7 +155,7 @@ player_thread = Thread(target=_play_thread)
 player_thread.setDaemon(True)
 
 
-def play(hz, length):
+def play(pitch, duration):
     """Plays a tone of a certain length from a note or frequency in hertz.
 
     Tones have a maximum duration of 4 seconds. This limitation is imposed to
@@ -160,12 +166,12 @@ def play(hz, length):
     create() and hold onto them, perhaps in an array.
 
     """
-    if length > MAX_DURATION:
+    if duration > MAX_DURATION:
         raise InvalidNote(
-            'Note length %ss is too long: notes may be at most %ss long' %
-            (length, MAX_DURATION)
+            'Note duration %ss is too long: notes may be at most %ss long' %
+            (duration, MAX_DURATION)
         )
-    args = _convert_args(hz, length)
+    args = _convert_args(pitch, duration)
     if not player_thread.is_alive():
         player_thread.start()
     note_queue.put(args)
