@@ -107,8 +107,8 @@ can use, as described below.
 
     :param pos: A tuple (x, y) that gives the location of the mouse pointer
                 when the button was pressed.
-    :param button: An integer indicating the button that was pressed (see
-                   :ref:`below <buttons-and-keys>`).
+    :param button: A :class:`mouse` enum value indicating the button that was
+                   pressed.
 
 .. function:: on_mouse_up([pos], [button])
 
@@ -116,8 +116,8 @@ can use, as described below.
 
     :param pos: A tuple (x, y) that gives the location of the mouse pointer
                 when the button was released.
-    :param button: An integer indicating the button that was released (see
-                   :ref:`below <buttons-and-keys>`).
+    :param button: A :class:`mouse` enum value indicating the button that was
+                   released.
 
 .. function:: on_mouse_move([pos], [rel], [buttons])
 
@@ -127,7 +127,16 @@ can use, as described below.
                 moved to.
     :param rel: A tuple (delta_x, delta_y) that represent the change in the
                 mouse pointer's position.
-    :param buttons: The buttons that were depressed, if any.
+    :param buttons: A set of :class:`mouse` enum values indicating the buttons
+                    that were depressed during the move.
+
+
+To handle mouse drags, use code such as the following::
+
+    def on_mouse_move(rel, buttons):
+        if mouse.LEFT in buttons:
+            # the mouse was dragged, do something with `rel`
+            ...
 
 
 .. function:: on_key_down([key], [mod], [unicode])

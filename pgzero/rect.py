@@ -50,26 +50,11 @@ class ZRect:
 
     _item_mapping = dict(enumerate("xywh"))
 
-    def __new__(cls, *args):
+    def __init__(self, *args):
 
-        #
-        # If there is only one argument, it should either be a Rect object
-        # (one of these or one from Pygame) or an arbitrary object with a
-        # "rect" attribute. In the former case, create an equivalent Rect;
-        # in the latter case, re-run the check with the object pointed to
-        # by ".rect", calling it first if it is callable.
-        #
         if len(args) == 1:
-            obj, = args
-            if isinstance(obj, RECT_CLASSES):
-                args = obj.x, obj.y, obj.w, obj.h
-            elif hasattr(obj, "rect"):
-                rectobj = obj.rect
-                if callable(rectobj):
-                    rectobj = rectobj()
-                return cls(rectobj)
+            args = tuple(self._handle_one_arg(args[0]))
 
-        obj = super().__new__(cls)
         #
         # At this point we have one of:
         #
@@ -78,20 +63,49 @@ class ZRect:
         # (x, y, w, h),
         #
         if len(args) == 4:
-            obj.x, obj.y, obj.w, obj.h = args
+            self.x, self.y, self.w, self.h = args
         elif len(args) == 2:
-            (obj.x, obj.y), (obj.w, obj.h) = args
+            (self.x, self.y), (self.w, self.h) = args
         elif len(args) == 1:
-            obj.x, obj.y, obj.w, obj.h = args[0]
+            self.x, self.y, self.w, self.h = args[0]
         else:
             raise TypeError("%s should be called with one, two or four arguments" % (cls.__name__))
 
+        self.rect = self
+
+    def _handle_one_arg(self, arg):
+        """Handle -- possibly recursively -- the case of one parameter
+
+        Pygame -- and consequently pgzero -- is very accommodating when constructing
+        a rect. You can pass four integers, two pairs of 2-tuples, or one 4-tuple.
+
+        Also, you can pass an existing Rect-like object, or an object with a .rect
+        attribute. The object named by the .rect attribute is either one of the above,
+        or it's a callable object which returns one of the above.
+
+        This is evidently a recursive solution where an object with a .rect
+        attribute can yield an object with a .rect attribute, and so ad infinitum.
+        """
         #
-        # To allow interoperation with Pygame, set a rect attribute
-        # to point to this instance.
+        # If the arg is an existing rect, return its elements
         #
-        obj.rect = obj
-        return obj
+        if isinstance(arg, RECT_CLASSES):
+            return arg.x, arg.y, arg.w, arg.h
+
+        #
+        # If it's something with a .rect attribute, start again with
+        # that attribute, calling it first if it's callable
+        #
+        if hasattr(arg, "rect"):
+            rectobj = arg.rect
+            if callable(rectobj):
+                rectobj = rectobj()
+            return self._handle_one_arg(rectobj)
+
+        #
+        # Otherwise, we assume it's an iterable of four elements
+        #
+        return arg
 
     def __repr__(self):
         return "<%s (x: %s, y: %s, w: %s, h: %s)>" % (self.__class__.__name__, self.x, self.y, self.w, self.h)
@@ -206,14 +220,12 @@ class ZRect:
     def _set_centerx(self, centerx):
         self.x = centerx - (self.w / 2)
     centerx = property(_get_centerx, _set_centerx)
-    centrex = centerx
 
     def _get_centery(self):
         return self.y + (self.h / 2)
     def _set_centery(self, centery):
         self.y = centery - (self.h / 2)
     centery = property(_get_centery, _set_centery)
-    centrey = centery
 
     def _get_topleft(self):
         return self.x, self.y
@@ -284,7 +296,6 @@ class ZRect:
         self.x = x - self.w / 2
         self.y = y - self.h / 2
     center = property(_get_center, _set_center)
-    centre = center
 
     def _get_size(self):
         return self.w, self.h
@@ -448,7 +459,7 @@ class ZRect:
 
     def collidepoint(self, *args):
         if len(args) == 1:
-            x, y = args,
+            x, y = args[0]
         else:
             x, y = args
         return (

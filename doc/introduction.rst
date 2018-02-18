@@ -24,8 +24,8 @@ may need to terminate it by pressing ``Ctrl-C`` in your Terminal window.
 Drawing a background
 --------------------
 
-Next, let's add a :func:`draw` function. Pygame Zero will call this function
-whenever it needs to paint the screen.
+Next, let's add a :func:`draw` function and set window dimensions. Pygame Zero
+will call this function whenever it needs to paint the screen.
 
 In ``intro.py``, add the following::
 
@@ -46,7 +46,8 @@ sets the window size to be 300 pixels in each dimension.
 :ref:`range of methods for drawing sprites and shapes <screen>`. The
 ``screen.fill()`` method call is filling the screen with a solid colour,
 specified as a ``(red, green, blue)`` colour tuple. ``(128, 0, 0)`` will be a
-medium-dark red.
+medium-dark red. Try changing these values with numbers between 0 and 255
+and see what colors you can create.
 
 Pygame Zero is actually calling your draw function many times a second. If your
 ``draw()`` function draws slightly different things every frame, it will appear
@@ -71,7 +72,9 @@ Create a directory called ``images`` and save the image into it as
 ``alien.png``. Both of those must be lower case. Pygame Zero will complain
 otherwise, to alert you to a potential cross-platform compatibility pitfall.
 
-If you've done that, your project should look like this::
+If you've done that, your project should look like this:
+
+.. code-block:: none
 
     .
     ├── images/
@@ -166,7 +169,9 @@ Now let's make the alien appear hurt. Save these files:
 * `eep.wav <_static/eep.wav>`_ - create a directory called ``sounds`` and save
   this as ``eep.wav`` in that directory.
 
-Your project should now look like this::
+Your project should now look like this:
+
+.. code-block:: none
 
     .
     ├── images/

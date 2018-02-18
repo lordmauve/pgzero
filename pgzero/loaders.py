@@ -1,4 +1,6 @@
 import os.path
+import sys
+
 from types import ModuleType
 import pygame.image
 import pygame.mixer
@@ -24,6 +26,7 @@ def set_root(path):
         root = path
     else:
         root = os.path.dirname(path)
+    sys.path.insert(0, root)
 
 
 class InvalidCase(Exception):
@@ -122,14 +125,14 @@ class ResourceLoader:
                 p = os.path.join(self._root(), name + '.' + ext)
                 if os.path.exists(p):
                     break
-        else:
-            raise KeyError(
-                "No {type} found like '{name}'. "
-                "Are you sure the {type} exists?".format(
-                    type=self.TYPE,
-                    name=name
+            else:
+                raise KeyError(
+                    "No {type} found like '{name}'. "
+                    "Are you sure the {type} exists?".format(
+                        type=self.TYPE,
+                        name=name
+                    )
                 )
-            )
 
         validate_compatible_path(p)
         res = self.cache[key] = self._load(p, *args, **kwargs)
@@ -202,8 +205,13 @@ images = ImageLoader('images')
 sounds = SoundLoader('sounds')
 fonts = FontLoader('fonts')
 
-
-def getfont(fontname, fontsize):
+def getfont(
+        fontname=None,
+        fontsize=None,
+        sysfontname=None,
+        bold=None,
+        italic=None,
+        underline=None):
     """Monkey-patch for ptext.getfont().
 
     This will use our loader and therefore obey our case validation, caching
@@ -213,15 +221,35 @@ def getfont(fontname, fontsize):
     fontname = fontname or ptext.DEFAULT_FONT_NAME
     fontsize = fontsize or ptext.DEFAULT_FONT_SIZE
 
+    key = (
+        fontname,
+        fontsize,
+        sysfontname,
+        bold,
+        italic,
+        underline
+    )
+
+    if key in ptext._font_cache:
+        return ptext._font_cache[key]
+
     if fontname is None:
-        key = fontname, fontsize
-        f = ptext._font_cache.get(key)
-        if f:
-            return f
-        f = pygame.font.Font(fontname, fontsize)
-        ptext._font_cache[key] = f
+        font = ptext._font_cache.get(key)
+        if font:
+            return font
+        font = pygame.font.Font(fontname, fontsize)
     else:
-        f = fonts.load(fontname, fontsize)
-    return f
+        font = fonts.load(fontname, fontsize)
+
+    if bold is not None:
+        font.set_bold(bold)
+    if italic is not None:
+        font.set_italic(italic)
+    if underline is not None:
+        font.set_underline(underline)
+
+    ptext._font_cache[key] = font
+    return font
+
 
 ptext.getfont = getfont

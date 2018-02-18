@@ -2,6 +2,7 @@ import unittest
 import pygame
 from pgzero.rect import ZRect as Rect
 
+
 class RectTypeTest( unittest.TestCase ):
     def testConstructionXYWidthHeight( self ):
         r = Rect(1,2,3,4)
@@ -19,7 +20,7 @@ class RectTypeTest( unittest.TestCase ):
 
     def testCalculatedAttributes( self ):
         r = Rect( 1, 2, 3, 4 )
-        
+
         self.assertEqual( r.left+r.width, r.right )
         self.assertEqual( r.top+r.height, r.bottom )
         self.assertEqual( (r.width,r.height), r.size )
@@ -38,7 +39,7 @@ class RectTypeTest( unittest.TestCase ):
         self.assertEqual( (r.centerx,r.bottom), r.midbottom )
         self.assertEqual( (r.left,r.centery), r.midleft )
         self.assertEqual( (r.right,r.centery), r.midright )
-    
+
     def test_normalize( self ):
         r = Rect( 1, 2, -3, -6 )
         r2 = Rect(r)
@@ -54,11 +55,11 @@ class RectTypeTest( unittest.TestCase ):
         """
         r = Rect( 1, 2, 3, 4 )
         new_left = 10
-        
+
         r.left = new_left
         self.assertEqual( new_left, r.left )
         self.assertEqual( Rect(new_left,2,3,4), r )
-    
+
     def test_right( self ):
         """Changing the right attribute moves the rect and does not change
            the rect's width
@@ -67,23 +68,23 @@ class RectTypeTest( unittest.TestCase ):
         new_right = r.right + 20
         expected_left = r.left + 20
         old_width = r.width
-        
+
         r.right = new_right
         self.assertEqual( new_right, r.right )
         self.assertEqual( expected_left, r.left )
         self.assertEqual( old_width, r.width )
-       
+
     def test_top( self ):
         """Changing the top attribute moves the rect and does not change
            the rect's width
         """
         r = Rect( 1, 2, 3, 4 )
         new_top = 10
-        
+
         r.top = new_top
         self.assertEqual( Rect(1,new_top,3,4), r )
         self.assertEqual( new_top, r.top )
-    
+
     def test_bottom( self ):
         """Changing the bottom attribute moves the rect and does not change
            the rect's height
@@ -92,12 +93,12 @@ class RectTypeTest( unittest.TestCase ):
         new_bottom = r.bottom + 20
         expected_top = r.top + 20
         old_height = r.height
-        
+
         r.bottom = new_bottom
         self.assertEqual( new_bottom, r.bottom )
         self.assertEqual( expected_top, r.top )
         self.assertEqual( old_height, r.height )
-    
+
     def test_centerx( self ):
         """Changing the centerx attribute moves the rect and does not change
            the rect's width
@@ -106,12 +107,12 @@ class RectTypeTest( unittest.TestCase ):
         new_centerx = r.centerx + 20
         expected_left = r.left + 20
         old_width = r.width
-        
+
         r.centerx = new_centerx
         self.assertEqual( new_centerx, r.centerx )
         self.assertEqual( expected_left, r.left )
         self.assertEqual( old_width, r.width )
-    
+
     def test_centery( self ):
         """Changing the centerx attribute moves the rect and does not change
            the rect's width
@@ -120,12 +121,12 @@ class RectTypeTest( unittest.TestCase ):
         new_centery = r.centery + 20
         expected_top = r.top + 20
         old_height = r.height
-        
+
         r.centery = new_centery
         self.assertEqual( new_centery, r.centery )
         self.assertEqual( expected_top, r.top )
         self.assertEqual( old_height, r.height )
-    
+
     def test_topleft( self ):
         """Changing the topleft attribute moves the rect and does not change
            the rect's size
@@ -133,11 +134,11 @@ class RectTypeTest( unittest.TestCase ):
         r = Rect( 1, 2, 3, 4 )
         new_topleft = (r.left+20,r.top+30)
         old_size = r.size
-        
+
         r.topleft = new_topleft
         self.assertEqual( new_topleft, r.topleft )
         self.assertEqual( old_size, r.size )
-        
+
     def test_bottomleft( self ):
         """Changing the bottomleft attribute moves the rect and does not change
            the rect's size
@@ -146,12 +147,12 @@ class RectTypeTest( unittest.TestCase ):
         new_bottomleft = (r.left+20,r.bottom+30)
         expected_topleft = (r.left+20,r.top+30)
         old_size = r.size
-        
+
         r.bottomleft = new_bottomleft
         self.assertEqual( new_bottomleft, r.bottomleft )
         self.assertEqual( expected_topleft, r.topleft )
         self.assertEqual( old_size, r.size )
-    
+
     def test_topright( self ):
         """Changing the bottomleft attribute moves the rect and does not change
            the rect's size
@@ -160,12 +161,12 @@ class RectTypeTest( unittest.TestCase ):
         new_topright = (r.right+20,r.top+30)
         expected_topleft = (r.left+20,r.top+30)
         old_size = r.size
-        
+
         r.topright = new_topright
         self.assertEqual( new_topright, r.topright )
         self.assertEqual( expected_topleft, r.topleft )
         self.assertEqual( old_size, r.size )
-    
+
     def test_bottomright( self ):
         """Changing the bottomright attribute moves the rect and does not change
            the rect's size
@@ -174,12 +175,12 @@ class RectTypeTest( unittest.TestCase ):
         new_bottomright = (r.right+20,r.bottom+30)
         expected_topleft = (r.left+20,r.top+30)
         old_size = r.size
-        
+
         r.bottomright = new_bottomright
         self.assertEqual( new_bottomright, r.bottomright )
         self.assertEqual( expected_topleft, r.topleft )
         self.assertEqual( old_size, r.size )
-    
+
     def test_center( self ):
         """Changing the center attribute moves the rect and does not change
            the rect's size
@@ -188,12 +189,12 @@ class RectTypeTest( unittest.TestCase ):
         new_center = (r.centerx+20,r.centery+30)
         expected_topleft = (r.left+20,r.top+30)
         old_size = r.size
-        
+
         r.center = new_center
         self.assertEqual( new_center, r.center )
         self.assertEqual( expected_topleft, r.topleft )
         self.assertEqual( old_size, r.size )
-    
+
     def test_midleft( self ):
         """Changing the midleft attribute moves the rect and does not change
            the rect's size
@@ -202,12 +203,12 @@ class RectTypeTest( unittest.TestCase ):
         new_midleft = (r.left+20,r.centery+30)
         expected_topleft = (r.left+20,r.top+30)
         old_size = r.size
-        
+
         r.midleft = new_midleft
         self.assertEqual( new_midleft, r.midleft )
         self.assertEqual( expected_topleft, r.topleft )
         self.assertEqual( old_size, r.size )
-    
+
     def test_midright( self ):
         """Changing the midright attribute moves the rect and does not change
            the rect's size
@@ -216,12 +217,12 @@ class RectTypeTest( unittest.TestCase ):
         new_midright= (r.right+20,r.centery+30)
         expected_topleft = (r.left+20,r.top+30)
         old_size = r.size
-        
+
         r.midright = new_midright
         self.assertEqual( new_midright, r.midright )
         self.assertEqual( expected_topleft, r.topleft )
         self.assertEqual( old_size, r.size )
-    
+
     def test_midtop( self ):
         """Changing the midtop attribute moves the rect and does not change
            the rect's size
@@ -230,12 +231,12 @@ class RectTypeTest( unittest.TestCase ):
         new_midtop= (r.centerx+20,r.top+30)
         expected_topleft = (r.left+20,r.top+30)
         old_size = r.size
-        
+
         r.midtop = new_midtop
         self.assertEqual( new_midtop, r.midtop )
         self.assertEqual( expected_topleft, r.topleft )
         self.assertEqual( old_size, r.size )
-    
+
     def test_midbottom( self ):
         """Changing the midbottom attribute moves the rect and does not change
            the rect's size
@@ -244,49 +245,49 @@ class RectTypeTest( unittest.TestCase ):
         new_midbottom = (r.centerx+20,r.bottom+30)
         expected_topleft = (r.left+20,r.top+30)
         old_size = r.size
-        
+
         r.midbottom = new_midbottom
         self.assertEqual( new_midbottom, r.midbottom )
         self.assertEqual( expected_topleft, r.topleft )
         self.assertEqual( old_size, r.size )
-    
+
     def test_width( self ):
         "Changing the width resizes the rect from the top-left corner"
         r = Rect( 1, 2, 3, 4 )
         new_width = 10
         old_topleft = r.topleft
         old_height = r.height
-        
+
         r.width = new_width
         self.assertEqual( new_width, r.width )
         self.assertEqual( old_height, r.height )
         self.assertEqual( old_topleft, r.topleft )
-    
+
     def test_height( self ):
         "Changing the height resizes the rect from the top-left corner"
         r = Rect( 1, 2, 3, 4 )
         new_height = 10
         old_topleft = r.topleft
         old_width = r.width
-        
+
         r.height = new_height
         self.assertEqual( new_height, r.height )
         self.assertEqual( old_width, r.width )
         self.assertEqual( old_topleft, r.topleft )
-    
+
     def test_size( self ):
         "Changing the size resizes the rect from the top-left corner"
         r = Rect( 1, 2, 3, 4 )
         new_size = (10,20)
         old_topleft = r.topleft
-        
+
         r.size = new_size
         self.assertEqual( new_size, r.size )
         self.assertEqual( old_topleft, r.topleft )
 
     def test_contains( self ):
         r = Rect( 1, 2, 3, 4 )
-        
+
         self.assertTrue( r.contains( Rect( 2, 3, 1, 1 ) ),
                          "r does not contain Rect(2,3,1,1)" )
         self.assertTrue( r.contains( Rect(r) ),
@@ -299,10 +300,10 @@ class RectTypeTest( unittest.TestCase ):
                      "r contains Rect(4,6,1,1)" )
         self.assertFalse( r.contains( Rect(4,6,0,0) ),
                      "r contains Rect(4,6,0,0)" )
-    
+
     def test_collidepoint( self ):
         r = Rect( 1, 2, 3, 4 )
-        
+
         self.assertTrue( r.collidepoint( r.left, r.top ),
                          "r does not collide with point (left,top)" )
         self.assertFalse( r.collidepoint( r.left-1, r.top ),
@@ -311,7 +312,7 @@ class RectTypeTest( unittest.TestCase ):
                      "r collides with point (left,top-1)"  )
         self.assertFalse( r.collidepoint( r.left-1,r.top-1 ),
                      "r collides with point (left-1,top-1)"  )
-        
+
         self.assertTrue( r.collidepoint( r.right-1, r.bottom-1 ),
                          "r does not collide with point (right-1,bottom-1)")
         self.assertFalse( r.collidepoint( r.right, r.bottom ),
@@ -326,7 +327,7 @@ class RectTypeTest( unittest.TestCase ):
         r = Rect( 2, 4, 6, 8 )
         r2 = r.inflate( 4, 6 )
 
-        self.assertEqual( r.center, r2.center )        
+        self.assertEqual( r.center, r2.center )
         self.assertEqual( r.left-2, r2.left )
         self.assertEqual( r.top-3, r2.top )
         self.assertEqual( r.right+2, r2.right )
@@ -339,7 +340,7 @@ class RectTypeTest( unittest.TestCase ):
         r = Rect( 2, 4, 6, 8 )
         r2 = r.inflate( -4, -6 )
 
-        self.assertEqual( r.center, r2.center )        
+        self.assertEqual( r.center, r2.center )
         self.assertEqual( r.left+2, r2.left )
         self.assertEqual( r.top+3, r2.top )
         self.assertEqual( r.right-2, r2.right )
@@ -347,13 +348,13 @@ class RectTypeTest( unittest.TestCase ):
         self.assertEqual( r.width-4, r2.width )
         self.assertEqual( r.height-6, r2.height )
 
-    def test_inflate_ip__larger( self ):    
+    def test_inflate_ip__larger( self ):
         "The inflate_ip method inflates around the center of the rectangle"
         r = Rect( 2, 4, 6, 8 )
         r2 = Rect( r )
         r2.inflate_ip( -4, -6 )
-        
-        self.assertEqual( r.center, r2.center )        
+
+        self.assertEqual( r.center, r2.center )
         self.assertEqual( r.left+2, r2.left )
         self.assertEqual( r.top+3, r2.top )
         self.assertEqual( r.right-2, r2.right )
@@ -366,8 +367,8 @@ class RectTypeTest( unittest.TestCase ):
         r = Rect( 2, 4, 6, 8 )
         r2 = Rect( r )
         r2.inflate_ip( -4, -6 )
-        
-        self.assertEqual( r.center, r2.center )        
+
+        self.assertEqual( r.center, r2.center )
         self.assertEqual( r.left+2, r2.left )
         self.assertEqual( r.top+3, r2.top )
         self.assertEqual( r.right-2, r2.right )
@@ -397,7 +398,7 @@ class RectTypeTest( unittest.TestCase ):
         c = Rect(5, 500, 22, 33)
         c.clamp_ip(r)
         self.assertEqual(c.center, r.center)
-        
+
     def test_clip( self ):
         r1 = Rect( 1, 2, 3, 4 )
         self.assertEqual( Rect( 1, 2, 2, 2 ), r1.clip( Rect(0,0,3,4) ) )
@@ -406,7 +407,7 @@ class RectTypeTest( unittest.TestCase ):
         self.assertEqual( (0,0), r1.clip(20,30,5,6).size )
         self.assertEqual( r1, r1.clip( Rect(r1) ),
                           "r1 does not clip an identical rect to itself" )
-        
+
     def test_move( self ):
         r = Rect( 1, 2, 3, 4 )
         move_x = 10
@@ -414,8 +415,8 @@ class RectTypeTest( unittest.TestCase ):
         r2 = r.move( move_x, move_y )
         expected_r2 = Rect(r.left+move_x,r.top+move_y,r.width,r.height)
         self.assertEqual( expected_r2, r2 )
-    
-    def test_move_ip( self ):    
+
+    def test_move_ip( self ):
         r = Rect( 1, 2, 3, 4 )
         r2 = Rect( r )
         move_x = 10
@@ -423,35 +424,35 @@ class RectTypeTest( unittest.TestCase ):
         r2.move_ip( move_x, move_y )
         expected_r2 = Rect(r.left+move_x,r.top+move_y,r.width,r.height)
         self.assertEqual( expected_r2, r2 )
-    
+
     def test_union( self ):
         r1 = Rect( 1, 1, 1, 2 )
         r2 = Rect( -2, -2, 1, 2 )
         self.assertEqual( Rect( -2, -2, 4, 5 ), r1.union(r2) )
-    
+
     def test_union__with_identical_Rect( self ):
         r1 = Rect( 1, 2, 3, 4 )
         self.assertEqual( r1, r1.union( Rect(r1) ) )
-    
+
     def test_union_ip( self ):
         r1 = Rect( 1, 1, 1, 2 )
         r2 = Rect( -2, -2, 1, 2 )
         r1.union_ip(r2)
         self.assertEqual( Rect( -2, -2, 4, 5 ), r1 )
-    
+
     def test_unionall( self ):
         r1 = Rect( 0, 0, 1, 1 )
         r2 = Rect( -2, -2, 1, 1 )
         r3 = Rect( 2, 2, 1, 1 )
-        
+
         r4 = r1.unionall( [r2,r3] )
         self.assertEqual( Rect(-2, -2, 5, 5), r4 )
-    
+
     def test_unionall_ip( self ):
         r1 = Rect( 0, 0, 1, 1 )
         r2 = Rect( -2, -2, 1, 1 )
         r3 = Rect( 2, 2, 1, 1 )
-        
+
         r1.unionall_ip( [r2,r3] )
         self.assertEqual( Rect(-2, -2, 5, 5), r1 )
 
@@ -481,7 +482,7 @@ class RectTypeTest( unittest.TestCase ):
                      "r1 collides with Rect(r1.right,r1.bottom,1,1)" )
 
     def testEquals( self ):
-        """ check to see how the rect uses __eq__ 
+        """ check to see how the rect uses __eq__
         """
         r1 = Rect(1,2,3,4)
         r2 = Rect(10,20,30,40)
@@ -521,11 +522,11 @@ class RectTypeTest( unittest.TestCase ):
 
           # Rect.collidedict(dict): return (key, value)
           # test if one rectangle in a dictionary intersects
-          # 
+          #
           # Returns the key and value of the first dictionary value that
           # collides with the Rect. If no collisions are found, None is
           # returned.
-          # 
+          #
           # Rect objects are not hashable and cannot be used as keys in a
           # dictionary, only as values.
 
@@ -560,11 +561,11 @@ class RectTypeTest( unittest.TestCase ):
 
           # Rect.collidedictall(dict): return [(key, value), ...]
           # test if all rectangles in a dictionary intersect
-          # 
+          #
           # Returns a list of all the key and value pairs that intersect with
           # the Rect. If no collisions are found an empty dictionary is
           # returned.
-          # 
+          #
           # Rect objects are not hashable and cannot be used as keys in a
           # dictionary, only as values.
 
@@ -583,14 +584,14 @@ class RectTypeTest( unittest.TestCase ):
         d2 = {2: r2, 3: r3, 4: r4, 5: r5}
         l2 = r.collidedictall(d2, rects_values)
         self.assertEqual(l2, [(2, r2), (3, r3), (4, r4)])
-        
+
     def test_collidelist(self):
 
         # __doc__ (as of 2008-08-02) for pygame.rect.Rect.collidelist:
 
           # Rect.collidelist(list): return index
           # test if one rectangle in a list intersects
-          # 
+          #
           # Test whether the rectangle collides with any in a sequence of
           # rectangles. The index of the first collision found is returned. If
           # no collisions are found an index of -1 is returned.
@@ -602,7 +603,7 @@ class RectTypeTest( unittest.TestCase ):
 
         f = [Rect(50, 50, 1, 1), (100, 100, 4, 4)]
         self.assertEqual(r.collidelist(f), -1)
-        
+
 
     def test_collidelistall(self):
 
@@ -610,7 +611,7 @@ class RectTypeTest( unittest.TestCase ):
 
           # Rect.collidelistall(list): return indices
           # test if all rectangles in a list intersect
-          # 
+          #
           # Returns a list of all the indices that contain rectangles that
           # collide with the Rect. If no intersecting rectangles are found, an
           # empty list is returned.
@@ -618,7 +619,7 @@ class RectTypeTest( unittest.TestCase ):
         r = Rect(1, 1, 10, 10)
 
         l = [
-            Rect(1, 1, 10, 10), 
+            Rect(1, 1, 10, 10),
             Rect(5, 5, 10, 10),
             Rect(15, 15, 1, 1),
             Rect(2, 2, 1, 1),
@@ -635,7 +636,7 @@ class RectTypeTest( unittest.TestCase ):
 
           # Rect.fit(Rect): return Rect
           # resize and move a rectangle with aspect ratio
-          # 
+          #
           # Returns a new rectangle that is moved and resized to fit another.
           # The aspect ratio of the original Rect is preserved, so the new
           # rectangle may be smaller than the target in either width or height.
@@ -646,7 +647,7 @@ class RectTypeTest( unittest.TestCase ):
 
         f = r.fit(r2)
         self.assertTrue(r2.contains(f))
-        
+
         f2 = r2.fit(r)
         self.assertTrue(r.contains(f2))
 
@@ -656,9 +657,9 @@ class RectTypeTest( unittest.TestCase ):
         r = Rect(1, 2, 10, 20)
         c = r.copy()
         self.assertEqual(c, r)
-        
+
 class PGZeroRectText(unittest.TestCase):
-    
+
     def test_constructor_from_tuple(self):
         "Build a Rect from a 4-item tuple"
         r = Rect((1, 2, 3, 4))
@@ -666,21 +667,21 @@ class PGZeroRectText(unittest.TestCase):
         self.assertEqual(r.y, 2)
         self.assertEqual(r.w, 3)
         self.assertEqual(r.h, 4)
-    
+
     def test_constructor_from_PGZeroRect(self):
         "Build a rect from another pgzero Rect"
         r = Rect(1, 2, 3, 4)
         r1 = Rect(r)
         self.assertEqual(r, r1)
         self.assertIsNot(r, r1)
-    
+
     def test_constructor_from_PygameRect(self):
         "Build a rect from a pygame Rect"
         r = pygame.Rect(1, 2, 3, 4)
         r1 = Rect(r)
         self.assertEqual(r, r1)
         self.assertIsNot(r, r1)
-    
+
     def test_constructor_from_rect_tuple(self):
         "Build a rect from an object with a rect attribute which is a tuple"
         class Obj: pass
@@ -688,7 +689,7 @@ class PGZeroRectText(unittest.TestCase):
         obj.rect = 1, 2, 3, 4
         r = Rect(obj)
         self.assertEqual(r, Rect(1, 2, 3, 4))
-    
+
     def test_constructor_from_rect_object(self):
         "Build a rect from an object with a rect attribute which is an object"
         class Obj: pass
@@ -696,9 +697,9 @@ class PGZeroRectText(unittest.TestCase):
         obj.rect = Rect(1, 2, 3, 4)
         r = Rect(obj)
         self.assertEqual(r, Rect(1, 2, 3, 4))
-        
+
     def test_constructor_from_rect_indirect_tuple(self):
-        """Build a rect from an object with a rect attribute which 
+        """Build a rect from an object with a rect attribute which
         is an object which has a rect attribute which is a tuple
         """
         class Obj: pass
@@ -708,12 +709,12 @@ class PGZeroRectText(unittest.TestCase):
         obj.rect = obj1
         r = Rect(obj)
         self.assertEqual(r, Rect(1, 2, 3, 4))
-    
+
     def test_constructor_from_rect_callable(self):
         """Build a rect from an object with a rect attribute which
         is called and returns a tuple
         """
-        class Obj: 
+        class Obj:
             def rect(self):
                 return 1, 2, 3, 4
         obj = Obj()
@@ -727,31 +728,31 @@ class PGZeroRectText(unittest.TestCase):
         self.assertEqual(r.y, 3.4)
         self.assertEqual(r.w, 5.6)
         self.assertEqual(r.h, 7.8)
-    
+
     def test_float_instance_as_PygameRect(self):
         "Create a Pygame Rect from a pgzero floating-point Rect"
         r = Rect(1.2, 3.4, 5.6, 7.8)
         r2 = pygame.Rect(r)
         self.assertEqual([int(i) for i in r], list(r2))
-    
-    def test_float_centre(self):
+
+    def test_float_center(self):
         r = Rect(0, 0, 5, 5)
-        self.assertEqual(r.centre, (2.5, 2.5))
+        self.assertEqual(r.center, (2.5, 2.5))
 
     def test_float_inflated(self):
         r = Rect(0, 0, 5, 5)
         self.assertEqual(r.inflate(1.5, 1.5), (-0.75, -0.75, 6.5, 6.5))
-    
+
     def test_contains_point(self):
         r = Rect(0, 0, 100, 100)
         self.assertTrue((50, 50) in r)
         self.assertFalse((150, 150) in r)
-    
+
     def test_contains_rect(self):
         r = Rect(0, 0, 100, 100)
         self.assertTrue((20, 20, 50, 50) in r)
         self.assertFalse((20, 20, 100, 100) in r)
-    
+
     def test_not_hashable(self):
         r1 = Rect(1, 2, 3, 4)
         r2 = Rect(r1)
@@ -759,11 +760,15 @@ class PGZeroRectText(unittest.TestCase):
         self.assertIsNot(r1, r2)
         with self.assertRaises(TypeError):
             self.assertEqual({r1}, {r2})
-    
+
     def test_as_tuple(self):
         t = 1, 2, 3, 4
         r1 = Rect(t)
         self.assertEqual(tuple(r1), t)
+
+    def test_collidepoint_tuple(self):
+        r = Rect(0, 0, 1, 1)
+        self.assertTrue(r.collidepoint((0.5, 0.5)))
 
 if __name__ == '__main__':
     unittest.main()

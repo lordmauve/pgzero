@@ -77,7 +77,11 @@ class PGZeroGame:
         constants.MUSIC_END: 'on_music_end'
     }
 
+    def map_buttons(val):
+        return {c for c, pressed in zip(constants.mouse, val) if pressed}
+
     EVENT_PARAM_MAPPERS = {
+        'buttons': map_buttons,
         'button': constants.mouse,
         'key': constants.keys
     }
@@ -184,6 +188,15 @@ class PGZeroGame:
             return draw
 
     def run(self):
+        """Invoke the main loop, and then clean up."""
+        try:
+            self.mainloop()
+        finally:
+            pygame.display.quit()
+            pygame.mixer.quit()
+
+    def mainloop(self):
+        """Run the main loop of Pygame Zero."""
         clock = pygame.time.Clock()
         self.reinit_screen()
 
