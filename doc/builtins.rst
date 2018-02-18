@@ -693,3 +693,42 @@ The ``animate()`` function returns an ``Animation`` instance:
         when the animation duration runs out. The ``on_finished`` argument
         to ``animate()`` also sets this attribute. It is not called when
         ``stop()`` is called. This function takes no arguments.
+
+
+Tone Generator
+--------------
+
+Pygame Zero can play tones using a built-in synthesizer.
+
+.. function:: tone.play(pitch, duration)
+
+    Play a note at the given pitch for the given duration.
+
+    Duration is in seconds.
+
+    The `pitch` can be specified as a number in which case it is the frequency
+    of the note in hertz.
+
+    Alternatively, the pitch can be specified as a string representing a note
+    name and octave. For example:
+
+    * ``'E4'`` would be E in octave 4.
+    * ``'A#5'`` would be A-sharp in octave 5.
+    * ``'Bb3'`` would be B-flat in octave 3.
+
+Creating notes, particularly long notes, takes time - up to several
+milliseconds. You can create your notes ahead of time so that this doesn't slow
+your game down while it is running:
+
+.. function:: tone.create(pitch, duration)
+
+    Create and return a Sound object.
+
+    The arguments are as for play(), above.
+
+This could be used in a Pygame Zero program like this::
+
+    beep = tone.create('A3', 0.5)
+
+    def on_mouse_down():
+        beep.play()
