@@ -1,6 +1,32 @@
 Changelog
 =========
 
+1.2 - unreleased
+----------------
+
+* New: :ref:`Actors can be rotated <rotation>` by assigning to ``actor.angle``
+* New: Actors now have :meth:`~Actor.angle_to()` and
+  :meth:`~Actor.distance_to()` methods.
+* New: Actors are no longer subclasses of Rect, though they provide the same
+  methods/properties. However they are now provided with floating point
+  precision.
+* New: ``pgzrun.go()`` to allow running Pygame Zero from an IDE (see
+  :doc:`ide-mode`).
+* Examples: add Asteroids example game (thanks to Ian Salmons)
+* Examples: add Flappy Bird example game
+* Examples: add Tetra example game (thanks to David Bern)
+* Docs: Documentation for the :ref:`anchor point system for Actors <anchor>`
+* Docs: Add :doc:`from-scratch` documentation
+* Fix: ``on_mouse_move()`` did not correctly handle the ``buttons`` parameter.
+* Fix: Error message when resource not found incorrectly named last extension
+  searched.
+* Fix: Drawing wrapped text would cause crashes.
+* Fix: :func:`animate()` now replaces animations of the same property, rather
+  than creating two animations which fight.
+* Updated ptext to a revision as of 2016-11-17.
+* Removed: removed undocumented British English ``centrex``, ``centrey``,
+  ``centre`` attribute aliases on ZRect (because they are not Rect-compatible).
+
 1.1 - 2015-08-03
 ----------------
 

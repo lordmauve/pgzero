@@ -9,6 +9,11 @@ Pygame Zero provides useful built-in objects to help you make games easily.
 Screen
 ------
 
+.. toctree::
+    :hidden:
+
+    ptext
+
 The ``screen`` object represents your game screen.
 
 It is a thin wrapper around a Pygame surface that allows you to easily
@@ -74,7 +79,6 @@ draw images to the screen ("blit" them).
 
         There's an extremely rich API for formatting text; see
         :doc:`ptext` for full details.
-
 
 .. _rect:
 
@@ -215,7 +219,7 @@ Then ``drum_kit.py`` could play the drum sound whenever the mouse is clicked
 with this code::
 
     def on_mouse_down():
-        sounds.drum_kit.play()
+        sounds.drum.play()
 
 Each loaded sound is a Pygame ``Sound``, and has various methods to play and
 stop the sound as well as query its length in seconds:
@@ -455,9 +459,18 @@ attribute to some new image name::
 
     alien.image = 'alien_hurt'
 
-Actors have all the same attributes as :ref:`Rect <rect>`. If you assign
-a new value to one of those attributes then the actor will be moved. For
-example::
+Actors have all the same attributes and methods as :ref:`Rect <rect>`,
+including methods like `.colliderect()`__ which can be used to test whether
+two actors have collided.
+
+.. __: https://www.pygame.org/docs/ref/rect.html#pygame.Rect.colliderect
+
+
+Positioning Actors
+''''''''''''''''''
+
+If you assign a new value to one of the position attributes then the actor will
+be moved. For example::
 
     alien.right = WIDTH
 
@@ -466,12 +479,35 @@ will position the alien so its right-hand side is set to ``WIDTH``.
 Similarly, you can also set the initial position of the actor in the
 constructor, by passing one of these as a keyword argument: ``pos``,
 ``topleft``, ``topright``, ``bottomleft``, ``bottomright``, ``midtop``,
-``midleft``, ``midright``, ``midbottom`` or ``center``. For example::
+``midleft``, ``midright``, ``midbottom`` or ``center``:
 
-    alien = Actor('alien', midbottom=(100, 300))
+.. image:: _static/actor/anchor_points.png
+
+This can be done during creation or by assigning a pair of x, y co-ordinates.
+For example::
+
+    WIDTH = 200
+    HEIGHT = 200
+
+    alien = Actor('alien', center=(100,100))
+
+    def draw():
+        screen.clear()
+        alien.draw()
+
+.. image:: _static/actor/alien_center.png
+
+Changing ``center=(100, 100)`` to ``midbottom=(100, 200)`` gives you:
+
+.. image:: _static/actor/alien_midbottom.png
 
 If you don't specify an initial position, the actor will initially be
 positioned in the top-left corner (equivalent to ``topleft=(0, 0)``).
+
+.. _anchor:
+
+Anchor point
+''''''''''''
 
 Actors have an "anchor position", which is a convenient way to position the
 actor in the scene. By default, the anchor position is the center, so the
@@ -486,6 +522,73 @@ be "standing on" something)::
 ``anchor`` is specified as a tuple ``(xanchor, yanchor)``, where the values can
 be floats or the strings ``left``, ``center``/``middle``, ``right``, ``top`` or
 ``bottom`` as appropriate.
+
+
+.. _rotation:
+
+Rotation
+''''''''
+
+The ``.angle`` attribute of an Actor controls the rotation of the sprite, in
+degrees, anticlockwise (counterclockwise).
+
+The centre of rotation is the Actor's :ref:`anchor point <anchor>`.
+
+Note that this will change the ``width`` and ``height`` of the Actor.
+
+For example, to make an asteroid sprite spinning slowly anticlockwise in
+space::
+
+    asteroid = Actor('asteroid', center=(300, 300))
+
+    def update():
+        asteroid.angle += 1
+
+To have it spin clockwise, we'd change ``update()`` to::
+
+    def update():
+        asteroid.angle -= 1
+
+As a different example, we could make an actor ``ship`` always face the mouse
+pointer. Because :meth:`~Actor.angle_to()` returns 0 for "right", the sprite we
+use for "ship" should face right::
+
+    ship = Actor('ship')
+
+    def on_mouse_move(pos):
+        ship.angle = ship.angle_to(pos)
+
+.. image:: _static/rotation.svg
+    :alt: Diagram showing how to set up sprites for rotation with angle_to()
+
+Remember that angles loop round, so 0 degrees == 360 degrees == 720 degrees.
+Likewise -180 degrees == 180 degrees.
+
+
+Distance and angle to
+'''''''''''''''''''''
+
+Actors have convenient methods for calculating their distance or angle to other
+Actors or ``(x, y)`` coordinate pairs.
+
+.. method:: Actor.distance_to(target)
+
+    Return the distance from this actor's position to target, in pixels.
+
+
+.. method:: Actor.angle_to(target)
+
+    Return the angle from this actor's position to target, in degrees.
+
+    This will return a number between -180 and 180 degrees. Right is 0 degrees
+    and the angles increase going anticlockwise.
+
+    Therefore:
+
+    * Left is 180 degrees.
+    * Up is 90 degrees.
+    * Down is -90 degrees.
+
 
 The Keyboard
 ------------
@@ -533,14 +636,14 @@ screen to the position ``(100, 100)``::
 
     animate(alien, pos=(100, 100))
 
-.. function:: animate(object, tween='linear', duration=1, **targets)
+.. function:: animate(object, tween='linear', duration=1, on_finished=None, **targets)
 
     Animate the attributes on object from their current value to that
     specified in the targets keywords.
 
     :param tween: The type of *tweening* to use.
     :param duration: The duration of the animation, in seconds.
-    :param on_complete: Function called when the animation finishes.
+    :param on_finished: Function called when the animation finishes.
     :param targets: The target values for the attributes to animate.
 
 The tween argument can be one of the following:

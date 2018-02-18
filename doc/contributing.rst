@@ -8,7 +8,7 @@ The Pygame Zero project is hosted on bitbucket:
 Development installation
 ------------------------
 
-It's possible to create a locally-editable install using pip. From the root directory of the checked out source, run:
+It's possible to create a locally-editable install using pip. From the root directory of the checked out source, run::
 
     pip3 install --editable .
 
@@ -20,7 +20,7 @@ Alternatively, if you don't want to install it at all, it may be run with:
 
 For example:
 
-   python3 -m pgzero examples/demo1.py
+   python3 -m pgzero examples/basic/demo1.py
 
 Tests
 -----

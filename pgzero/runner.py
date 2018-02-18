@@ -69,21 +69,42 @@ def main():
 
     if __debug__:
         warnings.simplefilter('default', DeprecationWarning)
-
     path = args[0]
+
     with open(path) as f:
         src = f.read()
 
     code = compile(src, os.path.basename(path), 'exec', dont_inherit=True)
 
-    loaders.set_root(path)
-
-    pygame.display.set_mode((100, 100), DISPLAY_FLAGS)
     name, _ = os.path.splitext(os.path.basename(path))
     mod = ModuleType(name)
     mod.__file__ = path
     mod.__name__ = name
-    mod.__dict__.update(builtins.__dict__)
     sys.modules[name] = mod
+
+    # Indicate that we're running with the pgzrun runner
+    # This disables the 'import pgzrun' module
+    sys._pgzrun = True
+
+    prepare_mod(mod)
     exec(code, mod.__dict__)
+    run_mod(mod)
+
+
+def prepare_mod(mod):
+    """Prepare a module to run as a Pygame Zero program.
+
+    mod is a loaded module object.
+
+    This sets up things like screen, loaders and builtins, which need to be
+    set before the module globals are run.
+
+    """
+    loaders.set_root(mod.__file__)
+    pygame.display.set_mode((100, 100), DISPLAY_FLAGS)
+    mod.__dict__.update(builtins.__dict__)
+
+
+def run_mod(mod):
+    """Run the module."""
     PGZeroGame(mod).run()
