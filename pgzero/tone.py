@@ -32,7 +32,7 @@ try:
 except ImportError:
     np = None
 import pygame.sndarray
-from threading import Thread
+from threading import Thread, Lock
 from queue import Queue
 
 __all__ = (
@@ -57,6 +57,12 @@ DECAY = 2000
 MAX_DURATION = 4
 
 
+cache_lock = Lock()
+note_queue = Queue()
+player_thread = Thread(target=_play_thread)
+player_thread.setDaemon(True)
+
+
 def sine_array_onecycle(hz):
     """Returns a single sin wave for a given frequency."""
     length = SAMPLE_RATE / hz
@@ -71,7 +77,8 @@ def create(pitch, duration):
     Return a Sound which can be played later.
 
     """
-    return _create(*_convert_args(pitch, duration))
+    with cache_lock:
+        return _create(*_convert_args(pitch, duration))
 
 
 @lru_cache()
@@ -147,12 +154,9 @@ def _play_thread():
     """
     while True:
         args = note_queue.get()
-        _create(*args).play()
-
-
-note_queue = Queue()
-player_thread = Thread(target=_play_thread)
-player_thread.setDaemon(True)
+        with cache_lock:
+            note = _create(*args)
+        note.play()
 
 
 def play(pitch, duration):
