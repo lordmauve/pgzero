@@ -1,6 +1,7 @@
 import sys
 import os.path
 from setuptools import setup
+import pgzero
 
 path = os.path.join(os.path.dirname(__file__), 'README.txt')
 with open(path, encoding='utf8') as f:
@@ -14,13 +15,14 @@ extras_require = {
 
 setup(
     name='pgzero',
-    version='1.2a1',
+    version=pgzero.__version__,
     description="A zero-boilerplate 2D games framework",
     long_description=LONG_DESCRIPTION,
     author='Daniel Pope',
     author_email='mauve@mauveweb.co.uk',
     url='http://pypi.python.org/pypi/pgzero',
     packages=['pgzero'],
+    include_package_data=True,
     py_modules=['pgzrun'],
     entry_points={
         'console_scripts': [

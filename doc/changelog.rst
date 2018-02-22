@@ -4,6 +4,7 @@ Changelog
 1.2 - unreleased
 ----------------
 
+* New: Show a logo if no ``draw()`` function is defined.
 * New: :ref:`Actors can be rotated <rotation>` by assigning to ``actor.angle``
 * New: Actors now have :meth:`~Actor.angle_to()` and
   :meth:`~Actor.distance_to()` methods.
@@ -16,6 +17,7 @@ Changelog
 * Examples: add Asteroids example game (thanks to Ian Salmons)
 * Examples: add Flappy Bird example game
 * Examples: add Tetra example game (thanks to David Bern)
+* Docs: Add a logo, fonts and colours to the documentation.
 * Docs: Documentation for the :ref:`anchor point system for Actors <anchor>`
 * Docs: Add :doc:`from-scratch` documentation
 * Fix: ``on_mouse_move()`` did not correctly handle the ``buttons`` parameter.

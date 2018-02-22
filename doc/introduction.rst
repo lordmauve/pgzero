@@ -9,9 +9,14 @@ Creating a window
 
 First, create an empty file called ``intro.py``.
 
-Verify that this runs and creates a blank window by running ::
+Verify that this runs by running ::
 
     pgzrun intro.py
+
+If Pygame Zero is installed and working correctly you should see a logo:
+
+.. image:: _static/pygame-zero-splash.png
+    :alt: Default Pygame Zero screen
 
 Everything in Pygame Zero is optional; a blank file is a valid Pygame Zero
 script!
@@ -24,8 +29,11 @@ may need to terminate it by pressing ``Ctrl-C`` in your Terminal window.
 Drawing a background
 --------------------
 
-Next, let's add a :func:`draw` function and set window dimensions. Pygame Zero
-will call this function whenever it needs to paint the screen.
+Let's get rid of that boring old logo. To do this we need to define a
+:func:`draw` function.
+
+Pygame Zero will call this function whenever it needs to paint the screen.
+Additionally we can set the width and height of the window.
 
 In ``intro.py``, add the following::
 
