@@ -41,12 +41,13 @@ def _substitute_full_framework_python():
     Then we use os.execv() to start a replacement process that uses the
     same environment as the previous one.
     """
-    PYVER = '3.4'
+    PYVER = '{}.{}'.format(*sys.version_info[:2])
     base_fw = '/Library/Frameworks/Python.framework/Versions/'
     framework_python = base_fw + '{pv}/bin/python{pv}'.format(pv=PYVER)
     venv_base = os.environ.get('VIRTUAL_ENV')
-    if not venv_base:
-        # Do nothing if virtual env hasn't been set up
+    if not venv_base or not os.path.exists(framework_python):
+        # Do nothing if virtual env hasn't been set up or if we can't
+        # find the framework Python interpreter
         return
     venv_paths = [p for p in sys.path if p.startswith(venv_base)]
     # Need to allow for PYTHONPATH not already existing in environment
