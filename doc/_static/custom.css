@@ -1,0 +1,28 @@
+@import url('https://fonts.googleapis.com/css?family=Fredoka+One');
+
+div.sphinxsidebarwrapper p.logo {
+    margin-bottom: 1.5em;
+}
+
+
+h1,
+h2,
+h3 {
+    font-family: 'Fredoka One', serif !important;
+}
+
+h1 {
+    color: #b83f3f !important;
+}
+
+h2 {
+    color: #3a76a8 !important;
+}
+
+h3 {
+    color: #266f2b !important;
+}
+
+div.sphinxsidebar h3 a {
+    color: #b79414 !important;
+}
