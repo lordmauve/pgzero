@@ -57,10 +57,7 @@ specified as a ``(red, green, blue)`` colour tuple. ``(128, 0, 0)`` will be a
 medium-dark red. Try changing these values with numbers between 0 and 255
 and see what colors you can create.
 
-Pygame Zero is actually calling your draw function many times a second. If your
-``draw()`` function draws slightly different things every frame, it will appear
-as an animation. We'll explore this shortly. For now, let's set up a sprite
-that we can animate.
+Let's set up a sprite that we can animate.
 
 
 Draw a sprite
