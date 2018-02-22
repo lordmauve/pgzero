@@ -57,8 +57,25 @@ DECAY = 2000
 MAX_DURATION = 4
 
 
+# lru_cache isn't threadsafe until Python 3.7, so protect it ourselves
+# https://bugs.python.org/issue28969
 cache_lock = Lock()
 note_queue = Queue()
+
+
+def _play_thread():
+    """Play any notes requested by the game thread.
+
+    Multithreading is useful because numpy releases the GIL while performing
+    many C operations.
+
+    """
+    while True:
+        args = note_queue.get()
+        with cache_lock:
+            note = _create(*args)
+        note.play()
+
 player_thread = Thread(target=_play_thread)
 player_thread.setDaemon(True)
 
@@ -143,20 +160,6 @@ def _convert_args(hz, duration):
     if not samples:
         raise InvalidNote("Note has zero duration")
     return hz, samples
-
-
-def _play_thread():
-    """Play any notes requested by the game thread.
-
-    Multithreading is useful because numpy releases the GIL while performing
-    many C operations.
-
-    """
-    while True:
-        args = note_queue.get()
-        with cache_lock:
-            note = _create(*args)
-        note.play()
 
 
 def play(pitch, duration):
