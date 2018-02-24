@@ -13,6 +13,7 @@ Changelog
 * New: ``tone.play()`` function to allow playing musical notes.
 * New: ``pgzrun.go()`` to allow running Pygame Zero from an IDE (see
   :doc:`ide-mode`).
+* New: show joypad icon by default
 * Examples: add Asteroids example game (thanks to Ian Salmons)
 * Examples: add Flappy Bird example game
 * Examples: add Tetra example game (thanks to David Bern)

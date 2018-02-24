@@ -64,6 +64,13 @@ right click on this one and save it ("Save Image As..." or similar).
 But it's designed for a dark background, so you may not be able to see the
 alien's space helmet until it is shown in the game).
 
+.. tip::
+
+    You can find lots of free sprites, including this one, on `kenney.nl
+    <https://kenney.nl/assets?q=2d>`_. This one comes from the
+    `Platformer Art Deluxe pack
+    <https://kenney.nl/assets/platformer-art-deluxe>`_.
+
 You need to save the file in the right place so that Pygame Zero can find it.
 Create a directory called ``images`` and save the image into it as
 ``alien.png``. Both of those must be lower case. Pygame Zero will complain

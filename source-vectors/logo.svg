@@ -16,7 +16,10 @@
    id="svg8085"
    version="1.1"
    inkscape:version="0.91 r13725"
-   sodipodi:docname="logo.svg">
+   sodipodi:docname="logo.svg"
+   inkscape:export-filename="/home/mauve/dev/pgzero/pgzero/data/joypad.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90">
   <defs
      id="defs8087">
     <linearGradient
@@ -181,16 +184,16 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1"
-     inkscape:cx="164.39489"
-     inkscape:cy="58.344659"
+     inkscape:zoom="8.4718499"
+     inkscape:cx="174.15978"
+     inkscape:cy="59.660696"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
-     inkscape:window-width="1535"
-     inkscape:window-height="876"
-     inkscape:window-x="65"
-     inkscape:window-y="24"
+     inkscape:window-width="3070"
+     inkscape:window-height="1752"
+     inkscape:window-x="130"
+     inkscape:window-y="48"
      inkscape:window-maximized="1"
      fit-margin-top="0"
      fit-margin-left="0"
