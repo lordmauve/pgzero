@@ -4,7 +4,6 @@ Changelog
 1.2 - unreleased
 ----------------
 
-* New: Show a logo if no ``draw()`` function is defined.
 * New: :ref:`Actors can be rotated <rotation>` by assigning to ``actor.angle``
 * New: Actors now have :meth:`~Actor.angle_to()` and
   :meth:`~Actor.distance_to()` methods.

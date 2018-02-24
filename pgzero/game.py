@@ -179,10 +179,7 @@ class PGZeroGame:
         try:
             draw = self.mod.draw
         except AttributeError:
-            from . import default_hooks
-            default_hooks.screen = self.mod.screen
-            default_hooks.init()
-            return default_hooks.draw
+            return lambda: None
         else:
             if draw.__code__.co_argcount != 0:
                 raise TypeError(
