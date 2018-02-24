@@ -234,7 +234,6 @@ class Actor:
         else:
             tx, ty = target
         myx, myy = self.pos
-        tx, ty = pos
         dx = tx - myx
         dy = myy - ty   # y axis is inverted from mathematical y in Pygame
         return degrees(atan2(dy, dx))
