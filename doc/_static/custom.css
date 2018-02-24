@@ -7,7 +7,8 @@ div.sphinxsidebarwrapper p.logo {
 
 h1,
 h2,
-h3 {
+h3,
+.admonition-title {
     font-family: 'Fredoka One', serif !important;
 }
 
@@ -25,4 +26,19 @@ h3 {
 
 div.sphinxsidebar h3 a {
     color: #b79414 !important;
+}
+
+
+.admonition.tip {
+    color: white;
+    background-color: #3a76a8;
+    border: none;
+    border-radius: 6px;
+    padding: 20px 30px;
+}
+
+.admonition.tip a {
+    color: #00b8e6;
+    border-bottom: none;
+    text-decoration: underline;
 }
