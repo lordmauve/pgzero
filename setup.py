@@ -7,7 +7,10 @@ path = os.path.join(os.path.dirname(__file__), 'README.txt')
 with open(path, encoding='utf8') as f:
     LONG_DESCRIPTION = f.read()
 
-install_requires = ['pygame>=1.9.2, <2.0']
+install_requires = [
+    'pygame>=1.9.2, <2.0',
+    'numpy',
+]
 
 extras_require = {
     ':python_version < "3.4"': ["enum34"],
