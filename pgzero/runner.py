@@ -103,6 +103,7 @@ def prepare_mod(mod):
 
     """
     loaders.set_root(mod.__file__)
+    PGZeroGame.show_default_icon()
     pygame.display.set_mode((100, 100), DISPLAY_FLAGS)
     mod.__dict__.update(builtins.__dict__)
 

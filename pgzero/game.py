@@ -32,6 +32,10 @@ def positional_parameters(handler):
     return code.co_varnames[:code.co_argcount]
 
 
+class DEFAULTICON:
+    """Sentinel indicating that we want to use the default icon."""
+
+
 class PGZeroGame:
     def __init__(self, mod):
         self.mod = mod
@@ -44,8 +48,23 @@ class PGZeroGame:
         self.handlers = {}
 
     def reinit_screen(self):
+        """Reinitialise the window.
+
+        Return True if the dimensions of the screen changed.
+
+        """
         global screen
+        changed = False
         mod = self.mod
+
+        icon = getattr(self.mod, 'ICON', DEFAULTICON)
+        if icon and icon != self.icon:
+            if icon is DEFAULTICON:
+                self.show_default_icon()
+            else:
+                pygame.display.set_icon(pygame.image.load(icon))
+            self.icon = icon
+
         w = getattr(mod, 'WIDTH', 800)
         h = getattr(mod, 'HEIGHT', 600)
         if w != self.width or h != self.height:
@@ -58,15 +77,20 @@ class PGZeroGame:
             self.width = w
             self.height = h
 
-        icon = getattr(mod, 'ICON', None)
-        if icon and icon != self.icon:
-            pygame.display.set_icon(pygame.image.load(icon))
-            self.icon = icon
-
         title = getattr(self.mod, 'TITLE', 'Pygame Zero Game')
         if title != self.title:
             pygame.display.set_caption(title)
             self.title = title
+
+        return changed
+
+    @staticmethod
+    def show_default_icon():
+        """Show a default icon loaded from Pygame Zero resources."""
+        from io import BytesIO
+        from pkgutil import get_data
+        buf = BytesIO(get_data(__name__, 'data/icon.png'))
+        pygame.display.set_icon(pygame.image.load(buf))
 
     EVENT_HANDLERS = {
         pygame.MOUSEBUTTONDOWN: 'on_mouse_down',
@@ -227,8 +251,8 @@ class PGZeroGame:
             if update:
                 update(dt)
 
-            if update or pgzclock.fired or self.need_redraw:
-                self.reinit_screen()
+            screen_change = self.reinit_screen()
+            if screen_change or update or pgzclock.fired or self.need_redraw:
                 draw()
                 pygame.display.flip()
                 self.need_redraw = False
