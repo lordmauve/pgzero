@@ -1,7 +1,7 @@
 Changelog
 =========
 
-1.2 - unreleased
+1.2 - 2018-02-24
 ----------------
 
 * New: :ref:`Actors can be rotated <rotation>` by assigning to ``actor.angle``
