@@ -59,9 +59,9 @@ for a taste of the other things that Pygame Zero can do.
 Contributing
 ------------
 
-The project is hosted on BitBucket:
+The project is hosted on Github:
 
-https://bitbucket.org/lordmauve/pgzero
+https://github.com/lordmauve/pgzero
 
 If you want to help out with the development of Pygame Zero, you can find some
 instructions on setting up a development version in the docs:

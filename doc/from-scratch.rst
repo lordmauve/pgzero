@@ -7,11 +7,11 @@ similar to a remarkable extent.
 
 The `Pygame Zero version`__ can be found in Pygame Zero repository.
 
-.. __: https://bitbucket.org/lordmauve/pgzero/src/tip/examples/flappybird/flappybird.py?at=default&fileviewer=file-view-default
+.. __: https://github.com/lordmauve/pgzero/blob/master/examples/flappybird/flappybird.py
 
 You can also download the `Scratch version`__ from the repository.
 
-.. __: https://bitbucket.org/lordmauve/pgzero/raw/6b0d2763c6ce2c4ccd073649e910a4b872675c67/examples/flappybird/Flappy%20Bird.sb
+.. __: https://github.com/lordmauve/pgzero/raw/master/examples/flappybird/Flappy%20Bird.sb
 
 The Pygame Zero version includes scoring logic, which is omitted in the code
 examples on this page to make it a closer comparison.
