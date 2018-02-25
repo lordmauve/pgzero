@@ -20,10 +20,7 @@ Courses
 
     introduction
     from-scratch
-
-.. This one is not yet complete
-.. learn-programming
-.. flappy-bird
+    flappy-bird
 
 Reference
 ---------
