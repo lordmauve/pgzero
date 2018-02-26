@@ -1,11 +1,12 @@
+import re
 from unittest import TestCase
 
 import numpy
 
-from pgzero.tone import sine_array_onecycle, note_value
-from tone import note_to_hertz, validate_note, InvalidNote
-
-import re
+from pgzero.tone import (
+    sine_array_onecycle, note_value,
+    note_to_hertz, validate_note, InvalidNote
+)
 
 TEST_NOTES = {
     'A4': dict(val = 0, hertz = 440, parts = ('A', '', 4)),
@@ -32,7 +33,7 @@ class ToneTest(TestCase):
             self.assertEqual(validate_note(note), val['parts'])
 
         for note in ['A9', 'H4', '4A', 'a4', 'Az4']:
-            with self.assertRaisesRegex(InvalidNote, re.escape('%s is not a valid note, notes are A-F, are either normal, flat (b) or sharp (#) and of octave 0-8' % note)):
+            with self.assertRaisesRegex(InvalidNote, re.escape('%s is not a valid note. notes are A-F, are either normal, flat (b) or sharp (#) and of octave 0-8' % note)):
                 validate_note(note)
 
     def test_note_value(self):
