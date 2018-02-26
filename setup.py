@@ -3,7 +3,7 @@ import os.path
 from setuptools import setup
 import pgzero
 
-path = os.path.join(os.path.dirname(__file__), 'README.txt')
+path = os.path.join(os.path.dirname(__file__), 'README.rst')
 with open(path, encoding='utf8') as f:
     LONG_DESCRIPTION = f.read()
 
