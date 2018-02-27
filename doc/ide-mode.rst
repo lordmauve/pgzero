@@ -1,6 +1,8 @@
 Running Pygame Zero in IDLE and other IDEs
 ==========================================
 
+.. versionadded:: 1.2
+
 Pygame Zero is usually run using a command such as::
 
     pgzrun my_program.py

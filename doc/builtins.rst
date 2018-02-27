@@ -531,6 +531,8 @@ be floats or the strings ``left``, ``center``/``middle``, ``right``, ``top`` or
 Rotation
 ''''''''
 
+.. versionadded:: 1.2
+
 The ``.angle`` attribute of an Actor controls the rotation of the sprite, in
 degrees, anticlockwise (counterclockwise).
 
@@ -699,6 +701,8 @@ The ``animate()`` function returns an ``Animation`` instance:
 
 Tone Generator
 --------------
+
+.. versionadded:: 1.2
 
 Pygame Zero can play tones using a built-in synthesizer.
 
