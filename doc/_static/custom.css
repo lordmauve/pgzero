@@ -29,6 +29,7 @@ div.sphinxsidebar h3 a {
 }
 
 
+.admonition.warning,
 .admonition.tip {
     color: white;
     background-color: #3a76a8;
@@ -37,8 +38,23 @@ div.sphinxsidebar h3 a {
     padding: 20px 30px;
 }
 
+.admonition.warning {
+    background-color: #b83f3f;
+}
+
+.admonition.warning a {
+    color: red;
+    border-bottom: none;
+    text-decoration: underline;
+}
+
 .admonition.tip a {
     color: #00b8e6;
     border-bottom: none;
     text-decoration: underline;
+}
+
+.admonition code {
+    background-color: rgba(255, 255, 255, 0.2) !important;
+    border-bottom: none !important;
 }

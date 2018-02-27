@@ -42,5 +42,14 @@ User Guide
 
     installation
     ide-mode
-    contributing
+    other-libs
     changelog
+
+
+Improving Pygame Zero
+---------------------
+
+.. toctree::
+    :maxdepth: 2
+
+    contributing

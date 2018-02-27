@@ -346,6 +346,8 @@ can use the :func:`on_music_end() hook <on_music_end>` to do something when the
 music ends - for example, to pick another track at random.
 
 
+.. _clock:
+
 Clock
 -----
 
