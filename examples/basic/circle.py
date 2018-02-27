@@ -1,4 +1,4 @@
 def draw():
     screen.clear()
-    screen.draw.circle((400, 300), 30, 'white')
+    screen.draw.circle((400, 300), 300, 'red', 10)
 
