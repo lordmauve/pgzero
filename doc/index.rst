@@ -52,4 +52,5 @@ Improving Pygame Zero
 .. toctree::
     :maxdepth: 2
 
+    principles
     contributing
