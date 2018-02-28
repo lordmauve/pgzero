@@ -11,7 +11,7 @@ Network Zero
 `Network Zero`_ makes it simpler to have several machines or several processes
 on one machine discovering each other and talking across a network.
 
-.. tip::
+.. caution::
 
     If you want to use Network Zero with Pygame Zero, make sure you don't let
     it **block** (stop everything while waiting for messages). This will
@@ -45,7 +45,7 @@ Purpose Input/Output (GPIO) pins on a `Raspberry Pi`_.
 GPIO Zero generally runs in its own thread, meaning that it will usually work
 very well with Pygame Zero.
 
-.. tip::
+.. caution::
 
     When copying GPIO Zero examples, do not copy the ``time.sleep()`` function
     calls or ``while True:`` loops, as these will stop Pygame Zero animating
@@ -71,3 +71,11 @@ Adventurelib cannot currently be combined with Pygame Zero.
 
 
 .. _Adventurelib: https://adventurelib.readthedocs.io/
+
+
+.. tip::
+
+    Know of another library that belongs here?
+
+    `Open an issue <https://github.com/lordmauve/pgzero/issues/new>`_ on the
+    issue tracker to let us know!

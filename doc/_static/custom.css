@@ -30,16 +30,26 @@ div.sphinxsidebar h3 a {
 
 
 .admonition.warning,
+.admonition.caution,
 .admonition.tip {
     color: white;
-    background-color: #3a76a8;
+    background-color: silver;
     border: none;
     border-radius: 6px;
     padding: 20px 30px;
 }
 
+.admonition.tip {
+    background-color: #3a76a8;
+}
+
 .admonition.warning {
     background-color: #b83f3f;
+}
+
+.admonition.caution {
+    background-color: #ffc238;
+    color: black;
 }
 
 .admonition.warning a {
