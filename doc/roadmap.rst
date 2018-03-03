@@ -8,6 +8,20 @@ This document just lays out some goals for future releases, but there is **no
 guarantee** that these targets will be hit.
 
 
+Translations
+------------
+
+Pygame Zero is aimed at young users, whose English skills might not be good
+enough to read the documentation if it isn't in their own language.
+
+Adding translations of the documentation would help to bring Pygame Zero to new
+users. This is something that needs contributors to help with. My own language
+skills aren't good enough!
+
+Please see :ref:`the translating guide <translating>` if you think you can
+help.
+
+
 Gamepad Support
 ---------------
 
@@ -23,7 +37,7 @@ nearly all more modern gamepads have at least as many buttons and axes.
 
 This feature needs to be added in a way that will not **require** a gamepad to
 play any Pygame Zero game, in order to follow the principle of
-:ref:`accessibility`_.
+:ref:`accessibility`.
 
 .. _`Pi Hut`: https://thepihut.com/products/raspberry-pi-compatible-usb-gamepad-controller-snes-style
 .. _Amazon: https://www.amazon.co.uk/s/ref=nb_sb_noss_2?url=search-alias%3Delectronics&field-keywords=usb+snes

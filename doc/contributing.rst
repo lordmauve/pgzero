@@ -101,3 +101,66 @@ How to run tests
 The tests can be run with
 
     python3 setup.py test
+
+
+.. _translating:
+
+Helping to translate the documentation
+--------------------------------------
+
+Pygame Zero's APIs will always be English, but we can bring Pygame Zero to more
+users around the world if the documentation is available in their language.
+
+If you are fluent in another language, please consider contributing by
+translating all or part of the documentation.
+
+The documentation is written in reStructuredText_, which is a text-based markup
+language for technical documentation. As much as possible, the existing
+formatting should be preserved. reStructuredText isn't too difficult once you
+get used to it.
+
+Creating a translation is done by creating a separate repository on Github with
+a copy of the documentation, rewritten (at least in part) into the language you
+would like to support. One advantage of this is that you can work on
+translations at your own pace, without having to submit pull requests back to
+the ``pgzero`` project itself. Please see the `translation guide`_ on Read The
+Docs for details.
+
+If this sounds like something you could tackle, here's how you might go about
+it:
+
+1. First, open an issue on the `pgzero issue tracker`_. You should search for
+   an existing issue covering the translation you want to do, before opening a
+   new one. This will help ensure that you don't do translation work that has
+   already been done by someone else (perhaps you can collaborate instead).
+2. Create a new Github repository under your user, called pgzero-*language*,
+   eg. ``pgzero-spanish`` if you're going to translate into Spanish.
+3. Clone the repository to your own computer.
+4. Download the Pygame Zero ``doc/`` directory and commit it in your project.
+   You can do this by extracting them from `repository ZIP file`_. You only
+   need the ``doc/`` directory from the ZIP file. You can delete the other
+   files.
+5. Now, work through the .rst files in the docs directory, translating, using
+   your preferred editor. You should commit regularly, and push your commits to
+   Github.
+6. Post a link to your repository as a comment in the Github issue you created
+   in step 1. You can do this as soon as you have some progress to show; this
+   will help people collaborate with you on the translation if they are
+   interested.
+7. `Set up the documentation to build on Read The Docs`__. Again, post a
+   comment on the Github issue when you have this working.
+8. We can then link up the new, translated documentation with the Pygame Zero
+   documentation.
+
+.. _reStructuredText: http://www.sphinx-doc.org/en/master/rest.html
+.. _`translation guide`: https://docs.readthedocs.io/en/latest
+                         /localization.html#project-with-multiple-translations
+.. _`pgzero issue tracker`: https://github.com/lordmauve/pgzero/issues/new
+.. _`repository ZIP file`: https://github.com/lordmauve/pgzero/archive/master.zip
+
+.. __: https://docs.readthedocs.io/en/latest/getting_started.html#import-your-docs
+
+Note that Pygame Zero will have updates, and the documentation will be changed
+accordingly. Using Git it is possible to see a diff of what changed in the
+English documentation, so that you can make corresponding changes in the
+translated documentation.
