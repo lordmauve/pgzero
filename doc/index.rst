@@ -52,5 +52,6 @@ Improving Pygame Zero
 .. toctree::
     :maxdepth: 2
 
+    roadmap
     principles
     contributing

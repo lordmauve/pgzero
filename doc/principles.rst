@@ -9,6 +9,8 @@ introducting hurdles for programmers who have not yet learned to deal with
 them.
 
 
+.. _accessibility:
+
 Make it accessible
 ------------------
 
