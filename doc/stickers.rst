@@ -10,6 +10,7 @@ Pygame Zero users for free.
     :alt: Sticker Mule logo
     :height: 40
     :align: center
+    :target: https://www.stickermule.com/supports/opensource
 
 Laptop stickers are a great way to encourage students to continue tinkering and
 learning, as well as spreading the word about Pygame Zero.
