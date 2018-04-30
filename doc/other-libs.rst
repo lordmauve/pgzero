@@ -73,6 +73,27 @@ Adventurelib cannot currently be combined with Pygame Zero.
 .. _Adventurelib: https://adventurelib.readthedocs.io/
 
 
+Blue Dot
+--------
+
+`Blue Dot`_ allows you to control your Raspberry Pi projects wirelessly using
+an Android device as a Bluetooth remote.
+
+Blue Dot generally runs in its own thread, meaning that it will usually work
+very well with Pygame Zero.
+
+.. caution::
+
+    Avoid ``time.sleep()`` function calls, ``while True:`` loops and Blue Dot's
+    blocking ``wait_for_press`` and ``wait_for_release`` methods, as these will
+    stop Pygame Zero animating the screen or responding to input. Use
+    :ref:`clock` functions instead to call functions periodically, or the
+    :func:`update()` function to check a value every frame.
+
+
+.. _`Blue Dot`: https://bluedot.readthedocs.io/
+
+
 .. tip::
 
     Know of another library that belongs here?
