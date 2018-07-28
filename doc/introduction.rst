@@ -133,6 +133,10 @@ alien a small number of pixels every frame will cause it to slide across the
 screen. Once it slides off the right-hand side of the screen, we reset it back
 to the left.
 
+Your Functions draw() and update() work in similar ways but are designed for two different purposes.
+The draw() function draws the current position of the alien while the update() function is used to show the alien
+moving on the screen.
+
 Handling clicks
 ---------------
 
@@ -192,8 +196,8 @@ Now let's change the ``on_mouse_down`` function to use these new resources::
 
     def on_mouse_down(pos):
         if alien.collidepoint(pos):
-            sounds.eep.play()
             alien.image = 'alien_hurt'
+            sounds.eep.play()
 
 Now when you click on the alien, you should hear a sound, and the sprite will
 change to an unhappy alien.
@@ -211,8 +215,8 @@ code like this::
 
     def on_mouse_down(pos):
         if alien.collidepoint(pos):
-            sounds.eep.play()
             alien.image = 'alien_hurt'
+            sounds.eep.play()
             time.sleep(1)
             alien.image = 'alien'
 
@@ -248,10 +252,10 @@ called. But let's change ``set_alien_hurt()`` to use the clock, so that the
     def set_alien_hurt():
         alien.image = 'alien_hurt'
         sounds.eep.play()
-        clock.schedule_unique(set_alien_normal, 1.0)
+        clock.schedule_unique(set_alien_normal, 1)
 
 ``clock.schedule_unique()`` will cause ``set_alien_normal()`` to be called
-after ``1.0`` second. ``schedule_unique()`` also prevents the same function
+after ``1`` second. ``schedule_unique()`` also prevents the same function
 being scheduled more than once, such as if you click very rapidly.
 
 Try it, and you'll see the alien revert to normal after 1 second. Try clicking
