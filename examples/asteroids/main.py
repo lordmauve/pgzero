@@ -146,11 +146,11 @@ def on_key_down(key):
         if key == keys.BACKSPACE:
             game.initials = game.initials[:-1]
         elif key == keys.RETURN and game.initials:
-            with open('leaderboard.json', 'r') as lb:
-                try:
+            try:
+                with open('leaderboard.json', 'r') as lb:
                     leader_board = json.load(lb)
-                except ValueError:
-                    leader_board = []
+            except (ValueError, FileNotFoundError):
+                leader_board = []
             leader_board.append((game.initials, game.score))
             with open('leaderboard.json', 'w') as lb:
                 json.dump(leader_board, lb)
