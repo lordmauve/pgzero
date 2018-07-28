@@ -1,10 +1,11 @@
 import sys
+import io
 import os.path
 from setuptools import setup
 import pgzero
 
 path = os.path.join(os.path.dirname(__file__), 'README.rst')
-with open(path, encoding='utf8') as f:
+with io.open(path, encoding='utf8') as f:
     LONG_DESCRIPTION = f.read()
 
 install_requires = [
@@ -34,6 +35,7 @@ setup(
     },
     install_requires=install_requires,
     extras_require=extras_require,
+    python_requires='>3',
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Education',
