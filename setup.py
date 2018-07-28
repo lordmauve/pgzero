@@ -15,6 +15,7 @@ install_requires = [
 
 extras_require = {
     ':python_version < "3.4"': ["enum34"],
+    'repl': ["ptpython==0.41"],
 }
 
 setup(

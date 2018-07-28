@@ -64,6 +64,11 @@ def main():
         _substitute_full_framework_python()
 
     parser = OptionParser()
+    parser.add_option(
+        '--repl',
+        action='store_true',
+        help="Show a REPL for interacting with the game while it is running."
+    )
     options, args = parser.parse_args()
 
     if len(args) != 1:
@@ -90,7 +95,7 @@ def main():
 
     prepare_mod(mod)
     exec(code, mod.__dict__)
-    run_mod(mod)
+    run_mod(mod, repl=options.repl)
 
 
 def prepare_mod(mod):
@@ -108,6 +113,59 @@ def prepare_mod(mod):
     mod.__dict__.update(builtins.__dict__)
 
 
-def run_mod(mod):
-    """Run the module."""
-    PGZeroGame(mod).run()
+def configure_repl(repl):
+    """Configure the ptpython REPL."""
+    from . import __version__ as pgzero_version
+    try:
+        import pkg_resources
+    except ImportError:
+        ptpython_version = '???'
+    else:
+        try:
+            dist = pkg_resources.working_set.require('ptpython')[0]
+        except (pkg_resources.DistributionNotFound, IndexError):
+            ptpython_version = '???'
+        else:
+            ptpython_version = dist.version
+
+    print(
+        'Pygame Zero {} REPL (ptpython {})'.format(
+            pgzero_version, ptpython_version
+        )
+    )
+    repl.show_status_bar = False
+    repl.confirm_exit = False
+
+
+def run_mod(mod, repl=False):
+    """Run the module.
+
+    If `repl` is True, also run a REPL to interact with the module.
+
+    """
+    game = PGZeroGame(mod)
+    if repl:
+        import asyncio
+        from ptpython.repl import embed
+        loop = asyncio.get_event_loop()
+
+        # Make sure the game runs
+        # NB. if the game exits, the REPL will keep running, which allows
+        # inspecting final state
+        game_task = loop.create_task(game.run_as_coroutine())
+
+        # Wait for the REPL to exit
+        loop.run_until_complete(embed(
+            globals=vars(mod),
+            return_asyncio_coroutine=True,
+            patch_stdout=True,
+            title="Pygame Zero REPL",
+            configure=configure_repl,
+        ))
+
+        # Ask game loop to shut down (if it has not) and wait for it
+        if game.running:
+            pygame.event.post(pygame.event.Event(pygame.QUIT))
+            loop.run_until_complete(game_task)
+    else:
+        game.run()
