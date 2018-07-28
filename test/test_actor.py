@@ -2,8 +2,8 @@ import unittest
 
 import pygame
 
-from pgzero.actor import calculate_anchor, Actor
-from pgzero.loaders import set_root
+from pgzero.actor import calculate_anchor, Actor, InvalidScaleException
+from pgzero.loaders import set_root, images
 
 
 TEST_MODULE = "pgzero.actor"
@@ -38,6 +38,12 @@ class ActorTest(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         set_root(__file__)
+
+    def assertImagesEqual(self, a, b):
+        adata, bdata = (pygame.image.tostring(i, 'RGB') for i in (a, b))
+
+        if adata != bdata:
+            raise AssertionError("Images differ")
 
     def test_sensible_init_defaults(self):
         a = Actor("alien")
@@ -107,3 +113,61 @@ class ActorTest(unittest.TestCase):
         for _ in range(360):
             a.angle += 1.0
         self.assertEqual(a.pos, (100.0, 100.0))
+
+    def test_scaling(self):
+        actor = Actor('alien')
+        originial_size = actor.size
+
+        # No scaling
+        actor.scale = (1, 1)
+        self.assertEqual(actor.size, originial_size)
+
+        # Scaling on x-axis only
+        actor.scale_x = 2
+        self.assertEqual(actor.size, (originial_size[0] * 2, originial_size[1]))
+
+        # Scaling on y-axis only
+        actor.scale_y = 2
+        self.assertEqual(actor.size, (originial_size[0], originial_size[1] * 2))
+
+        # Scaling down
+        actor.scale = (.5, .5)
+        self.assertEqual(actor.size, (originial_size[0]/2, originial_size[1]/2))
+
+        # Test scale getters
+        self.assertEqual(actor.scale, (actor.scale_x, actor.scale_y))
+
+        # Rotate and then scale
+        actor.angle = 90
+        actor.scale = (.5, .5)
+        self.assertEqual(actor.angle, 90)
+        self.assertEqual((actor.width, actor.height), (originial_size[1]/2, originial_size[0]/2))
+        self.assertEqual(actor.topleft, (-13, 13))
+
+        # Test rasing exception for invalid scale parameters
+        with self.assertRaises(InvalidScaleException) as cm:
+            actor.scale = (0, -2)
+        self.assertEqual(cm.exception.args[0], 'Invalid scale values. They should be not equal to 0.')
+
+        # Test horizontal flip
+        actor.angle = 0
+        orig = images.load('alien')
+        exp = pygame.transform.flip(orig, True, False)
+        actor.scale = (-1, 1)
+        self.assertImagesEqual(exp, actor._surf)
+
+        # Test vertical flip
+        exp = pygame.transform.flip(orig, False, True)
+        actor.scale = (1, -1)
+        self.assertImagesEqual(exp, actor._surf)
+
+        # Test horizontal + vertical flip
+        exp = pygame.transform.flip(orig, True, True)
+        actor.scale = (-1, -1)
+        self.assertImagesEqual(exp, actor._surf)
+
+        # Test flip + scaling
+        exp = pygame.transform.scale(orig, (orig.get_size()[0]*3, orig.get_size()[1]*2))
+        exp = pygame.transform.flip(exp, True, True)
+        actor.scale = (-3, -2)
+        self.assertImagesEqual(exp, actor._surf)
