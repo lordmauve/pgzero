@@ -36,6 +36,16 @@ class ScreenTest(unittest.TestCase):
         self.screen.blit('alien', (0, 0))
         self.assertImagesAlmostEqual(self.screen.surface, images.expected_alien_blit)
 
+    def test_bounds(self):
+        """test that the bounds method is present / works and that the return
+        value is minimally correct (top-left should equal 0, bottom-right
+        greater than 0)"""
+        b = self.screen.bounds()
+        self.assertEqual(b.left, 0)
+        self.assertEqual(b.top, 0)
+        self.assertGreater(b.width, 0)
+        self.assertGreater(b.height, 0)
+
 
 if __name__ == '__main__':
     unittest.main()
