@@ -43,21 +43,6 @@ play any Pygame Zero game, in order to follow the principle of
 .. _Amazon: https://www.amazon.co.uk/s/ref=nb_sb_noss_2?url=search-alias%3Delectronics&field-keywords=usb+snes
 
 
-REPL
-----
-
-Python's REPL is a valuable feature that makes the language much more
-accessible to beginners.
-
-Python programs that present a user interface, however, rarely provide a REPL,
-because the main thread is used to run the event loop for the user interface.
-
-However, Javascript in a web browser demonstrates how this can work. You have
-access to an interactive REPL that allows investigating program state *while
-you interact with the interface*. This is very useful for debugging, and would
-be a powerful addition to Pygame Zero.
-
-
 Surface juggling
 ----------------
 
