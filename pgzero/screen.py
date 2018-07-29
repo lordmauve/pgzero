@@ -1,7 +1,7 @@
 import pygame
 import pygame.draw
 from . import ptext
-from .rect import RECT_CLASSES, Rect
+from .rect import RECT_CLASSES, ZRect
 from . import loaders
 
 
@@ -73,8 +73,8 @@ class Screen:
         self.width, self.height = surface.get_size()
 
     def bounds(self):
-        """Returns a Rect representing the bounds of the screen"""
-        return Rect((0, 0), (self.width, self.height))
+        """Return a Rect representing the bounds of the screen."""
+        return ZRect((0, 0), (self.width, self.height))
 
     def clear(self):
         """Clear the screen to black."""
