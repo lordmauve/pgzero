@@ -41,6 +41,7 @@ User Guide
     :maxdepth: 2
 
     installation
+    repl
     ide-mode
     other-libs
     changelog

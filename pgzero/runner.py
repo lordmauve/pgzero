@@ -6,12 +6,16 @@ pygame.init()
 import os
 import sys
 import warnings
-from optparse import OptionParser
+import argparse
 from types import ModuleType
 
 from .game import PGZeroGame, DISPLAY_FLAGS
 from . import loaders
 from . import builtins
+
+
+# The base URL for Pygame Zero documentation
+DOCS_URL = 'http://pygame-zero.readthedocs.io/en/stable'
 
 
 def _check_python_ok_for_pygame():
@@ -57,21 +61,43 @@ def _substitute_full_framework_python():
     os.execv(framework_python, ['python', '-m', 'pgzero'] + sys.argv[1:])
 
 
-def main():
 
+def main():
     # Pygame won't run from a normal virtualenv copy of Python on a Mac
     if not _check_python_ok_for_pygame():
         _substitute_full_framework_python()
 
-    parser = OptionParser()
-    options, args = parser.parse_args()
-
-    if len(args) != 1:
-        parser.error("You must specify which module to run.")
+    parser = argparse.ArgumentParser()
+    try:
+        import ptpython
+    except ImportError:
+        replhelp = argparse.SUPPRESS
+        have_repl = False
+    else:
+        replhelp = "Show a REPL for interacting with the game while it is running."
+        have_repl = True
+    parser.add_argument(
+        '--repl',
+        action='store_true',
+        help=replhelp
+    )
+    parser.add_argument(
+        'script',
+        help='The name of the Pygame Zero game to run'
+    )
+    args = parser.parse_args()
+    if args.repl and not have_repl:
+        sys.exit(
+            "Error: Pygame Zero was not installed with REPL support.\n"
+            "\n"
+            "Please read\n"
+            "{}/installation.html#install-repl\n"
+            "for instructions on how to install this feature.".format(DOCS_URL)
+        )
 
     if __debug__:
         warnings.simplefilter('default', DeprecationWarning)
-    path = args[0]
+    path = args.script
 
     with open(path) as f:
         src = f.read()
@@ -90,7 +116,7 @@ def main():
 
     prepare_mod(mod)
     exec(code, mod.__dict__)
-    run_mod(mod)
+    run_mod(mod, repl=args.repl)
 
 
 def prepare_mod(mod):
@@ -105,9 +131,64 @@ def prepare_mod(mod):
     loaders.set_root(mod.__file__)
     PGZeroGame.show_default_icon()
     pygame.display.set_mode((100, 100), DISPLAY_FLAGS)
-    mod.__dict__.update(builtins.__dict__)
+    import builtins as python_builtins
+    for k, v in builtins.__dict__.items():
+        python_builtins.__dict__.setdefault(k, v)
 
 
-def run_mod(mod):
-    """Run the module."""
-    PGZeroGame(mod).run()
+def configure_repl(repl):
+    """Configure the ptpython REPL."""
+    from . import __version__ as pgzero_version
+    try:
+        import pkg_resources
+    except ImportError:
+        ptpython_version = '???'
+    else:
+        try:
+            dist = pkg_resources.working_set.require('ptpython')[0]
+        except (pkg_resources.DistributionNotFound, IndexError):
+            ptpython_version = '???'
+        else:
+            ptpython_version = dist.version
+
+    print(
+        'Pygame Zero {} REPL (ptpython {})'.format(
+            pgzero_version, ptpython_version
+        )
+    )
+    repl.show_status_bar = False
+    repl.confirm_exit = False
+
+
+def run_mod(mod, repl=False):
+    """Run the module.
+
+    If `repl` is True, also run a REPL to interact with the module.
+
+    """
+    game = PGZeroGame(mod)
+    if repl:
+        import asyncio
+        from ptpython.repl import embed
+        loop = asyncio.get_event_loop()
+
+        # Make sure the game runs
+        # NB. if the game exits, the REPL will keep running, which allows
+        # inspecting final state
+        game_task = loop.create_task(game.run_as_coroutine())
+
+        # Wait for the REPL to exit
+        loop.run_until_complete(embed(
+            globals=vars(mod),
+            return_asyncio_coroutine=True,
+            patch_stdout=True,
+            title="Pygame Zero REPL",
+            configure=configure_repl,
+        ))
+
+        # Ask game loop to shut down (if it has not) and wait for it
+        if game.running:
+            pygame.event.post(pygame.event.Event(pygame.QUIT))
+            loop.run_until_complete(game_task)
+    else:
+        game.run()

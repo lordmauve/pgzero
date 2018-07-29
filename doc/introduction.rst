@@ -111,6 +111,7 @@ the window based on the height of the alien.
 The ``alien.draw()`` method draws the sprite to the screen at its current
 position.
 
+
 Moving the alien
 ----------------
 
@@ -132,6 +133,11 @@ Pygame Zero will call your :func:`update` function once every frame. Moving the
 alien a small number of pixels every frame will cause it to slide across the
 screen. Once it slides off the right-hand side of the screen, we reset it back
 to the left.
+
+Your functions ``draw()`` and ``update()`` work in similar ways but are designed for two different purposes.
+The ``draw()`` function draws the current position of the alien while the ``update()`` function is used to show the alien
+moving on the screen.
+
 
 Handling clicks
 ---------------
@@ -163,6 +169,7 @@ or::
             print("Eek!")
 
 
+
 Sounds and images
 -----------------
 
@@ -192,8 +199,8 @@ Now let's change the ``on_mouse_down`` function to use these new resources::
 
     def on_mouse_down(pos):
         if alien.collidepoint(pos):
-            sounds.eep.play()
             alien.image = 'alien_hurt'
+            sounds.eep.play()
 
 Now when you click on the alien, you should hear a sound, and the sprite will
 change to an unhappy alien.
@@ -211,8 +218,8 @@ code like this::
 
     def on_mouse_down(pos):
         if alien.collidepoint(pos):
-            sounds.eep.play()
             alien.image = 'alien_hurt'
+            sounds.eep.play()
             time.sleep(1)
             alien.image = 'alien'
 
@@ -248,15 +255,18 @@ called. But let's change ``set_alien_hurt()`` to use the clock, so that the
     def set_alien_hurt():
         alien.image = 'alien_hurt'
         sounds.eep.play()
-        clock.schedule_unique(set_alien_normal, 1.0)
+        clock.schedule_unique(set_alien_normal, 0.5)
 
 ``clock.schedule_unique()`` will cause ``set_alien_normal()`` to be called
-after ``1.0`` second. ``schedule_unique()`` also prevents the same function
+after ``0.5`` second. ``schedule_unique()`` also prevents the same function
 being scheduled more than once, such as if you click very rapidly.
 
-Try it, and you'll see the alien revert to normal after 1 second. Try clicking
-rapidly and verify that the alien doesn't revert until 1 second after the last
+Try it, and you'll see the alien revert to normal after 0.5 second. Try clicking
+rapidly and verify that the alien doesn't revert until 0.5 second after the last
 click.
+
+``clock.schedule_unique()`` accepts both integers and float numbers for the time interval. in the tutorial we are using
+a float number to show this but feel free to use both to see the difference and effects the different values have.
 
 
 Summary

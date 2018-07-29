@@ -105,6 +105,13 @@ class Actor:
     def __iter__(self):
         return iter(self._rect)
 
+    def __repr__(self):
+        return '<{} {!r} pos={!r}>'.format(
+            type(self).__name__,
+            self._image_name,
+            self.pos
+        )
+
     def _handle_unexpected_kwargs(self, kwargs):
         unexpected_kwargs = set(kwargs.keys()) - self.EXPECTED_INIT_KWARGS
         if not unexpected_kwargs:
