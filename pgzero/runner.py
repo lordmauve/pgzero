@@ -131,7 +131,9 @@ def prepare_mod(mod):
     loaders.set_root(mod.__file__)
     PGZeroGame.show_default_icon()
     pygame.display.set_mode((100, 100), DISPLAY_FLAGS)
-    mod.__dict__.update(builtins.__dict__)
+    import builtins as python_builtins
+    for k, v in builtins.__dict__.items():
+        python_builtins.__dict__.setdefault(k, v)
 
 
 def configure_repl(repl):
