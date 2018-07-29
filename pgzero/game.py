@@ -110,6 +110,37 @@ class PGZeroGame:
         'key': constants.keys
     }
 
+    def initialize_joysticks(self):
+        pygame.joystick.init()
+        joysticks = [pygame.joystick.Joystick(x) for x in range(pygame.joystick.get_count())]
+        for joystick in joysticks:
+            print ("initializing joystick {}".format(joystick))
+            joystick.init()
+
+    
+    def map_joy_event2keyboard(self, event):
+        if event.type == pygame.JOYAXISMOTION:
+            axis = event.axis
+            value = round(event.value)
+            if axis == 0 and value == -1:
+                print("key A")
+                return 97
+            if axis == 0 and value == 1:
+                print("key D")
+                return 100
+            if axis == 1 and value == -1:
+                print("key W")
+                return 119
+            if axis == 1 and value == 1:
+                print("key S")
+                return 115
+        if event.type == pygame.JOYBUTTONDOWN:
+            if event.button == 3:
+                print("key SPACE")
+                return 32
+        return 0
+
+
     def load_handlers(self):
         from .spellcheck import spellcheck
         spellcheck(vars(self.mod))
@@ -231,12 +262,18 @@ class PGZeroGame:
         pgzclock = pgzero.clock.clock
 
         self.need_redraw = True
+        self.initialize_joysticks()
+
         while True:
             dt = clock.tick(60) / 1000.0
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     return
+                print("event caught {}, vars: {}".format(event, vars(event)))
+                was_joystick = self.map_joy_event2keyboard(event)
+                if was_joystick:
+                    self.keyboard._press(was_joystick)
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_q and \
                             event.mod & (pygame.KMOD_CTRL | pygame.KMOD_META):
