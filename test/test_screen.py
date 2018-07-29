@@ -18,21 +18,23 @@ class ScreenTest(unittest.TestCase):
         surf.fill((0, 0, 0))
         self.screen = Screen(surf)
 
-    def assertImagesEqual(self, a, b):
-        adata, bdata = (pygame.image.tostring(i, 'RGB') for i in (a, b))
+    def assertImagesAlmostEqual(self, a, b):
+        """Check that 2 images are equal besides 1 bit alpha blending rounding errors"""
+        zdata = zip(pygame.image.tostring(a, 'RGB'), pygame.image.tostring(b, 'RGB'))
 
-        if adata != bdata:
-            raise AssertionError("Images differ")
+        for z in zdata:
+            if abs(z[0] - z[1]) > 1:
+                raise AssertionError("Images differ")
 
     def test_blit_surf(self):
         """We can blit a surface to the screen."""
         self.screen.blit(images.alien, (0, 0))
-        self.assertImagesEqual(surf, images.expected_alien_blit)
+        self.assertImagesAlmostEqual(surf, images.expected_alien_blit)
 
     def test_blit_name(self):
         """screen.blit() accepts an image name instead of a Surface."""
         self.screen.blit('alien', (0, 0))
-        self.assertImagesEqual(surf, images.expected_alien_blit)
+        self.assertImagesAlmostEqual(surf, images.expected_alien_blit)
 
 
 if __name__ == '__main__':
