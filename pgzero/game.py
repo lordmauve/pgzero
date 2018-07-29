@@ -6,13 +6,12 @@ import pygame
 import pgzero.clock
 import pgzero.keyboard
 import pgzero.screen
+import pgzero.gamepad
 
 from . import constants
 
-
 screen = None
 DISPLAY_FLAGS = 0
-
 
 def exit():
     """Wait for up to a second for all sounds to play out
@@ -45,6 +44,7 @@ class PGZeroGame:
         self.title = None
         self.icon = None
         self.keyboard = pgzero.keyboard.keyboard
+        self.gamepad = pgzero.gamepad.gamepad
         self.handlers = {}
 
     def reinit_screen(self):
@@ -98,16 +98,22 @@ class PGZeroGame:
         pygame.MOUSEMOTION: 'on_mouse_move',
         pygame.KEYDOWN: 'on_key_down',
         pygame.KEYUP: 'on_key_up',
+        pygame.JOYBUTTONDOWN: 'on_joy_button_down',
+        pygame.JOYBUTTONUP: 'on_joy_button_up',
         constants.MUSIC_END: 'on_music_end'
     }
 
     def map_buttons(val):
         return {c for c, pressed in zip(constants.mouse, val) if pressed}
 
+    def map_gamepad(val):
+        return gamepad.map(val)
+
     EVENT_PARAM_MAPPERS = {
         'buttons': map_buttons,
         'button': constants.mouse,
-        'key': constants.keys
+        'key': constants.keys,
+        'gamepad': map_gamepad
     }
 
     def load_handlers(self):
@@ -244,6 +250,7 @@ class PGZeroGame:
                     self.keyboard._press(event.key)
                 elif event.type == pygame.KEYUP:
                     self.keyboard._release(event.key)
+                self.gamepad.handle(event)
                 self.dispatch_event(event)
 
             pgzclock.tick(dt)
