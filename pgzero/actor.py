@@ -1,5 +1,6 @@
 import pygame
 from math import radians, sin, cos, atan2, degrees, sqrt
+import collections
 
 from . import game
 from . import loaders
@@ -35,9 +36,8 @@ def calculate_anchor(value, dim, total):
 
 
 class InvalidScaleException(Exception):
-    """The scale parameters where invalid."""
+    """The scale parameters where invalid ( scale == 0)."""
     pass
-
 
 # These are methods (of the same name) on pygame.Rect
 SYMBOLIC_POSITIONS = set((
@@ -156,11 +156,11 @@ class Actor:
     @anchor.setter
     def anchor(self, val):
         self._anchor_value = val
-        self._calc_anchor()
+        self._calc_anchor(self._orig_surf)
 
-    def _calc_anchor(self):
+    def _calc_anchor(self, surf):
         ax, ay = self._anchor_value
-        ow, oh = self._orig_surf.get_size()
+        ow, oh = surf.get_size()
         ax = calculate_anchor(ax, 'x', ow)
         ay = calculate_anchor(ay, 'y', oh)
         self._untransformed_anchor = ax, ay
@@ -175,17 +175,10 @@ class Actor:
 
     @angle.setter
     def angle(self, angle):
-        self._angle = angle
-        self._adjust_scale_and_angle(self._scale_x, self._scale_y)
-        """
-        self._surf = pygame.transform.rotate(self._orig_surf, angle)
-        p = self.pos
+        self._adjust_scale(self._scale_x, self._scale_y)
+        self._adjust_angle(angle)
         self.width, self.height = self._surf.get_size()
-        w, h = self._orig_surf.get_size()
-        ax, ay = self._untransformed_anchor
-        self._anchor = transform_anchor(ax, ay, w, h, angle)
-        self.pos = p
-        """
+
     @property
     def pos(self):
         px, py = self.topleft
@@ -224,8 +217,15 @@ class Actor:
     def image(self, image):
         self._image_name = image
         self._orig_surf = self._surf = loaders.images.load(image)
-        self._adjust_scale_and_angle(self._scale_x, self._scale_y)
-        self._update_pos()
+        self._adjust_scale(self._scale_x, self._scale_y)
+        try:
+            self._adjust_angle(self._angle)
+        except AttributeError:
+            self._update_pos()
+            self._adjust_angle(self._angle)
+
+        self.width, self.height = self._surf.get_size()
+
 
     @property
     def scale(self):
@@ -233,7 +233,15 @@ class Actor:
 
     @scale.setter
     def scale(self, scale):
-        self._adjust_scale_and_angle(scale[0], scale[1])
+        if isinstance(scale, collections.Sequence):
+            x, y = scale[0], scale[1]
+        else:
+            x = y = scale
+
+        if self._validate_scale_values(x, y):
+            self._adjust_scale(x, y)
+            self._adjust_angle(self._angle)
+            self.width, self.height = self._surf.get_size()
 
     @property
     def scale_x(self):
@@ -241,7 +249,10 @@ class Actor:
 
     @scale_x.setter
     def scale_x(self, x):
-        self._adjust_scale_and_angle(x, 1.0)
+        if self._validate_scale_values(x, self._scale_y):
+            self._adjust_scale(x, self._scale_y)
+            self._adjust_angle(self._angle)
+            self.width, self.height = self._surf.get_size()
 
     @property
     def scale_y(self):
@@ -249,32 +260,59 @@ class Actor:
 
     @scale_y.setter
     def scale_y(self, y):
-        self._adjust_scale_and_angle(1.0, y)
+        if self._validate_scale_values(self._scale_x, y):
+            self._adjust_scale(self._scale_x, y)
+            self._adjust_angle(self._angle)
+            self.width, self.height = self._surf.get_size()
 
-    @property
-    def size(self):
-        return self._surf.get_size()
+    def _validate_scale_values(self, x, y):
+        """Validates the x and y scaling values and raises appropriate exceptions.
 
-    def _adjust_scale_and_angle(self, x, y):
+           If the new values are the same, then
+        """
+        if not isinstance(x, (int, float)):
+            raise TypeError('Invalid type of scale values. Expected "int/ float", got "{}".'.format(type(x).__name__))
+
+        if not isinstance(y, (int, float)):
+            raise TypeError('Invalid type of scale values. Expected "int/ float", got "{}".'.format(type(y).__name__))
+
         if x == 0 or y == 0:
             raise InvalidScaleException('Invalid scale values. They should be not equal to 0.')
 
+        if self._scale_x == x and self._scale_y == y:
+            return False
+
+        return True
+
+    def _adjust_scale(self, x, y):
+
         self._scale_x = x
         self._scale_y = y
+
+        if x == 1.0 and y == 1.0:
+            self._surf = self._orig_surf
+            pass
 
         new_width = int(self._orig_surf.get_size()[0] * abs(x))
         new_height = int(self._orig_surf.get_size()[1] * abs(y))
 
         self._surf = pygame.transform.scale(self._orig_surf, (new_width, new_height))
         self._surf = pygame.transform.flip(self._surf, (x < 0), (y < 0))
-        self._surf = pygame.transform.rotate(self._surf, self._angle)
 
-        self._update_pos()
+    def _adjust_angle(self, angle):
+        self._angle = angle
+        self._surf = pygame.transform.rotate(self._surf, angle)
+
+        p = self.pos
+        w, h = self._orig_surf.get_size()
+        ax, ay = self._untransformed_anchor
+        self._anchor = transform_anchor(ax, ay, w, h, angle)
+        self.pos = p
 
     def _update_pos(self):
         p = self.pos
         self.width, self.height = self._surf.get_size()
-        self._calc_anchor()
+        self._calc_anchor(self._surf)
         self.pos = p
 
     def draw(self):

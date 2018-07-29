@@ -114,59 +114,114 @@ class ActorTest(unittest.TestCase):
             a.angle += 1.0
         self.assertEqual(a.pos, (100.0, 100.0))
 
-    def test_scaling(self):
+    def test_no_scaling(self):
         actor = Actor('alien')
-        originial_size = actor.size
+        originial_size = (actor.width, actor.height)
 
-        # No scaling
-        actor.scale = (1, 1)
-        self.assertEqual(actor.size, originial_size)
+        actor.scale = 1
+        self.assertEqual((actor.width, actor.height), originial_size)
 
-        # Scaling on x-axis only
+    def test_scale_horizontal(self):
+        actor = Actor('alien')
+        originial_size = (actor.width, actor.height)
+
         actor.scale_x = 2
-        self.assertEqual(actor.size, (originial_size[0] * 2, originial_size[1]))
+        self.assertEqual((actor.width, actor.height), (originial_size[0] * 2, originial_size[1]))
 
-        # Scaling on y-axis only
+    def test_scale_vertical(self):
+        actor = Actor('alien')
+        originial_size = (actor.width, actor.height)
+
         actor.scale_y = 2
-        self.assertEqual(actor.size, (originial_size[0], originial_size[1] * 2))
+        self.assertEqual((actor.width, actor.height), (originial_size[0], originial_size[1] * 2))
 
-        # Scaling down
+    def test_scale_down(self):
+        actor = Actor('alien')
+        originial_size = (actor.width, actor.height)
+
         actor.scale = (.5, .5)
-        self.assertEqual(actor.size, (originial_size[0]/2, originial_size[1]/2))
+        self.assertEqual((actor.width, actor.height), (originial_size[0]/2, originial_size[1]/2))
 
-        # Test scale getters
-        self.assertEqual(actor.scale, (actor.scale_x, actor.scale_y))
+    def test_scale_different(self):
+        actor = Actor('alien')
+        originial_size = (actor.width, actor.height)
 
-        # Rotate and then scale
+        actor.scale = (.5, 3)
+        self.assertEqual((actor.width, actor.height), (originial_size[0]/2, originial_size[1]*3))
+
+    def test_scale_from_float(self):
+        actor1 = Actor('alien')
+        actor2 = Actor('alien')
+
+        actor1.scale = .5
+        actor2.scale = (.5, .5)
+
+        self.assertEqual(actor1.width, actor2.width)
+        self.assertEqual(actor1.height, actor2.height)
+
+    def test_scaling_on_x_and_y(self):
+        actor1 = Actor('alien')
+        actor2 = Actor('alien')
+
+        actor1.scale = .5
+        actor2.scale_x = .5
+        actor2.scale_y = .5
+
+        self.assertEqual(actor1.width, actor2.width)
+        self.assertEqual(actor1.height, actor2.height)
+
+    def test_rotate_and_scale(self):
+        actor = Actor('alien')
+        original_size = (actor.width, actor.height)
+
         actor.angle = 90
-        actor.scale = (.5, .5)
+        actor.scale = .5
         self.assertEqual(actor.angle, 90)
-        self.assertEqual((actor.width, actor.height), (originial_size[1]/2, originial_size[0]/2))
+        self.assertEqual((actor.width, actor.height), (original_size[1]/2, original_size[0]/2))
         self.assertEqual(actor.topleft, (-13, 13))
 
-        # Test rasing exception for invalid scale parameters
+    def test_exception_invalid_scale_params(self):
+        actor = Actor('alien')
+
         with self.assertRaises(InvalidScaleException) as cm:
             actor.scale = (0, -2)
         self.assertEqual(cm.exception.args[0], 'Invalid scale values. They should be not equal to 0.')
 
-        # Test horizontal flip
-        actor.angle = 0
+    def test_exception_invalid_types(self):
+        actor = Actor('alien')
+
+        with self.assertRaises(TypeError) as cm:
+            actor.scale = ('something', 1)
+        self.assertEqual(cm.exception.args[0], 'Invalid type of scale values. Expected "int/ float", got "str".')
+
+    def test_horizontal_flip(self):
+        actor = Actor('alien')
         orig = images.load('alien')
         exp = pygame.transform.flip(orig, True, False)
+
         actor.scale = (-1, 1)
         self.assertImagesEqual(exp, actor._surf)
 
-        # Test vertical flip
+    def test_vertical_flip(self):
+        actor = Actor('alien')
+        orig = images.load('alien')
+
         exp = pygame.transform.flip(orig, False, True)
         actor.scale = (1, -1)
         self.assertImagesEqual(exp, actor._surf)
 
-        # Test horizontal + vertical flip
+    def test_flip_both_axes(self):
+        actor = Actor('alien')
+        orig = images.load('alien')
+
         exp = pygame.transform.flip(orig, True, True)
-        actor.scale = (-1, -1)
+        actor.scale = -1
         self.assertImagesEqual(exp, actor._surf)
 
-        # Test flip + scaling
+    def test_flip_and_scale(self):
+        actor = Actor('alien')
+        orig = images.load('alien')
+
         exp = pygame.transform.scale(orig, (orig.get_size()[0]*3, orig.get_size()[1]*2))
         exp = pygame.transform.flip(exp, True, True)
         actor.scale = (-3, -2)
