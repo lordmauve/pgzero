@@ -5,6 +5,7 @@ import time
 import pygame
 import pgzero.clock
 import pgzero.keyboard
+import pgzero.controller
 import pgzero.screen
 
 from . import constants
@@ -98,48 +99,21 @@ class PGZeroGame:
         pygame.MOUSEMOTION: 'on_mouse_move',
         pygame.KEYDOWN: 'on_key_down',
         pygame.KEYUP: 'on_key_up',
-        constants.MUSIC_END: 'on_music_end'
+        pygame.JOYBUTTONUP: 'on_joystick_up',
+        pygame.JOYBUTTONDOWN: 'on_joystick_down',
+        pygame.JOYAXISMOTION: 'on_joystick_motion',
+        constants.MUSIC_END: 'on_music_end',
     }
 
     def map_buttons(val):
         return {c for c, pressed in zip(constants.mouse, val) if pressed}
 
     EVENT_PARAM_MAPPERS = {
-        'buttons': map_buttons,
-        'button': constants.mouse,
-        'key': constants.keys
+        'buttons': ('buttons', map_buttons),
+        'button': ('button', constants.mouse),
+        'key': ('key', constants.keys),
+        'joy_button': ('button', constants.controller),  
     }
-
-    def initialize_joysticks(self):
-        pygame.joystick.init()
-        joysticks = [pygame.joystick.Joystick(x) for x in range(pygame.joystick.get_count())]
-        for joystick in joysticks:
-            print ("initializing joystick {}".format(joystick))
-            joystick.init()
-
-    
-    def map_joy_event2keyboard(self, event):
-        if event.type == pygame.JOYAXISMOTION:
-            axis = event.axis
-            value = round(event.value)
-            if axis == 0 and value == -1:
-                print("key A")
-                return 97
-            if axis == 0 and value == 1:
-                print("key D")
-                return 100
-            if axis == 1 and value == -1:
-                print("key W")
-                return 119
-            if axis == 1 and value == 1:
-                print("key S")
-                return 115
-        if event.type == pygame.JOYBUTTONDOWN:
-            if event.button == 3:
-                print("key SPACE")
-                return 32
-        return 0
-
 
     def load_handlers(self):
         from .spellcheck import spellcheck
@@ -147,6 +121,7 @@ class PGZeroGame:
         self.handlers = {}
         for type, name in self.EVENT_HANDLERS.items():
             handler = getattr(self.mod, name, None)
+            print('load handler', name, type, handler)
             if callable(handler):
                 self.handlers[type] = self.prepare_handler(handler)
 
@@ -169,16 +144,19 @@ class PGZeroGame:
 
         def make_getter(mapper, getter):
             if mapper:
+                print('making getter', mapper, getter)
                 return lambda event: mapper(getter(event))
             return getter
 
         param_handlers = []
         for name in param_names:
-            getter = operator.attrgetter(name)
-            mapper = self.EVENT_PARAM_MAPPERS.get(name)
+            print('add handler', name)
+            attribute_name, mapper = self.EVENT_PARAM_MAPPERS.get(name)
+            getter = operator.attrgetter(attribute_name)
             param_handlers.append((name, make_getter(mapper, getter)))
 
         def prep_args(event):
+            # import ipdb; ipdb.set_trace()
             return {name: get(event) for name, get in param_handlers}
 
         def new_handler(event):
@@ -198,6 +176,7 @@ class PGZeroGame:
 
     def dispatch_event(self, event):
         handler = self.handlers.get(event.type)
+        # import ipdb; ipdb.set_trace()
         if handler:
             self.need_redraw = True
             handler(event)
@@ -262,7 +241,7 @@ class PGZeroGame:
         pgzclock = pgzero.clock.clock
 
         self.need_redraw = True
-        self.initialize_joysticks()
+        pgzero.controller.initialize_joysticks()
 
         while True:
             dt = clock.tick(60) / 1000.0
@@ -270,11 +249,15 @@ class PGZeroGame:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     return
-                print("event caught {}, vars: {}".format(event, vars(event)))
-                was_joystick = self.map_joy_event2keyboard(event)
-                if was_joystick:
-                    self.keyboard._press(was_joystick)
-                if event.type == pygame.KEYDOWN:
+                # print("event caught {}, vars: {} ".format(event, vars(event)))
+                # print("event type", event.type)
+                was_joystick_down = pgzero.controller.map_joy_event_key_down(event)
+                was_joystick_up = pgzero.controller.map_joy_event_key_up(event)
+                if was_joystick_down:
+                    self.keyboard._press(was_joystick_down)
+                elif was_joystick_up:
+                    self.keyboard._release(was_joystick_up)
+                elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_q and \
                             event.mod & (pygame.KMOD_CTRL | pygame.KMOD_META):
                         sys.exit(0)

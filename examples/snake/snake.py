@@ -4,6 +4,8 @@ from collections import deque
 from itertools import islice
 
 from pygame.transform import flip, rotate
+from pgzero.constants import controller
+
 
 
 TILE_SIZE = 24
@@ -159,6 +161,13 @@ KEYBINDINGS = {
     keys.DOWN: Direction.DOWN,
 }
 
+J_KEYBINDINGS = {
+    controller.BUTTON_Y: Direction.LEFT,
+    controller.BUTTON_A: Direction.RIGHT,
+    controller.BUTTON_X: Direction.UP,
+    controller.BUTTON_B: Direction.DOWN,
+}
+
 
 snake = Snake()
 snake.alive = True
@@ -188,6 +197,16 @@ def place_apple():
             apple.pos = pos
             return
 
+
+def on_joystick_down(joy_button):
+    if not snake.alive:
+        return
+    print('snake', joy_button)
+    direction = J_KEYBINDINGS.get(joy_button)
+    if (direction and 
+        direction != snake.lastdir.opposite()):
+        snake.dir = direction
+        return
 
 def on_key_down(key):
     if not snake.alive:
