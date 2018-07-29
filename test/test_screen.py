@@ -15,8 +15,8 @@ class ScreenTest(unittest.TestCase):
         set_root(__file__)
 
     def setUp(self):
-        surf.fill((0, 0, 0))
         self.screen = Screen(surf)
+        self.screen.clear()
 
     def assertImagesAlmostEqual(self, a, b):
         """Check that 2 images are equal besides 1 bit alpha blending rounding errors"""
@@ -34,7 +34,7 @@ class ScreenTest(unittest.TestCase):
     def test_blit_name(self):
         """screen.blit() accepts an image name instead of a Surface."""
         self.screen.blit('alien', (0, 0))
-        self.assertImagesAlmostEqual(surf, images.expected_alien_blit)
+        self.assertImagesAlmostEqual(self.screen.surface, images.expected_alien_blit)
 
 
 if __name__ == '__main__':
