@@ -6,12 +6,16 @@ pygame.init()
 import os
 import sys
 import warnings
-from optparse import OptionParser
+import argparse
 from types import ModuleType
 
 from .game import PGZeroGame, DISPLAY_FLAGS
 from . import loaders
 from . import builtins
+
+
+# The base URL for Pygame Zero documentation
+DOCS_URL = 'http://pygame-zero.readthedocs.io/en/stable'
 
 
 def _check_python_ok_for_pygame():
@@ -57,26 +61,43 @@ def _substitute_full_framework_python():
     os.execv(framework_python, ['python', '-m', 'pgzero'] + sys.argv[1:])
 
 
-def main():
 
+def main():
     # Pygame won't run from a normal virtualenv copy of Python on a Mac
     if not _check_python_ok_for_pygame():
         _substitute_full_framework_python()
 
-    parser = OptionParser()
-    parser.add_option(
+    parser = argparse.ArgumentParser()
+    try:
+        import ptpython
+    except ImportError:
+        replhelp = argparse.SUPPRESS
+        have_repl = False
+    else:
+        replhelp = "Show a REPL for interacting with the game while it is running."
+        have_repl = True
+    parser.add_argument(
         '--repl',
         action='store_true',
-        help="Show a REPL for interacting with the game while it is running."
+        help=replhelp
     )
-    options, args = parser.parse_args()
-
-    if len(args) != 1:
-        parser.error("You must specify which module to run.")
+    parser.add_argument(
+        'script',
+        help='The name of the Pygame Zero game to run'
+    )
+    args = parser.parse_args()
+    if args.repl and not have_repl:
+        sys.exit(
+            "Error: Pygame Zero was not installed with REPL support.\n"
+            "\n"
+            "Please read\n"
+            "{}/installation.html#install-repl\n"
+            "for instructions on how to install this feature.".format(DOCS_URL)
+        )
 
     if __debug__:
         warnings.simplefilter('default', DeprecationWarning)
-    path = args[0]
+    path = args.script
 
     with open(path) as f:
         src = f.read()
@@ -95,7 +116,7 @@ def main():
 
     prepare_mod(mod)
     exec(code, mod.__dict__)
-    run_mod(mod, repl=options.repl)
+    run_mod(mod, repl=args.repl)
 
 
 def prepare_mod(mod):
