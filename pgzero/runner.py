@@ -12,6 +12,8 @@ from types import ModuleType
 from .game import PGZeroGame, DISPLAY_FLAGS
 from . import loaders
 from . import clock
+from . import builtins
+from .storage import Storage
 
 
 # The base URL for Pygame Zero documentation
@@ -150,6 +152,8 @@ def prepare_mod(mod):
       Sprite surfaces for blitting to the screen).
 
     """
+    fn_hash = hash(mod.__file__) % ((sys.maxsize + 1) * 2)
+    Storage.set_app_hash(format(fn_hash, 'x'))
     loaders.set_root(mod.__file__)
 
     # An icon needs to exist before the window is created.
