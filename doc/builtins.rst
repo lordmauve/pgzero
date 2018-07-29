@@ -738,3 +738,63 @@ This could be used in a Pygame Zero program like this::
 
     def on_mouse_down():
         beep.play()
+
+
+.. _data_storage:
+
+
+Data Storage
+------------
+
+The ``storage`` object behaves just like a dictionary but has two additional methods to
+allow to save/load the data to/from the disk.
+
+Because it's a dictionary-like object, it supports all operations a dictionary does.
+For example, you can update the storage with another dictionary, like so::
+
+    my_data = {'player_turn': 1, 'level': 10}
+    storage.update(my_data)
+
+On windows the data is saved under ``%APPDATA%/pgzero/saves/`` and on Linux/MacOS under ``~/.config/pgzero/saves/``.
+
+The saved files will be named after their module name.
+
+**NOTE:** Make sure your scripts have different names, otherwise they will be picking each other data.
+
+.. class:: Storage
+
+    .. method:: save()
+
+        Saves the data to disk.
+
+    .. method:: load()
+
+        Loads the data from disk.
+
+Example of usage::
+
+    # Setting some values
+    storage['my_score'] = 500
+    storage['level'] = 1
+
+    # You can have nested lists and dictionaries
+    storage['high_scores'] = []
+    storage['high_scores'].append(10)
+    storage['high_scores'].append(12)
+    storage['high_scores'].append(11)
+    storage['high_scores'].sort()
+
+    # Save storage to disk.
+    storage.save()
+
+
+Following on the previous example, when starting your program, you can load that data back in::
+
+    storage.load()
+
+    my_score = storage['my_score']
+
+    level = storage['level']
+
+    # Can use the get method from dicts to return a default value
+    storage.get('lifes', 3)

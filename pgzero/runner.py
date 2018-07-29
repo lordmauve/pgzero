@@ -12,6 +12,7 @@ from types import ModuleType
 from .game import PGZeroGame, DISPLAY_FLAGS
 from . import loaders
 from . import builtins
+from .storage import Storage
 
 
 def _check_python_ok_for_pygame():
@@ -102,6 +103,8 @@ def prepare_mod(mod):
     set before the module globals are run.
 
     """
+    fn_hash = hash(mod.__file__) % ((sys.maxsize + 1) * 2)
+    Storage.set_app_hash(format(fn_hash, 'x'))
     loaders.set_root(mod.__file__)
     PGZeroGame.show_default_icon()
     pygame.display.set_mode((100, 100), DISPLAY_FLAGS)
