@@ -661,11 +661,11 @@ The tween argument can be one of the following:
 +--------------------+------------------------------------------------------+
 | 'accel_decel'      | Accelerate to mid point and decelerate to finish     |
 +--------------------+------------------------------------------------------+
-| 'end_elastic'      | Give a little wobble at the end                      |
+| 'in_elastic'       | Give a little wobble at the end                      |
 +--------------------+------------------------------------------------------+
-| 'start_elastic'    | Have a little wobble at the start                    |
+| 'out_elastic'      | Have a little wobble at the start                    |
 +--------------------+------------------------------------------------------+
-| 'both_elastic'     | Have a wobble at both ends                           |
+| 'in_out_elastic'   | Have a wobble at both ends                           |
 +--------------------+------------------------------------------------------+
 | 'bounce_end'       | Accelerate to the finish and bounce there            |
 +--------------------+------------------------------------------------------+
