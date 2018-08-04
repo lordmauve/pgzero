@@ -244,16 +244,9 @@ class PGZeroGame:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     return
-                was_joystick_down = pgzero.controller.map_joy_event_key_down(event)
-                was_joystick_up = pgzero.controller.map_joy_event_key_up(event)
-                if was_joystick_down:
-                    self.keyboard._press(was_joystick_down)
-                    new_event = pygame.event.Event(pygame.KEYDOWN, key=was_joystick_down)
-                    self.dispatch_event(new_event)
-                elif was_joystick_up:
-                    self.keyboard._release(was_joystick_up)
-                    new_event = pygame.event.Event(pygame.KEYUP, key=was_joystick_up)
-                    self.dispatch_event(new_event)
+
+                if pgzero.controller.process_event(event):
+                    pass
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_q and \
                             event.mod & (pygame.KMOD_CTRL | pygame.KMOD_META):
