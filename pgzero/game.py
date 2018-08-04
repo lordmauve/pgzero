@@ -121,7 +121,6 @@ class PGZeroGame:
         self.handlers = {}
         for type, name in self.EVENT_HANDLERS.items():
             handler = getattr(self.mod, name, None)
-            print('load handler', name, type, handler)
             if callable(handler):
                 self.handlers[type] = self.prepare_handler(handler)
 
@@ -144,19 +143,16 @@ class PGZeroGame:
 
         def make_getter(mapper, getter):
             if mapper:
-                print('making getter', mapper, getter)
                 return lambda event: mapper(getter(event))
             return getter
 
         param_handlers = []
         for name in param_names:
-            print('add handler', name)
             attribute_name, mapper = self.EVENT_PARAM_MAPPERS.get(name)
             getter = operator.attrgetter(attribute_name)
             param_handlers.append((name, make_getter(mapper, getter)))
 
         def prep_args(event):
-            # import ipdb; ipdb.set_trace()
             return {name: get(event) for name, get in param_handlers}
 
         def new_handler(event):
@@ -176,7 +172,6 @@ class PGZeroGame:
 
     def dispatch_event(self, event):
         handler = self.handlers.get(event.type)
-        # import ipdb; ipdb.set_trace()
         if handler:
             self.need_redraw = True
             handler(event)
@@ -249,14 +244,16 @@ class PGZeroGame:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     return
-                # print("event caught {}, vars: {} ".format(event, vars(event)))
-                # print("event type", event.type)
                 was_joystick_down = pgzero.controller.map_joy_event_key_down(event)
                 was_joystick_up = pgzero.controller.map_joy_event_key_up(event)
                 if was_joystick_down:
                     self.keyboard._press(was_joystick_down)
+                    new_event = pygame.event.Event(pygame.KEYDOWN, key=was_joystick_down)
+                    self.dispatch_event(new_event)
                 elif was_joystick_up:
                     self.keyboard._release(was_joystick_up)
+                    new_event = pygame.event.Event(pygame.KEYUP, key=was_joystick_up)
+                    self.dispatch_event(new_event)
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_q and \
                             event.mod & (pygame.KMOD_CTRL | pygame.KMOD_META):
