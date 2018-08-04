@@ -138,3 +138,103 @@ class ControllerTest(TestCase):
         event = pygame.event.Event(pygame.JOYAXISMOTION, joy=2, axis=1, value=0)
         result = controller.map_joy_event_key_up(event)
         self.assertTrue(result is None)
+
+    def test_joy0_same_axis_sequence_events(self):
+        """ press&release first controller joystick left axis, then right axis."""
+        # press & release left
+        event = pygame.event.Event(pygame.JOYAXISMOTION, joy=0, axis=0, value=-1)
+        result = controller.map_joy_event_key_down(event)
+        self.assertEqual(result, pygame.K_LEFT)
+        event = pygame.event.Event(pygame.JOYAXISMOTION, joy=0, axis=0, value=0)
+        result = controller.map_joy_event_key_up(event)
+        self.assertEqual(result, pygame.K_LEFT)
+        # press & release right
+        event = pygame.event.Event(pygame.JOYAXISMOTION, joy=0, axis=0, value=1)
+        result = controller.map_joy_event_key_down(event)
+        self.assertEqual(result, pygame.K_RIGHT)
+        event = pygame.event.Event(pygame.JOYAXISMOTION, joy=0, axis=0, value=0)
+        result = controller.map_joy_event_key_up(event)
+        self.assertEqual(result, pygame.K_RIGHT)
+
+    def test_joy1_same_axis_sequence_events(self):
+        """ press&release first controller joystick left axis, then right axis."""
+        # press & release A
+        event = pygame.event.Event(pygame.JOYAXISMOTION, joy=1, axis=0, value=-1)
+        result = controller.map_joy_event_key_down(event)
+        self.assertEqual(result, pygame.K_a)
+        event = pygame.event.Event(pygame.JOYAXISMOTION, joy=1, axis=0, value=0)
+        result = controller.map_joy_event_key_up(event)
+        self.assertEqual(result, pygame.K_a)
+        # press & release D
+        event = pygame.event.Event(pygame.JOYAXISMOTION, joy=1, axis=0, value=1)
+        result = controller.map_joy_event_key_down(event)
+        self.assertEqual(result, pygame.K_d)
+        event = pygame.event.Event(pygame.JOYAXISMOTION, joy=1, axis=0, value=0)
+        result = controller.map_joy_event_key_up(event)
+        self.assertEqual(result, pygame.K_d)
+
+    def test_joy0_diff_axis_sequence_events(self):
+        """ pressing second controller joystick up axis event is converted  """
+        # press left&down
+        event = pygame.event.Event(pygame.JOYAXISMOTION, joy=0, axis=0, value=-1)
+        result = controller.map_joy_event_key_down(event)
+        self.assertEqual(result, pygame.K_LEFT)
+        event = pygame.event.Event(pygame.JOYAXISMOTION, joy=0, axis=1, value=1)
+        result = controller.map_joy_event_key_down(event)
+        self.assertEqual(result, pygame.K_DOWN)
+        # release down&left
+        event = pygame.event.Event(pygame.JOYAXISMOTION, joy=0, axis=1, value=0)
+        result = controller.map_joy_event_key_up(event)
+        self.assertEqual(result, pygame.K_DOWN)
+        event = pygame.event.Event(pygame.JOYAXISMOTION, joy=0, axis=0, value=0)
+        result = controller.map_joy_event_key_up(event)
+        self.assertEqual(result, pygame.K_LEFT)
+
+    def test_joy1_diff_axis_sequence_events(self):
+        """ pressing second controller joystick up axis event is converted  """
+        # press left&down
+        event = pygame.event.Event(pygame.JOYAXISMOTION, joy=1, axis=0, value=-1)
+        result = controller.map_joy_event_key_down(event)
+        self.assertEqual(result, pygame.K_a)
+        event = pygame.event.Event(pygame.JOYAXISMOTION, joy=1, axis=1, value=1)
+        result = controller.map_joy_event_key_down(event)
+        self.assertEqual(result, pygame.K_s)
+        # release down&left
+        event = pygame.event.Event(pygame.JOYAXISMOTION, joy=1, axis=1, value=0)
+        result = controller.map_joy_event_key_up(event)
+        self.assertEqual(result, pygame.K_s)
+        event = pygame.event.Event(pygame.JOYAXISMOTION, joy=1, axis=0, value=0)
+        result = controller.map_joy_event_key_up(event)
+        self.assertEqual(result, pygame.K_a)
+
+    def test_joy0_mix_axis_button_sequence_events(self):
+        # press LEFT and ENTER
+        event = pygame.event.Event(pygame.JOYAXISMOTION, joy=0, axis=0, value=-1)
+        result = controller.map_joy_event_key_down(event)
+        self.assertEqual(result, pygame.K_LEFT)
+        event = pygame.event.Event(pygame.JOYBUTTONDOWN, joy=0, key=3)
+        result = controller.map_joy_event_key_down(event)
+        self.assertEqual(result, pygame.K_RETURN)
+        # release LEFT and ENTER
+        event = pygame.event.Event(pygame.JOYAXISMOTION, joy=0, axis=0, value=0)
+        result = controller.map_joy_event_key_up(event)
+        self.assertEqual(result, pygame.K_LEFT)
+        event = pygame.event.Event(pygame.JOYBUTTONDOWN, joy=0, key=3)
+        result = controller.map_joy_event_key_up(event)
+        self.assertEqual(result, pygame.K_RETURN)
+
+    def test_joy0_mix_axis_button_sequence_events(self):
+        # press A and SPACE
+        event = pygame.event.Event(pygame.JOYAXISMOTION, joy=1, axis=0, value=-1)
+        result = controller.map_joy_event_key_down(event)
+        self.assertEqual(result, pygame.K_a)
+        event = pygame.event.Event(pygame.JOYBUTTONDOWN, joy=1, key=3)
+        result = controller.map_joy_event_key_down(event)
+        self.assertEqual(result, pygame.K_SPACE)
+        # release A and SPACE
+        event = pygame.event.Event(pygame.JOYAXISMOTION, joy=1, axis=0, value=0)
+        result = controller.map_joy_event_key_up(event)
+        self.assertEqual(result, pygame.K_a)
+        event = pygame.event.Event(pygame.JOYBUTTONDOWN, joy=1, key=3)
+        result = controller.map_joy_event_key_up(event)
+        self.assertEqual(result, pygame.K_SPACE)

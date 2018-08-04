@@ -50,6 +50,7 @@ JoystickAxisEvent = collections.namedtuple(
     'type,joy,axis,value'
 )
 
+
 JOYSTICK_MAPPING_PRESSED = {
     # gamepad 0
     JoystickAxisEvent(
