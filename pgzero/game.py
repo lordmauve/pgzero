@@ -243,6 +243,7 @@ class PGZeroGame:
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
+                    pgzero.controller.quit_joysticks()
                     return
 
                 if pgzero.controller.process_event(event):
@@ -250,6 +251,7 @@ class PGZeroGame:
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_q and \
                             event.mod & (pygame.KMOD_CTRL | pygame.KMOD_META):
+                        pgzero.controller.quit_joysticks()
                         sys.exit(0)
                     self.keyboard._press(event.key)
                 elif event.type == pygame.KEYUP:
