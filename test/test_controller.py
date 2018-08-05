@@ -212,29 +212,29 @@ class ControllerTest(TestCase):
         event = pygame.event.Event(pygame.JOYAXISMOTION, joy=0, axis=0, value=-1)
         result = controller.map_joy_event_key_down(event)
         self.assertEqual(result, pygame.K_LEFT)
-        event = pygame.event.Event(pygame.JOYBUTTONDOWN, joy=0, key=3)
+        event = pygame.event.Event(pygame.JOYBUTTONDOWN, joy=0, button=3)
         result = controller.map_joy_event_key_down(event)
         self.assertEqual(result, pygame.K_RETURN)
         # release LEFT and ENTER
         event = pygame.event.Event(pygame.JOYAXISMOTION, joy=0, axis=0, value=0)
         result = controller.map_joy_event_key_up(event)
         self.assertEqual(result, pygame.K_LEFT)
-        event = pygame.event.Event(pygame.JOYBUTTONDOWN, joy=0, key=3)
+        event = pygame.event.Event(pygame.JOYBUTTONUP, joy=0, button=3)
         result = controller.map_joy_event_key_up(event)
         self.assertEqual(result, pygame.K_RETURN)
 
-    def test_joy0_mix_axis_button_sequence_events(self):
+    def test_joy1_mix_axis_button_sequence_events(self):
         # press A and SPACE
         event = pygame.event.Event(pygame.JOYAXISMOTION, joy=1, axis=0, value=-1)
         result = controller.map_joy_event_key_down(event)
         self.assertEqual(result, pygame.K_a)
-        event = pygame.event.Event(pygame.JOYBUTTONDOWN, joy=1, key=3)
+        event = pygame.event.Event(pygame.JOYBUTTONDOWN, joy=1, button=3)
         result = controller.map_joy_event_key_down(event)
         self.assertEqual(result, pygame.K_SPACE)
         # release A and SPACE
         event = pygame.event.Event(pygame.JOYAXISMOTION, joy=1, axis=0, value=0)
         result = controller.map_joy_event_key_up(event)
         self.assertEqual(result, pygame.K_a)
-        event = pygame.event.Event(pygame.JOYBUTTONDOWN, joy=1, key=3)
+        event = pygame.event.Event(pygame.JOYBUTTONUP, joy=1, button=3)
         result = controller.map_joy_event_key_up(event)
         self.assertEqual(result, pygame.K_SPACE)
