@@ -4,6 +4,9 @@ from . import music
 from . import tone
 from .actor import Actor
 from .keyboard import keyboard
+from .gamepad import gamepad_1
+from .gamepad import gamepad_2
+from .gamepad import gamepad
 from .animation import animate
 from .rect import Rect, ZRect
 
