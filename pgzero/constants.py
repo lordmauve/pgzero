@@ -15,7 +15,23 @@ class mouse(IntEnum):
     WHEEL_DOWN = 5
 
 
-class controller(IntEnum):
+class joysticks(IntEnum):
+    JOYSTICK_1 = 0
+    JOYSTICK_2 = 1
+
+
+class joy_axis(IntEnum):
+    VERTICAL = 0
+    HORIZONTAL = 1
+
+
+class joy_value(IntEnum):
+    PRESSED_UP_OR_LEFT = -1
+    PRESSED_DOWN_OR_RIGHT = 1
+    RELEASED = 0
+
+
+class joy_button(IntEnum):
     'simple snes controller'
     BUTTON_A = 1
     BUTTON_B = 2

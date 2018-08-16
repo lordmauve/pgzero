@@ -7,7 +7,7 @@ import pygame
 import pgzero.keyboard
 
 _pressed = set()
-GAMEPADS = {
+JOYSTICKS = {
     0: {
         "id": 0,
         "keybindings": {
@@ -44,8 +44,8 @@ def _joy_axis_release(joy=0, axis=0):
     #  on joystick initialize the 'release' events for both axes are sent
     # TODO: we might want to not add those events to _pressed set
     dpads = ("dpadleft", "dpadright") if axis == 0 else ("dpadup", "dpaddown")
-    option1 = GAMEPADS.get(joy, {}).get("keybindings", {}).get(dpads[1])
-    option2 = GAMEPADS.get(joy, {}).get("keybindings", {}).get(dpads[0])
+    option1 = JOYSTICKS.get(joy, {}).get("keybindings", {}).get(dpads[1])
+    option2 = JOYSTICKS.get(joy, {}).get("keybindings", {}).get(dpads[0])
     if option1 in _pressed:
         return option1
     if option2 in _pressed:
@@ -63,59 +63,62 @@ JoystickButtonEvent = collections.namedtuple(
 )
 
 
-def one_joystick_mapping(gamepad):
+def one_joystick_mapping(joystick):
+    """ map joystick events from a single joystick to JOYSTICKS keybindings."""
     return {
         # pressed events
         JoystickAxisEvent(
-            type=pygame.JOYAXISMOTION, joy=gamepad, axis=0, value=-1
-        ): GAMEPADS.get(gamepad, {}).get("keybindings", {}).get("dpadleft"),
+            type=pygame.JOYAXISMOTION, joy=joystick, axis=0, value=-1
+        ): JOYSTICKS.get(joystick, {}).get("keybindings", {}).get("dpadleft"),
         JoystickAxisEvent(
-            type=pygame.JOYAXISMOTION, joy=gamepad, axis=0, value=1
-        ): GAMEPADS.get(gamepad, {}).get("keybindings", {}).get("dpadright"),
+            type=pygame.JOYAXISMOTION, joy=joystick, axis=0, value=1
+        ): JOYSTICKS.get(joystick, {}).get("keybindings", {}).get("dpadright"),
         JoystickAxisEvent(
-            type=pygame.JOYAXISMOTION, joy=gamepad, axis=1, value=-1
-        ): GAMEPADS.get(gamepad, {}).get("keybindings", {}).get("dpadup"),
+            type=pygame.JOYAXISMOTION, joy=joystick, axis=1, value=-1
+        ): JOYSTICKS.get(joystick, {}).get("keybindings", {}).get("dpadup"),
         JoystickAxisEvent(
-            type=pygame.JOYAXISMOTION, joy=gamepad, axis=1, value=1
-        ): GAMEPADS.get(gamepad, {}).get("keybindings", {}).get("dpaddown"),
+            type=pygame.JOYAXISMOTION, joy=joystick, axis=1, value=1
+        ): JOYSTICKS.get(joystick, {}).get("keybindings", {}).get("dpaddown"),
         JoystickButtonEvent(
-            type=pygame.JOYBUTTONDOWN, joy=gamepad, button=0
-        ): GAMEPADS.get(gamepad, {}).get("keybindings", {}).get(0),
+            type=pygame.JOYBUTTONDOWN, joy=joystick, button=0
+        ): JOYSTICKS.get(joystick, {}).get("keybindings", {}).get(0),
         JoystickButtonEvent(
-            type=pygame.JOYBUTTONDOWN, joy=gamepad, button=1
-        ): GAMEPADS.get(gamepad, {}).get("keybindings", {}).get(1),
+            type=pygame.JOYBUTTONDOWN, joy=joystick, button=1
+        ): JOYSTICKS.get(joystick, {}).get("keybindings", {}).get(1),
         JoystickButtonEvent(
-            type=pygame.JOYBUTTONDOWN, joy=gamepad, button=2
-        ): GAMEPADS.get(gamepad, {}).get("keybindings", {}).get(2),
+            type=pygame.JOYBUTTONDOWN, joy=joystick, button=2
+        ): JOYSTICKS.get(joystick, {}).get("keybindings", {}).get(2),
         JoystickButtonEvent(
-            type=pygame.JOYBUTTONDOWN, joy=gamepad, button=3
-        ): GAMEPADS.get(gamepad, {}).get("keybindings", {}).get(3),
+            type=pygame.JOYBUTTONDOWN, joy=joystick, button=3
+        ): JOYSTICKS.get(joystick, {}).get("keybindings", {}).get(3),
         # release events
         JoystickAxisEvent(
-            type=pygame.JOYAXISMOTION, joy=gamepad, axis=0, value=0
-        ): functools.partial(_joy_axis_release, joy=gamepad, axis=0),
+            type=pygame.JOYAXISMOTION, joy=joystick, axis=0, value=0
+        ): functools.partial(_joy_axis_release, joy=joystick, axis=0),
         JoystickAxisEvent(
-            type=pygame.JOYAXISMOTION, joy=gamepad, axis=1, value=0
-        ): functools.partial(_joy_axis_release, joy=gamepad, axis=1),
+            type=pygame.JOYAXISMOTION, joy=joystick, axis=1, value=0
+        ): functools.partial(_joy_axis_release, joy=joystick, axis=1),
         JoystickButtonEvent(
-            type=pygame.JOYBUTTONUP, joy=gamepad, button=0
-        ): GAMEPADS.get(gamepad, {}).get("keybindings", {}).get(0),
+            type=pygame.JOYBUTTONUP, joy=joystick, button=0
+        ): JOYSTICKS.get(joystick, {}).get("keybindings", {}).get(0),
         JoystickButtonEvent(
-            type=pygame.JOYBUTTONUP, joy=gamepad, button=1
-        ): GAMEPADS.get(gamepad, {}).get("keybindings", {}).get(1),
+            type=pygame.JOYBUTTONUP, joy=joystick, button=1
+        ): JOYSTICKS.get(joystick, {}).get("keybindings", {}).get(1),
         JoystickButtonEvent(
-            type=pygame.JOYBUTTONUP, joy=gamepad, button=2
-        ): GAMEPADS.get(gamepad, {}).get("keybindings", {}).get(2),
+            type=pygame.JOYBUTTONUP, joy=joystick, button=2
+        ): JOYSTICKS.get(joystick, {}).get("keybindings", {}).get(2),
         JoystickButtonEvent(
-            type=pygame.JOYBUTTONUP, joy=gamepad, button=3
-        ): GAMEPADS.get(gamepad, {}).get("keybindings", {}).get(3),
+            type=pygame.JOYBUTTONUP, joy=joystick, button=3
+        ): JOYSTICKS.get(joystick, {}).get("keybindings", {}).get(3),
     }
 
 
 def build_joystick_mapping():
+    """ build a dictionary with josytick events mapped to pygame keys.
+        uses JOYSTICKS as basis."""
     result = {}
-    for gamepad in GAMEPADS.keys():
-        result.update(one_joystick_mapping(gamepad))
+    for joystick in JOYSTICKS.keys():
+        result.update(one_joystick_mapping(joystick))
     return result
 
 
@@ -123,6 +126,8 @@ JOYSTICK_MAPPING = build_joystick_mapping()
 
 
 def initialize_joysticks():
+    """ initialize pygame.joystick module,
+        and call init on available joysticks."""
     pygame.joystick.init()
     joysticks = [pygame.joystick.Joystick(x) for x in range(pygame.joystick.get_count())]
     for joystick in joysticks:
@@ -131,6 +136,8 @@ def initialize_joysticks():
 
 
 def quit_joysticks():
+    """ deinit (only) initialized joysticks,
+        and pygame.joystick module."""
     if pygame.joystick.get_init():
         joysticks = [
             pygame.joystick.Joystick(x)
@@ -138,7 +145,7 @@ def quit_joysticks():
             if pygame.joystick.Joystick(x).get_init()
         ]
         for joystick in joysticks:
-            print ("initializing joystick {}".format(joystick))
+            print ("quitting joystick {}".format(joystick))
             joystick.quit()
         pygame.joystick.quit()
 
@@ -186,9 +193,9 @@ def map_joy_event_key_up(event):
 
 def process_event(event):
     """ if event is a joystick event, build a keyboard event
-        based on GAMEPAD mapping and post that event on
+        based on JOYSTICK mapping and post that event on
         pygame event loop.
-        returns True if event was keyboard event, False otherwise."""
+        returns True if event was joystick event, False otherwise."""
     was_joystick_down = pgzero.controller.map_joy_event_key_down(event)
     was_joystick_up = pgzero.controller.map_joy_event_key_up(event)
     if was_joystick_down:

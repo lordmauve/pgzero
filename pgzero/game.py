@@ -33,6 +33,14 @@ def positional_parameters(handler):
     return code.co_varnames[:code.co_argcount]
 
 
+def joy_axis_mapper(axis):
+    return constants.joy_axis(round(axis))
+
+
+def joy_value_mapper(value):
+    return constants.joy_value(round(value))
+
+
 class DEFAULTICON:
     """Sentinel indicating that we want to use the default icon."""
 
@@ -112,7 +120,10 @@ class PGZeroGame:
         'buttons': ('buttons', map_buttons),
         'button': ('button', constants.mouse),
         'key': ('key', constants.keys),
-        'joy_button': ('button', constants.controller),  
+        'joy_button': ('button', constants.joy_button),
+        'axis': ('axis', joy_axis_mapper),
+        'value': ('value', joy_value_mapper),
+        'joy': ('joy', constants.joysticks)
     }
 
     def load_handlers(self):
@@ -148,8 +159,8 @@ class PGZeroGame:
 
         param_handlers = []
         for name in param_names:
-            attribute_name, mapper = self.EVENT_PARAM_MAPPERS.get(name)
-            getter = operator.attrgetter(attribute_name)
+            attribute_name, mapper = self.EVENT_PARAM_MAPPERS.get(name) or (None, None)
+            getter = operator.attrgetter(attribute_name or name)
             param_handlers.append((name, make_getter(mapper, getter)))
 
         def prep_args(event):
