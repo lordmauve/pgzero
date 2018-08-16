@@ -44,6 +44,7 @@ class PGZeroGame:
         self.title = None
         self.icon = None
         self.keyboard = pgzero.keyboard.keyboard
+        self.handlers = {}
         self.setup_gamepads()
 
     def setup_gamepads(self):
@@ -51,7 +52,6 @@ class PGZeroGame:
         self.gamepad_1.prepare(self)
         self.gamepad_2 = pgzero.gamepad.gamepad_2
         self.gamepad_2.prepare(self)
-        self.handlers = {}
 
     def reinit_screen(self):
         """Reinitialise the window.
