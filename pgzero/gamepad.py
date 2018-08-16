@@ -94,8 +94,9 @@ class Gamepad:
                         if DOWN in self._pressed:
                             self.release(DOWN)
 
-    def __getattr__(self, button):
-        return buttons[button]
+    def __getattr__(self, buttonName):
+        button = buttons[buttonName.upper()]
+        return button in self._pressed
 
     def __getitem__(self, button):
         return button in self._pressed
