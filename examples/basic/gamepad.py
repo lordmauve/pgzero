@@ -8,7 +8,8 @@ def draw():
     screen.fill((0, 0, 0))
 
 def update():
-    pass
+    if gamepad_1[gamepad.UP]:
+        print('UP ON ONE')
 
 def on_gamepad_1_pressed(button):
     print('GAMEPAD 1:', gamepad.name(button))

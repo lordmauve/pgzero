@@ -17,7 +17,6 @@ class Gamepad:
         try:
             self.joystick = pygame.joystick.Joystick(joystick-1)
             self.joystick.init()
-            print(self.joystick.get_name())
         except pygame.error:
             pass
 
