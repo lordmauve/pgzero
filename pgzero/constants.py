@@ -21,8 +21,8 @@ class joysticks(IntEnum):
 
 
 class joy_axis(IntEnum):
-    VERTICAL = 0
-    HORIZONTAL = 1
+    VERTICAL = 1
+    HORIZONTAL = 0
 
 
 class joy_value(IntEnum):
@@ -32,7 +32,7 @@ class joy_value(IntEnum):
 
 
 class joy_button(IntEnum):
-    'simple snes controller'
+    'simple snes joystick'
     BUTTON_A = 1
     BUTTON_B = 2
     BUTTON_X = 0

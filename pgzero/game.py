@@ -5,7 +5,7 @@ import time
 import pygame
 import pgzero.clock
 import pgzero.keyboard
-import pgzero.controller
+import pgzero.joysticks
 import pgzero.screen
 
 from . import constants
@@ -247,22 +247,22 @@ class PGZeroGame:
         pgzclock = pgzero.clock.clock
 
         self.need_redraw = True
-        pgzero.controller.initialize_joysticks()
+        pgzero.joysticks.initialize_joysticks()
 
         while True:
             dt = clock.tick(60) / 1000.0
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    pgzero.controller.quit_joysticks()
+                    pgzero.joysticks.quit_joysticks()
                     return
 
-                if pgzero.controller.process_event(event):
+                if pgzero.joysticks.process_event(event):
                     pass
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_q and \
                             event.mod & (pygame.KMOD_CTRL | pygame.KMOD_META):
-                        pgzero.controller.quit_joysticks()
+                        pgzero.joysticks.quit_joysticks()
                         sys.exit(0)
                     self.keyboard._press(event.key)
                 elif event.type == pygame.KEYUP:
