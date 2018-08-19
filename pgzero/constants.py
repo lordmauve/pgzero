@@ -1,5 +1,5 @@
 """Names for constants returned by Pygame."""
-from enum import IntEnum
+from enum import IntEnum, Enum
 import pygame.locals
 
 
@@ -31,16 +31,16 @@ class joy_value(IntEnum):
     RELEASED = 0
 
 
-class joy_button(IntEnum):
+class joy_button(Enum):
     'simple snes joystick'
-    BUTTON_A = 1
-    BUTTON_B = 2
-    BUTTON_X = 0
-    BUTTON_Y = 3
-    BUTTON_SELECT = 8
-    BUTTON_START = 9
-    BUTTON_RIGHT = 5
-    BUTTON_LEFT = 4
+    BUTTON_A = "button_a"
+    BUTTON_B = "button_b"
+    BUTTON_X = "button_x"
+    BUTTON_Y = "button_y"
+    BUTTON_SELECT = "button_select"
+    BUTTON_START = "button_start"
+    BUTTON_RIGHT = "button_right"
+    BUTTON_LEFT = "button_left"
 
 
 # Use a code generation approach to copy Pygame's key constants out into

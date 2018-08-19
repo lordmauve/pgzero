@@ -1,0 +1,28 @@
+{
+    "0": {
+        "id": 0,
+        "keybindings": {
+            "dpadleft": 276,
+            "dpadright": 275,
+            "dpadup": 273,
+            "dpaddown": 274,
+            "button_x": 91,
+            "button_y": 13,
+            "button_a": 93,
+            "button_b": 92
+        }
+    },
+    "1": {
+        "id": 1,
+        "keybindings": {
+            "dpadleft": 97,
+            "dpadright": 100,
+            "dpadup": 119,
+            "dpaddown": 115,
+            "button_x": 118,
+            "button_y": 32,
+            "button_a": 98,
+            "button_b": 110
+        }
+    }
+}

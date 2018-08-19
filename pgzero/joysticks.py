@@ -1,51 +1,32 @@
 import collections
 import numbers
 import functools
+import json
 
 import pygame
 
 import pgzero.keyboard
 
 _pressed = set()
-JOYSTICKS = {
-    "0": {
-        "id": 0,
-        "keybindings": {
-            "dpadleft": pygame.K_LEFT,
-            "dpadright": pygame.K_RIGHT,
-            "dpadup": pygame.K_UP,
-            "dpaddown": pygame.K_DOWN,
-            "button_x": pygame.K_LEFTBRACKET,
-            "button_y": pygame.K_RETURN,
-            "button_a": pygame.K_RIGHTBRACKET,
-            "button_b": pygame.K_BACKSLASH,
-        }
-    },
-    "1": {
-        "id": 1,
-        "keybindings": {
-            "dpadleft": pygame.K_a,
-            "dpadright": pygame.K_d,
-            "dpadup": pygame.K_w,
-            "dpaddown": pygame.K_s,
-            "button_x": pygame.K_v,
-            "button_y": pygame.K_SPACE,
-            "button_a": pygame.K_b,
-            "button_b": pygame.K_n,
-        }
-    },
-}
+# the joysticks that will be detected by pygame, during runtime
+INITIALIZED_JOYS = []
+# the joysticks from joysticks.json (same mapping for all types of joysticks)
+JOY_TYPES = {}
+# the handlers for pygame joystick events
+JOY_EVENTS_MAP = {}
+# the joystick to keyboard bindings 
+JOY_KEY_BINDINGS = {}
 
 
-def _joy_axis_release(joy=0, axis=0):
+def _joy_axis_release(joy, axis):
     # joy axis release events are the same for right&left or up&down
     # so look into _pressed set to see what was previously pressed.
     # but be wary:
     #  on joystick initialize the 'release' events for both axes are sent
     # TODO: we might want to not add those events to _pressed set
     dpads = ("dpadleft", "dpadright") if axis == 0 else ("dpadup", "dpaddown")
-    option1 = JOYSTICKS.get(joy, {}).get("keybindings", {}).get(dpads[1])
-    option2 = JOYSTICKS.get(joy, {}).get("keybindings", {}).get(dpads[0])
+    option1 = JOY_KEY_BINDINGS.get(str(joy), {}).get("keybindings", {}).get(dpads[1])
+    option2 = JOY_KEY_BINDINGS.get(str(joy), {}).get("keybindings", {}).get(dpads[0])
     if option1 in _pressed:
         return option1
     if option2 in _pressed:
@@ -63,75 +44,90 @@ JoystickButtonEvent = collections.namedtuple(
 )
 
 
-def one_joystick_mapping(joystick):
+def get_joy_button(joy, button):
+    joy_name = INITIALIZED_JOYS[int(joy)] if len(INITIALIZED_JOYS) > int(joy) else 'snes'
+    return JOY_TYPES.get(joy_name, {}).get(button)
+
+def one_joystick_mapping(joy):
     """ map joystick events from a single joystick to JOYSTICKS keybindings."""
     return {
         # pressed events
         JoystickAxisEvent(
-            type=pygame.JOYAXISMOTION, joy=int(joystick), axis=0, value=-1
-        ): JOYSTICKS.get(joystick, {}).get("keybindings", {}).get("dpadleft"),
+            type=pygame.JOYAXISMOTION, joy=joy, axis=0, value=-1
+        ): JOY_KEY_BINDINGS.get(str(joy), {}).get("keybindings", {}).get("dpadleft"),
         JoystickAxisEvent(
-            type=pygame.JOYAXISMOTION, joy=int(joystick), axis=0, value=1
-        ): JOYSTICKS.get(joystick, {}).get("keybindings", {}).get("dpadright"),
+            type=pygame.JOYAXISMOTION, joy=joy, axis=0, value=1
+        ): JOY_KEY_BINDINGS.get(str(joy), {}).get("keybindings", {}).get("dpadright"),
         JoystickAxisEvent(
-            type=pygame.JOYAXISMOTION, joy=int(joystick), axis=1, value=-1
-        ): JOYSTICKS.get(joystick, {}).get("keybindings", {}).get("dpadup"),
+            type=pygame.JOYAXISMOTION, joy=joy, axis=1, value=-1
+        ): JOY_KEY_BINDINGS.get(str(joy), {}).get("keybindings", {}).get("dpadup"),
         JoystickAxisEvent(
-            type=pygame.JOYAXISMOTION, joy=int(joystick), axis=1, value=1
-        ): JOYSTICKS.get(joystick, {}).get("keybindings", {}).get("dpaddown"),
+            type=pygame.JOYAXISMOTION, joy=joy, axis=1, value=1
+        ): JOY_KEY_BINDINGS.get(str(joy), {}).get("keybindings", {}).get("dpaddown"),
         JoystickButtonEvent(
-            type=pygame.JOYBUTTONDOWN, joy=int(joystick), button=0
-        ): JOYSTICKS.get(joystick, {}).get("keybindings", {}).get("button_x"),
+            type=pygame.JOYBUTTONDOWN, joy=joy, button=get_joy_button(joy, 'button_x')
+        ): JOY_KEY_BINDINGS.get(str(joy), {}).get("keybindings", {}).get("button_x"),
         JoystickButtonEvent(
-            type=pygame.JOYBUTTONDOWN, joy=int(joystick), button=1
-        ): JOYSTICKS.get(joystick, {}).get("keybindings", {}).get("button_a"),
+            type=pygame.JOYBUTTONDOWN, joy=joy, button=get_joy_button(joy, 'button_a')
+        ): JOY_KEY_BINDINGS.get(str(joy), {}).get("keybindings", {}).get("button_a"),
         JoystickButtonEvent(
-            type=pygame.JOYBUTTONDOWN, joy=int(joystick), button=2
-        ): JOYSTICKS.get(joystick, {}).get("keybindings", {}).get("button_b"),
+            type=pygame.JOYBUTTONDOWN, joy=joy, button=get_joy_button(joy, 'button_b')
+        ): JOY_KEY_BINDINGS.get(str(joy), {}).get("keybindings", {}).get("button_b"),
         JoystickButtonEvent(
-            type=pygame.JOYBUTTONDOWN, joy=int(joystick), button=3
-        ): JOYSTICKS.get(joystick, {}).get("keybindings", {}).get("button_y"),
+            type=pygame.JOYBUTTONDOWN, joy=joy, button=get_joy_button(joy, 'button_y')
+        ): JOY_KEY_BINDINGS.get(str(joy), {}).get("keybindings", {}).get("button_y"),
         # release events
         JoystickAxisEvent(
-            type=pygame.JOYAXISMOTION, joy=int(joystick), axis=0, value=0
-        ): functools.partial(_joy_axis_release, joy=int(joystick), axis=0),
+            type=pygame.JOYAXISMOTION, joy=joy, axis=0, value=0
+        ): functools.partial(_joy_axis_release, joy=joy, axis=0),
         JoystickAxisEvent(
-            type=pygame.JOYAXISMOTION, joy=int(joystick), axis=1, value=0
-        ): functools.partial(_joy_axis_release, joy=int(joystick), axis=1),
+            type=pygame.JOYAXISMOTION, joy=joy, axis=1, value=0
+        ): functools.partial(_joy_axis_release, joy=joy, axis=1),
         JoystickButtonEvent(
-            type=pygame.JOYBUTTONUP, joy=int(joystick), button=0
-        ): JOYSTICKS.get(joystick, {}).get("keybindings", {}).get("button_x"),
+            type=pygame.JOYBUTTONUP, joy=joy, button=get_joy_button(joy, 'button_x')
+        ): JOY_KEY_BINDINGS.get(str(joy), {}).get("keybindings", {}).get("button_x"),
         JoystickButtonEvent(
-            type=pygame.JOYBUTTONUP, joy=int(joystick), button=1
-        ): JOYSTICKS.get(joystick, {}).get("keybindings", {}).get("button_a"),
+            type=pygame.JOYBUTTONUP, joy=joy, button=get_joy_button(joy, 'button_a')
+        ): JOY_KEY_BINDINGS.get(str(joy), {}).get("keybindings", {}).get("button_a"),
         JoystickButtonEvent(
-            type=pygame.JOYBUTTONUP, joy=int(joystick), button=2
-        ): JOYSTICKS.get(joystick, {}).get("keybindings", {}).get("button_b"),
+            type=pygame.JOYBUTTONUP, joy=joy, button=get_joy_button(joy, 'button_b')
+        ): JOY_KEY_BINDINGS.get(str(joy), {}).get("keybindings", {}).get("button_b"),
         JoystickButtonEvent(
-            type=pygame.JOYBUTTONUP, joy=int(joystick), button=3
-        ): JOYSTICKS.get(joystick, {}).get("keybindings", {}).get("button_y"),
+            type=pygame.JOYBUTTONUP, joy=joy, button=get_joy_button(joy, 'button_y')
+        ): JOY_KEY_BINDINGS.get(str(joy), {}).get("keybindings", {}).get("button_y"),
     }
+
+
+def load_joy_key_bindings():
+    with open('joy_key_bindings.json', 'r') as fp:
+        JOY_KEY_BINDINGS.update(json.loads(fp.read()))
 
 
 def build_joystick_mapping():
     """ build a dictionary with josytick events mapped to pygame keys.
-        uses JOYSTICKS as basis."""
-    result = {}
-    for joystick in JOYSTICKS.keys():
-        result.update(one_joystick_mapping(joystick))
-    return result
+        uses INITIALIZED_JOYS as basis."""
+    for joystick in JOY_KEY_BINDINGS.keys():
+        JOY_EVENTS_MAP.update(one_joystick_mapping(int(joystick)))
 
 
-JOYSTICK_MAPPING = build_joystick_mapping()
+def load_joysticks_types():
+    with open('joysticks.json', 'r') as fp:
+        JOY_TYPES.update(json.loads(fp.read()))
 
 
 def initialize_joysticks():
     """ initialize pygame.joystick module,
         and call init on available joysticks."""
+    # load internal mappings
+    load_joysticks_types()
+    load_joy_key_bindings()
+    build_joystick_mapping()
+    # initialize pygame joysticks
     pygame.joystick.init()
     joysticks = [pygame.joystick.Joystick(x) for x in range(pygame.joystick.get_count())]
     for joystick in joysticks:
-        print ("initializing joystick {}".format(joystick))
+        print ("initializing joystick {}".format(joystick.get_name()))
+        INITIALIZED_JOYS.append(joystick.get_name())
         joystick.init()
 
 
@@ -145,7 +141,7 @@ def quit_joysticks():
             if pygame.joystick.Joystick(x).get_init()
         ]
         for joystick in joysticks:
-            print ("quitting joystick {}".format(joystick))
+            print ("quitting joystick {}".format(joystick.get_name()))
             joystick.quit()
         pygame.joystick.quit()
 
@@ -172,9 +168,9 @@ def _get_joy_event_elems(event):
 
 def map_joy_event_key_down(event):
     """ processes event if it is a pressed event
-        returns the keyboard key from JOYSTICK_MAPPING"""
+        returns the keyboard key from JOY_EVENTS_MAP"""
     elems = _get_joy_event_elems(event) #joy,axis,value or joy,button
-    key = JOYSTICK_MAPPING.get((event.type, *elems))
+    key = JOY_EVENTS_MAP.get((event.type, *elems))
     if key:
         _pressed.add(key)
     return key
@@ -182,9 +178,9 @@ def map_joy_event_key_down(event):
 
 def map_joy_event_key_up(event):
     """ processes event if it is a release event
-        returns the keyboard key from JOYSTICK_MAPPING"""
+        returns the keyboard key from JOY_EVENTS_MAP"""
     elems = _get_joy_event_elems(event) #joy,axis,value or joy,button
-    partial_func = JOYSTICK_MAPPING.get((event.type, *elems))
+    partial_func = JOY_EVENTS_MAP.get((event.type, *elems))
     key = partial_func() if callable(partial_func) else partial_func
     if key:
         _pressed.remove(key)
@@ -193,7 +189,7 @@ def map_joy_event_key_up(event):
 
 def process_event(event):
     """ if event is a joystick event, build a keyboard event
-        based on JOYSTICK mapping and post that event on
+        based on JOY_KEY_BINDINGS mapping and post that event on
         pygame event loop.
         returns True if event was joystick event, False otherwise."""
     was_joystick_down = map_joy_event_key_down(event)

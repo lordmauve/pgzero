@@ -40,6 +40,15 @@ def joy_axis_mapper(axis):
 def joy_value_mapper(value):
     return constants.joy_value(round(value))
 
+def joy_button_mapper(button, context={}):
+    initialized_joys = pgzero.joysticks.INITIALIZED_JOYS
+    joy_number = getattr(context.get('event'), 'joy', 0) 
+    joy = initialized_joys[joy_number] if initialized_joys else 'snes'
+    joy_type = pgzero.joysticks.JOY_TYPES.get(joy)
+    # TODO: maybe better to have the numbers as keys and button names as values
+    buttons_match = [key for key in joy_type.keys() if joy_type[key] == button]
+    button_name = buttons_match[0] if buttons_match else None
+    return constants.joy_button(button_name)
 
 class DEFAULTICON:
     """Sentinel indicating that we want to use the default icon."""
@@ -120,7 +129,7 @@ class PGZeroGame:
         'buttons': ('buttons', map_buttons),
         'button': ('button', constants.mouse),
         'key': ('key', constants.keys),
-        'joy_button': ('button', constants.joy_button),
+        'joy_button': ('button', joy_button_mapper),
         'axis': ('axis', joy_axis_mapper),
         'value': ('value', joy_value_mapper),
         'joy': ('joy', constants.joysticks)
@@ -154,7 +163,12 @@ class PGZeroGame:
 
         def make_getter(mapper, getter):
             if mapper:
-                return lambda event: mapper(getter(event))
+                # can we pass context?
+                pass_context = hasattr(mapper, '__code__') and mapper.__code__.co_argcount > 1 and 'context' in mapper.__code__.co_varnames
+                if pass_context:
+                    return lambda event: mapper(getter(event), context={'event': event})
+                else:
+                    return lambda event: mapper(getter(event))
             return getter
 
         param_handlers = []
