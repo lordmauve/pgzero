@@ -4,7 +4,7 @@ from collections import deque
 from itertools import islice
 
 from pygame.transform import flip, rotate
-from pgzero.constants import controller
+from pgzero.constants import joy_button, joy_axis, joy_value
 
 
 
@@ -162,10 +162,17 @@ KEYBINDINGS = {
 }
 
 J_KEYBINDINGS = {
-    controller.BUTTON_Y: Direction.LEFT,
-    controller.BUTTON_A: Direction.RIGHT,
-    controller.BUTTON_X: Direction.UP,
-    controller.BUTTON_B: Direction.DOWN,
+    joy_button.BUTTON_Y: Direction.LEFT,
+    joy_button.BUTTON_A: Direction.RIGHT,
+    joy_button.BUTTON_X: Direction.UP,
+    joy_button.BUTTON_B: Direction.DOWN,
+}
+
+MOTION_KEYBINDINGS = {
+    (joy_axis.HORIZONTAL, joy_value.PRESSED_DOWN_OR_RIGHT): Direction.RIGHT,
+    (joy_axis.HORIZONTAL, joy_value.PRESSED_UP_OR_LEFT): Direction.LEFT,
+    (joy_axis.VERTICAL, joy_value.PRESSED_DOWN_OR_RIGHT): Direction.DOWN,
+    (joy_axis.VERTICAL, joy_value.PRESSED_UP_OR_LEFT): Direction.UP,
 }
 
 
@@ -207,6 +214,14 @@ def on_joystick_down(joy_button):
         direction != snake.lastdir.opposite()):
         snake.dir = direction
         return
+
+# def on_joystick_motion(axis, value):
+#     print('snake', axis, value)
+#     direction = MOTION_KEYBINDINGS.get((axis, value))
+#     if (direction and 
+#         direction != snake.lastdir.opposite()):
+#         snake.dir = direction
+#         return
 
 def on_key_down(key):
     if not snake.alive:
