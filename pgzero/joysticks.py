@@ -44,7 +44,17 @@ JoystickButtonEvent = collections.namedtuple(
 )
 
 
+def get_joy_btn_name(joy, button):
+    """ given a joy number and a button event number return a button name"""
+    joy_name = INITIALIZED_JOYS[int(joy)] if len(INITIALIZED_JOYS) > int(joy) else 'snes'
+    joy_type = JOY_TYPES.get(joy_name, {})
+    buttons_match = [key for key in joy_type.keys() if joy_type[key] == button]
+    return buttons_match[0] if buttons_match else None
+
+
 def get_joy_button(joy, button):
+    """ given a 'button_x' return the button value that we expect in event
+        it uses the JOY_TYPES global"""
     joy_name = INITIALIZED_JOYS[int(joy)] if len(INITIALIZED_JOYS) > int(joy) else 'snes'
     return JOY_TYPES.get(joy_name, {}).get(button)
 
@@ -99,19 +109,22 @@ def one_joystick_mapping(joy):
 
 
 def load_joy_key_bindings():
-    with open('joy_key_bindings.json', 'r') as fp:
+    JOY_KEY_BINDINGS.clear()
+    with open('config/joy_key_bindings.json', 'r') as fp:
         JOY_KEY_BINDINGS.update(json.loads(fp.read()))
 
 
 def build_joystick_mapping():
-    """ build a dictionary with josytick events mapped to pygame keys.
+    """ build a dictionary with joystick events mapped to pygame keys.
         uses INITIALIZED_JOYS as basis."""
+    JOY_EVENTS_MAP.clear()
     for joystick in JOY_KEY_BINDINGS.keys():
         JOY_EVENTS_MAP.update(one_joystick_mapping(int(joystick)))
 
 
 def load_joysticks_types():
-    with open('joysticks.json', 'r') as fp:
+    JOY_TYPES.clear()
+    with open('config/joysticks.json', 'r') as fp:
         JOY_TYPES.update(json.loads(fp.read()))
 
 

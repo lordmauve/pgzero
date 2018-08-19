@@ -40,14 +40,10 @@ def joy_axis_mapper(axis):
 def joy_value_mapper(value):
     return constants.joy_value(round(value))
 
+
 def joy_button_mapper(button, context={}):
-    initialized_joys = pgzero.joysticks.INITIALIZED_JOYS
     joy_number = getattr(context.get('event'), 'joy', 0) 
-    joy = initialized_joys[joy_number] if initialized_joys else 'snes'
-    joy_type = pgzero.joysticks.JOY_TYPES.get(joy)
-    # TODO: maybe better to have the numbers as keys and button names as values
-    buttons_match = [key for key in joy_type.keys() if joy_type[key] == button]
-    button_name = buttons_match[0] if buttons_match else None
+    button_name = pgzero.joysticks.get_joy_btn_name(joy_number, button)
     return constants.joy_button(button_name)
 
 class DEFAULTICON:
