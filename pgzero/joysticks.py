@@ -11,7 +11,7 @@ import pgzero.constants
 
 _pressed = set()
 # the joysticks that will be detected by pygame, during runtime
-INITIALIZED_JOYS = []
+INITIALIZED_JOYS = {}
 # the joysticks from joysticks.json (same mapping for all types of joysticks)
 JOY_TYPES = {}
 # the handlers for pygame joystick events
@@ -115,7 +115,7 @@ def load_joy_key_bindings():
 
 def build_joystick_mapping():
     """ build a dictionary with joystick events mapped to pygame keys.
-        uses INITIALIZED_JOYS as basis."""
+        uses JOY_KEY_BINDINGS as basis."""
     JOY_EVENTS_MAP.clear()
     for joystick in JOY_KEY_BINDINGS.keys():
         result = _joy_buttons_mapping(int(joystick))
@@ -139,9 +139,9 @@ def initialize_joysticks():
     # initialize pygame joysticks
     pygame.joystick.init()
     joysticks = [pygame.joystick.Joystick(x) for x in range(pygame.joystick.get_count())]
-    for joystick in joysticks:
+    for index, joystick in enumerate(joysticks):
         print ("initializing joystick {}".format(joystick.get_name()))
-        INITIALIZED_JOYS.append(joystick.get_name())
+        INITIALIZED_JOYS[index] = joystick.get_name()
         joystick.init()
 
 
