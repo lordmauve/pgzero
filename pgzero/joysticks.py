@@ -15,7 +15,8 @@ INITIALIZED_JOYS = {}
 # the joysticks from joysticks.json (same mapping for all types of joysticks)
 JOY_TYPES = {}
 # the handlers for pygame joystick events
-JOY_EVENTS_MAP = {}
+JOY_PRESSED_EVENTS_MAP = {}
+JOY_RELEASED_EVENTS_MAP = {}
 # the joystick to keyboard bindings 
 JOY_KEY_BINDINGS = {}
 
@@ -67,28 +68,25 @@ def get_joy_button(joy, button):
 
 def _joy_buttons_mapping(joy):
     """ map all button bindings from constants to JOY_KEY_BINDINGS if found."""
-    result = {}
     for button in pgzero.constants.joy_button:
         binding = _get_binding(joy, button.value)
         if binding:
-            result[JoystickButtonEvent(
+            JOY_PRESSED_EVENTS_MAP[JoystickButtonEvent(
                 type=pygame.JOYBUTTONDOWN,
                 joy=joy,
                 button=get_joy_button(joy, button.value)
             )] = binding
-            result[JoystickButtonEvent(
+            JOY_RELEASED_EVENTS_MAP[JoystickButtonEvent(
                 type=pygame.JOYBUTTONUP,
                 joy=joy,
                 button=get_joy_button(joy, button.value)
             )] = binding
-    return result
 
 
 def _joy_dpad_mapping(joy):
     """ map all axis/dpad bindings from constants to JOY_KEY_BINDINGS if found.
     """
     # TODO: there might be some way to differentiate between dpads and the joysticks
-    result = {}
     dpads = {
         pgzero.constants.joy_axis.HORIZONTAL: ("dpadleft", "dpadright", ""),
         pgzero.constants.joy_axis.VERTICAL: ("dpadup", "dpaddown", ""),
@@ -97,14 +95,13 @@ def _joy_dpad_mapping(joy):
         for index, value in enumerate(pgzero.constants.joy_value):
             binding = _get_binding(joy, dpad[index])
             if binding:
-                result[JoystickAxisEvent(
+                JOY_PRESSED_EVENTS_MAP[JoystickAxisEvent(
                     type=pygame.JOYAXISMOTION, joy=joy, axis=axis, value=value
                 )] = binding
         released = pgzero.constants.joy_value.RELEASED
-        result[JoystickAxisEvent(
+        JOY_RELEASED_EVENTS_MAP[JoystickAxisEvent(
             type=pygame.JOYAXISMOTION, joy=joy, axis=axis, value=released
         )] = functools.partial(_joy_axis_release, joy=joy, axis=axis)
-    return result
 
 
 def load_joy_key_bindings():
@@ -116,11 +113,11 @@ def load_joy_key_bindings():
 def build_joystick_mapping():
     """ build a dictionary with joystick events mapped to pygame keys.
         uses JOY_KEY_BINDINGS as basis."""
-    JOY_EVENTS_MAP.clear()
+    JOY_PRESSED_EVENTS_MAP.clear()
+    JOY_RELEASED_EVENTS_MAP.clear()
     for joystick in JOY_KEY_BINDINGS.keys():
-        result = _joy_buttons_mapping(int(joystick))
-        result.update(_joy_dpad_mapping(int(joystick)))
-        JOY_EVENTS_MAP.update(result)
+        _joy_buttons_mapping(int(joystick))
+        _joy_dpad_mapping(int(joystick))
 
 
 def load_joysticks_types():
@@ -184,7 +181,7 @@ def map_joy_event_key_down(event):
     """ processes event if it is a pressed event
         returns the keyboard key from JOY_EVENTS_MAP"""
     elems = _get_joy_event_elems(event) #joy,axis,value or joy,button
-    key = JOY_EVENTS_MAP.get((event.type, *elems))
+    key = JOY_PRESSED_EVENTS_MAP.get((event.type, *elems))
     if key:
         _pressed.add(key)
     return key
@@ -194,7 +191,7 @@ def map_joy_event_key_up(event):
     """ processes event if it is a release event
         returns the keyboard key from JOY_EVENTS_MAP"""
     elems = _get_joy_event_elems(event) #joy,axis,value or joy,button
-    partial_func = JOY_EVENTS_MAP.get((event.type, *elems))
+    partial_func = JOY_RELEASED_EVENTS_MAP.get((event.type, *elems))
     key = partial_func() if callable(partial_func) else partial_func
     if key:
         _pressed.remove(key)
@@ -209,12 +206,10 @@ def process_event(event):
     was_joystick_down = map_joy_event_key_down(event)
     was_joystick_up = map_joy_event_key_up(event)
     if was_joystick_down:
-        pgzero.keyboard.keyboard._press(was_joystick_down)
         new_event = pygame.event.Event(pygame.KEYDOWN, key=was_joystick_down)
         pygame.event.post(new_event)
         return True
     elif was_joystick_up:
-        pgzero.keyboard.keyboard._release(was_joystick_up)
         new_event = pygame.event.Event(pygame.KEYUP, key=was_joystick_up)
         pygame.event.post(new_event)
         return True

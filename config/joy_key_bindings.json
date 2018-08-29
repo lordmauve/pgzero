@@ -7,7 +7,7 @@
             "dpadup": 273,
             "dpaddown": 274,
             "button_x": 91,
-            "button_y": 13,
+            "button_y": 32,
             "button_a": 93,
             "button_b": 92
         }
@@ -20,7 +20,7 @@
             "dpadup": 119,
             "dpaddown": 115,
             "button_x": 118,
-            "button_y": 32,
+            "button_y": 13,
             "button_a": 98,
             "button_b": 110
         }

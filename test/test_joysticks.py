@@ -13,9 +13,7 @@ class JoysticksTest(TestCase):
         joysticks.build_joystick_mapping()
     
     def tearDown(self):
-        joysticks.JOY_TYPES.clear()
-        joysticks.JOY_KEY_BINDINGS.clear()
-        joysticks.JOY_EVENTS_MAP.clear()
+        pass
 
     def test_joysticks_0_joy_right_event(self):
         """ pressing first controller joystick right axis event is converted """
@@ -218,33 +216,33 @@ class JoysticksTest(TestCase):
         self.assertEqual(result, pygame.K_a)
 
     def test_joy0_mix_axis_button_sequence_events(self):
-        # press LEFT and ENTER
+        # press LEFT and SPACE
         event = pygame.event.Event(pygame.JOYAXISMOTION, joy=0, axis=0, value=-1)
         result = joysticks.map_joy_event_key_down(event)
         self.assertEqual(result, pygame.K_LEFT)
         event = pygame.event.Event(pygame.JOYBUTTONDOWN, joy=0, button=3)
         result = joysticks.map_joy_event_key_down(event)
-        self.assertEqual(result, pygame.K_RETURN)
-        # release LEFT and ENTER
+        self.assertEqual(result, pygame.K_SPACE)
+        # release LEFT and SPACE
         event = pygame.event.Event(pygame.JOYAXISMOTION, joy=0, axis=0, value=0)
         result = joysticks.map_joy_event_key_up(event)
         self.assertEqual(result, pygame.K_LEFT)
         event = pygame.event.Event(pygame.JOYBUTTONUP, joy=0, button=3)
         result = joysticks.map_joy_event_key_up(event)
-        self.assertEqual(result, pygame.K_RETURN)
+        self.assertEqual(result, pygame.K_SPACE)
 
     def test_joy1_mix_axis_button_sequence_events(self):
-        # press A and SPACE
+        # press A and ENTER
         event = pygame.event.Event(pygame.JOYAXISMOTION, joy=1, axis=0, value=-1)
         result = joysticks.map_joy_event_key_down(event)
         self.assertEqual(result, pygame.K_a)
         event = pygame.event.Event(pygame.JOYBUTTONDOWN, joy=1, button=3)
         result = joysticks.map_joy_event_key_down(event)
-        self.assertEqual(result, pygame.K_SPACE)
-        # release A and SPACE
+        self.assertEqual(result, pygame.K_RETURN)
+        # release A and ENTER
         event = pygame.event.Event(pygame.JOYAXISMOTION, joy=1, axis=0, value=0)
         result = joysticks.map_joy_event_key_up(event)
         self.assertEqual(result, pygame.K_a)
         event = pygame.event.Event(pygame.JOYBUTTONUP, joy=1, button=3)
         result = joysticks.map_joy_event_key_up(event)
-        self.assertEqual(result, pygame.K_SPACE)
+        self.assertEqual(result, pygame.K_RETURN)
