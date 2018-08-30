@@ -2,6 +2,7 @@ import collections
 import numbers
 import functools
 import json
+import os
 
 import pygame
 
@@ -104,9 +105,16 @@ def _joy_dpad_mapping(joy):
         )] = functools.partial(_joy_axis_release, joy=joy, axis=axis)
 
 
+def _get_absolute_path(path):
+    module_path = os.path.dirname(os.path.abspath(__file__))
+    package_path = os.path.abspath(os.path.join(module_path, '../'))
+    return os.path.join(package_path, path)
+
+
 def load_joy_key_bindings():
     JOY_KEY_BINDINGS.clear()
-    with open('config/joy_key_bindings.json', 'r') as fp:
+    path = _get_absolute_path('config/joy_key_bindings.json')
+    with open(path, 'r') as fp:
         JOY_KEY_BINDINGS.update(json.loads(fp.read()))
 
 
@@ -122,7 +130,8 @@ def build_joystick_mapping():
 
 def load_joysticks_types():
     JOY_TYPES.clear()
-    with open('config/joysticks.json', 'r') as fp:
+    path = _get_absolute_path('config/joysticks.json')
+    with open(path, 'r') as fp:
         JOY_TYPES.update(json.loads(fp.read()))
 
 
