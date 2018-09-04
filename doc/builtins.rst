@@ -738,3 +738,53 @@ This could be used in a Pygame Zero program like this::
 
     def on_mouse_down():
         beep.play()
+
+
+Joysticks
+---------
+
+.. versionadded:: TBA
+
+If you have joysticks connected and configured correctly, they should appear in
+the ``joysticks`` list. Pygame Zero will automatically initialize them, and you
+can access each joystick by number like this ``joysticks[1]`` (starting with 
+``0``).
+
+.. class:: Joystick
+    .. method:: get_numbuttons()
+        
+        Return the number of buttons on the joystick.
+        
+    .. method:: getbutton(button)
+        
+        Check whether a button is currently pressed.
+        
+        :param button: The number of the button, starting at ``0``.
+        
+    .. method:: get_numaxes()
+        
+        Return the number of axes on the joystick. Normally at least two, one
+        for the left/right direction, and another for up/down.
+        
+    .. method:: get_axis(axis_number)
+        
+        Return a value for how far the joystick axis is moved, from -1 to 1. 
+        The value will be negative for one direction, and positive for the 
+        other. It might also be less than 1, depending on your joystick.
+
+You can use them in a Pygame Zero program like this::
+
+    def on_joy_button_down(joy, button):
+        if button == joybutton.TWO:  # jump
+            direction = (joysticks[joy].get_axis(0),
+                         joysticks[joy].get_axis(1))
+            # the joystick number will tell us which player jumped
+            player[joy].jump(direction)
+    
+    def on_joy_axis_motion(joy, axis, value):
+        if joysticks[joy].getbutton(SNEAK):
+            player[joy].set_sneaking()
+        direction = (joysticks[joy].get_axis(0),
+                     joysticks[joy].get_axis(1))
+        player[joy].handle_movement(direction)
+

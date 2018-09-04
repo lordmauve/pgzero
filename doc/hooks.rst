@@ -167,6 +167,35 @@ To handle mouse drags, use code such as the following::
     Note that this will not be called if the track is configured to loop.
 
 
+.. function:: on_joy_button_down([joy], [button])
+
+    Called when a joystick button is pressed.
+
+    :param joy: An integer indicating the joystick that had its button pressed.
+    :param button: A :class:`joystick` enum value indicating the button that was
+                   pressed.
+
+.. function:: on_joy_button_up([joy], [button])
+
+    Called when a joystick button is released.
+
+    :param joy: An integer indicating the joystick that had its button released.
+    :param button: A :class:`joystick` enum value indicating the button that was
+                   pressed.
+
+.. function:: on_joy_axis_motion([joy], [axis], [value])
+
+    Called when a joystick axis is moved.
+    
+    :param joy: An integer indicating the joystick that had its axis changed.
+    :param button: A :class:`axis` enum value indicating the axis that was
+                   moved.  Normally axis 0 is X and axis 1 is Y, and there may
+                   be others if you use a gamepad with two sticks or shoulder
+                   buttons.
+    :param value: The current position of the joystick axis. This will normally
+                  be a floating point number ranging from -1 to +1, but may be
+                  lower depending on the joystick.
+
 .. _buttons-and-keys:
 
 Buttons and Keys
@@ -352,3 +381,35 @@ Additionally you can access a set of constants that represent modifier keys:
     .. attribute:: CAPS
     .. attribute:: MODE
 
+Joysticks have constants for both buttons and axes:
+
+.. class:: joystick
+
+    A built-in enumeration of buttons that can be received by the ``on_joy_button_*``
+    handlers.
+
+    .. attribute:: ZERO
+    .. attribute:: ONE
+    .. attribute:: TWO
+    .. attribute:: THREE
+    .. attribute:: FOUR
+    .. attribute:: FIVE
+    .. attribute:: SIX
+    .. attribute:: SEVEN
+    .. attribute:: EIGHT
+    .. attribute:: NINE
+    .. attribute:: TEN
+    .. attribute:: ELEVEN
+    .. attribute:: TWELVE
+
+.. class:: axis
+    
+    The axes that are on the joystick. Note that joystick axes vary a lot, so these
+    might be mislabelled for your joystick.
+    
+    .. attribute:: X
+    .. attribute:: Y
+    .. attribute:: ALT_X
+    .. attribute:: ALT_Y
+    .. attribute:: FOUR
+    .. attribute:: FIVE
