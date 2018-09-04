@@ -15,6 +15,30 @@ class mouse(IntEnum):
     WHEEL_DOWN = 5
 
 
+class joybutton(IntEnum):
+    ZERO = 0
+    ONE = 1
+    TWO = 2
+    THREE = 3
+    FOUR = 4
+    FIVE = 5
+    SIX = 6
+    SEVEN = 7
+    EIGHT = 8
+    NINE = 9
+    TEN = 10
+    ELEVEN = 11
+    TWELVE = 12
+    
+class axis(IntEnum):
+    X = 0
+    Y = 1
+    ALT_X = 2
+    ALT_Y = 3
+    FOUR = 4
+    FIVE = 5
+
+
 # Use a code generation approach to copy Pygame's key constants out into
 # a Python 3.4 IntEnum, stripping prefixes where possible
 srclines = ["class keys(IntEnum):"]

@@ -1,7 +1,11 @@
 import pygame
 pygame.mixer.pre_init(frequency=22050, size=-16, channels=2)
 pygame.init()
-
+pygame.joystick.init()
+joysticks = [pygame.joystick.Joystick(x) 
+             for x in range(pygame.joystick.get_count())]
+for j in joysticks:
+    j.init()
 
 import os
 import sys
