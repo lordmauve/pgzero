@@ -100,7 +100,12 @@ class PGZeroGame:
         pygame.MOUSEMOTION: 'on_mouse_move',
         pygame.KEYDOWN: 'on_key_down',
         pygame.KEYUP: 'on_key_up',
-        constants.MUSIC_END: 'on_music_end'
+        constants.MUSIC_END: 'on_music_end',
+        pygame.JOYAXISMOTION: 'on_joy_axis_motion',
+        pygame.JOYBALLMOTION: 'on_joy_ball_motion',   # trackball
+        pygame.JOYBUTTONDOWN: 'on_joy_button_down',
+        pygame.JOYBUTTONUP: 'on_joy_button_up',
+        pygame.JOYHATMOTION: 'on_joy_hat_motion',
     }
 
     def map_buttons(val):
@@ -109,7 +114,9 @@ class PGZeroGame:
     EVENT_PARAM_MAPPERS = {
         'buttons': map_buttons,
         'button': constants.mouse,
-        'key': constants.keys
+        'key': constants.keys,
+        'joybutton': constants.joybutton,
+        'axis': constants.axis,
     }
 
     def load_handlers(self):
@@ -145,8 +152,13 @@ class PGZeroGame:
 
         param_handlers = []
         for name in param_names:
+            # joystick hack
+            if name == 'button' and 'joy' in param_names:
+                mapper_name = 'joybutton'
+            else:
+                mapper_name = name
             getter = operator.attrgetter(name)
-            mapper = self.EVENT_PARAM_MAPPERS.get(name)
+            mapper = self.EVENT_PARAM_MAPPERS.get(mapper_name)
             param_handlers.append((name, make_getter(mapper, getter)))
 
         def prep_args(event):
@@ -155,12 +167,13 @@ class PGZeroGame:
         def new_handler(event):
             try:
                 prepped = prep_args(event)
-            except ValueError:
+            except ValueError as err:
                 # If we couldn't construct the keys/mouse objects representing
                 # the button that was pressed, then skip the event handler.
                 #
                 # This happens because Pygame can generate key codes that it
                 # does not have constants for.
+                print("ERROR on event {0}: {1}".format(event, err))
                 return
             else:
                 return handler(**prepped)
