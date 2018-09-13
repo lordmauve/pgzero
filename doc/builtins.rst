@@ -526,6 +526,29 @@ be floats or the strings ``left``, ``center``/``middle``, ``right``, ``top`` or
 ``bottom`` as appropriate.
 
 
+.. _flipping:
+
+Flipping
+''''''''
+
+Actors can be flipped, so that their image is mirrored horizontally or
+vertically (or both). You can use this to save creating and loading a 
+separate set of images if you want an Actor to move in both directions.
+
+To flip an Actor horizontally, just set its ``flip`` property to ``True``.
+Since our alien faces right, the following will make it face left::
+
+    alien = Actor('alien')
+    alien.flip = True
+
+If you want the alien to flip vertically too (maybe it can walk on the 
+ceiling?), pass it a tuple ``(horizontal, vertical)`` with the vertical value
+set to True::
+
+    alien.flip = (True, True)
+    alien.flip = (False, True)
+
+
 .. _rotation:
 
 Rotation

@@ -77,7 +77,8 @@ class Actor:
 
     _anchor = _anchor_value = (0, 0)
     _angle = 0.0
-
+    _flip = (False, False)
+    
     def __init__(self, image, pos=POS_TOPLEFT, anchor=ANCHOR_CENTER, **kwargs):
         self._handle_unexpected_kwargs(kwargs)
 
@@ -127,7 +128,9 @@ class Actor:
         if anchor is None:
             anchor = ("center", "center")
         self.anchor = anchor
-
+        
+        self.flip = (False, False)
+        
         symbolic_pos_args = {
             k: kwargs[k] for k in kwargs if k in SYMBOLIC_POSITIONS}
 
@@ -184,7 +187,15 @@ class Actor:
         ax, ay = self._untransformed_anchor
         self._anchor = transform_anchor(ax, ay, w, h, angle)
         self.pos = p
+    
+    @property
+    def flip(self):
+        return self._flip
 
+    @flip.setter
+    def flip(self, horizontal, vertical=False):
+        self._flip = (bool(horizontal), bool(vertical))
+        
     @property
     def pos(self):
         px, py = self.topleft
@@ -232,7 +243,12 @@ class Actor:
         self.pos = p
 
     def draw(self):
-        game.screen.blit(self._surf, self.topleft)
+        if self._flip == (False, False):
+            game.screen.blit(self._surf, self.topleft)
+        else:
+            flipped = pygame.transform.flip(self._surf, *self.flip)
+            game.screen.blit(flipped, self.topleft)
+
 
     def angle_to(self, target):
         """Return the angle from this actors position to target, in degrees."""
