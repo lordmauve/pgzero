@@ -112,6 +112,11 @@ class Actor:
             self.pos
         )
 
+    def __dir__(self):
+        standard_attributes = [key for key in self.__dict__.keys()
+            if not key.startswith("_")]
+        return standard_attributes + self.__class__.DELEGATED_ATTRIBUTES
+
     def _handle_unexpected_kwargs(self, kwargs):
         unexpected_kwargs = set(kwargs.keys()) - self.EXPECTED_INIT_KWARGS
         if not unexpected_kwargs:
