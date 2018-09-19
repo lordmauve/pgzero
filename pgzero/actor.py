@@ -77,6 +77,7 @@ class Actor:
 
     _anchor = _anchor_value = (0, 0)
     _angle = 0.0
+    _opacity = 1
 
     def __init__(self, image, pos=POS_TOPLEFT, anchor=ANCHOR_CENTER, **kwargs):
         self._handle_unexpected_kwargs(kwargs)
@@ -184,6 +185,18 @@ class Actor:
         ax, ay = self._untransformed_anchor
         self._anchor = transform_anchor(ax, ay, w, h, angle)
         self.pos = p
+
+    @property
+    def opacity(self):
+        return self._opacity
+
+    @opacity.setter
+    def opacity(self, opacity):
+        self._opacity = opacity
+        alpha_img = pygame.Surface(self._orig_surf.get_rect().size, pygame.SRCALPHA)
+        alpha_img.fill((255, 255, 255, opacity))
+        alpha_img.blit(self._orig_surf, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
+        self._surf = alpha_img
 
     @property
     def pos(self):
