@@ -5,6 +5,7 @@
 from math import sin, pow, pi
 
 from .clock import each_tick, unschedule
+from .spellcheck import suggest
 
 TWEEN_FUNCTIONS = {}
 
@@ -151,7 +152,14 @@ class Animation:
     def __init__(self, object, tween='linear', duration=1, on_finished=None,
                  **targets):
         self.targets = targets
-        self.function = TWEEN_FUNCTIONS[tween]
+        try:
+            self.function = TWEEN_FUNCTIONS[tween]
+        except KeyError:
+            suggested_tween = suggest(tween, TWEEN_FUNCTIONS.keys())
+            if len(suggested_tween) > 0:
+                raise KeyError('No tween called %s found, did you mean %s?' % (tween, suggested_tween[0]))
+            else:
+                raise KeyError('No tween called %s found.' % tween)
         self.duration = duration
         self.on_finished = on_finished
         self.t = 0
