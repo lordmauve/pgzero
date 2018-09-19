@@ -107,3 +107,9 @@ class ActorTest(unittest.TestCase):
         for _ in range(360):
             a.angle += 1.0
         self.assertEqual(a.pos, (100.0, 100.0))
+
+    def test_dir_correct(self):
+        """Everything returned by dir should be indexable as an attribute."""
+        a = Actor("alien")
+        for attribute in dir(a):
+            a.__getattr__(attribute)
