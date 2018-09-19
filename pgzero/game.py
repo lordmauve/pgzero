@@ -7,6 +7,7 @@ import pygame
 import pgzero.clock
 import pgzero.keyboard
 import pgzero.screen
+import pgzero.loaders
 
 from . import constants
 
@@ -61,11 +62,7 @@ class PGZeroGame:
 
         icon = getattr(self.mod, 'ICON', DEFAULTICON)
         if icon and icon != self.icon:
-            if icon is DEFAULTICON:
-                self.show_default_icon()
-            else:
-                pygame.display.set_icon(pygame.image.load(icon))
-            self.icon = icon
+            self.show_icon()
 
         w = getattr(mod, 'WIDTH', 800)
         h = getattr(mod, 'HEIGHT', 600)
@@ -93,6 +90,14 @@ class PGZeroGame:
         from pkgutil import get_data
         buf = BytesIO(get_data(__name__, 'data/icon.png'))
         pygame.display.set_icon(pygame.image.load(buf))
+
+    def show_icon(self):
+        icon = getattr(self.mod, 'ICON', DEFAULTICON)
+        if icon is DEFAULTICON:
+            self.show_default_icon()
+        else:
+            pygame.display.set_icon(pgzero.loaders.images.load(icon))
+        self.icon = icon
 
     EVENT_HANDLERS = {
         pygame.MOUSEBUTTONDOWN: 'on_mouse_down',
