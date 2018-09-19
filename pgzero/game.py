@@ -13,7 +13,14 @@ from . import constants
 
 screen = None
 DISPLAY_FLAGS = 0
+paused = False
 
+def pause():
+    global paused
+    paused = not paused
+
+def is_paused():
+    return paused
 
 def exit():
     """Wait for up to a second for all sounds to play out
@@ -243,7 +250,7 @@ class PGZeroGame:
 
         pgzclock = pgzero.clock.clock
 
-        self.need_redraw = True
+        self.need_redraw = not paused
         while True:
             # TODO: Use asyncio.sleep() for frame delay if accurate enough
             yield from asyncio.sleep(0)
@@ -261,9 +268,9 @@ class PGZeroGame:
                     self.keyboard._release(event.key)
                 self.dispatch_event(event)
 
-            pgzclock.tick(dt)
 
-            if update:
+            if update and not paused:
+                pgzclock.tick(dt)
                 update(dt)
 
             screen_change = self.reinit_screen()

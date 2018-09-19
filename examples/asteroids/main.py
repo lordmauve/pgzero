@@ -3,6 +3,7 @@ import json
 import operator
 
 from pygame.math import Vector2
+from pgzero.builtins import pause, is_paused
 
 from space import create_star_scape
 from actors import Player, Asteroid
@@ -139,9 +140,11 @@ def on_key_down(key):
             game.player.turn += 1
         if key == keys.RIGHT:
             game.player.turn -= 1
-        if key == keys.SPACE and not game.player.frozen:
+        if key == keys.SPACE and not game.player.frozen and not is_paused():
             sounds.fire.play()
             game.bullets.append(game.player.fire())
+        if key == keys.RETURN:
+            pause()
     elif game.stage is GameStage.game_over:
         if key == keys.BACKSPACE:
             game.initials = game.initials[:-1]
