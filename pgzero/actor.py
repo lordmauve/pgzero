@@ -71,17 +71,42 @@ def transform_anchor(ax, ay, w, h, angle):
     )
 
 
+def _set_angle(actor, current_surface):
+    if actor._angle % 360 == 0:
+        return current_surface
+    return pygame.transform.rotate(current_surface, actor._angle)
+
+def _set_opacity(actor, current_surface):
+    alpha_img = pygame.Surface(current_surface.get_rect().size, pygame.SRCALPHA)
+    alpha_img.fill((255, 255, 255, actor._opacity))
+    alpha_img.blit(current_surface, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
+    return alpha_img
+
 class Actor:
     EXPECTED_INIT_KWARGS = SYMBOLIC_POSITIONS
     DELEGATED_ATTRIBUTES = [a for a in dir(rect.ZRect) if not a.startswith("_")]
 
+    function_order = [_set_opacity, _set_angle]
     _anchor = _anchor_value = (0, 0)
     _angle = 0.0
-    _opacity = 1
+    _opacity = 255
+
+    def _build_transformed_surf(self):
+        cache_len = len(self._surface_cache)
+        if cache_len == 0:
+            last = self._orig_surf 
+        else:
+            last = self._surface_cache[-1]
+        for f in self.function_order[cache_len:]:
+            new_surf = f(self, last)
+            self._surface_cache.append(new_surf)
+            last = new_surf
+        return self._surface_cache[-1]
 
     def __init__(self, image, pos=POS_TOPLEFT, anchor=ANCHOR_CENTER, **kwargs):
         self._handle_unexpected_kwargs(kwargs)
 
+        self._surface_cache = []
         self.__dict__["_rect"] = rect.ZRect((0, 0), (0, 0))
         # Initialise it at (0, 0) for size (0, 0).
         # We'll move it to the right place and resize it later
@@ -156,6 +181,15 @@ class Actor:
         setter_name, position = symbolic_pos_dict.popitem()
         setattr(self, setter_name, position)
 
+    def _update_transform(self, function):
+        if function in self.function_order:
+            i = self.function_order.index(function)
+            del self._surface_cache[i:]
+        else:
+            raise IndexError(
+                "function {!r} does not have a registered order."
+                "".format(function))
+
     @property
     def anchor(self):
         return self._anchor_value
@@ -183,25 +217,23 @@ class Actor:
     @angle.setter
     def angle(self, angle):
         self._angle = angle
-        self._surf = pygame.transform.rotate(self._orig_surf, angle)
-        p = self.pos
-        self.width, self.height = self._surf.get_size()
-        w, h = self._orig_surf.get_size()
+        w,h = self._orig_surf.get_size()
+        self.width = abs(w * sin(radians(angle))) + abs(h * cos(radians(angle)))
+        self.height = abs(w * cos(radians(angle))) + abs(h * sin(radians(angle)))
         ax, ay = self._untransformed_anchor
+        p = self.pos
         self._anchor = transform_anchor(ax, ay, w, h, angle)
         self.pos = p
+        self._update_transform(_set_angle)
 
     @property
     def opacity(self):
-        return self._opacity
+        return int(self._opacity/255)
 
     @opacity.setter
     def opacity(self, opacity):
-        self._opacity = opacity
-        alpha_img = pygame.Surface(self._orig_surf.get_rect().size, pygame.SRCALPHA)
-        alpha_img.fill((255, 255, 255, opacity))
-        alpha_img.blit(self._orig_surf, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
-        self._surf = alpha_img
+        self._opacity = opacity*255
+        self._update_transform(_set_opacity)
 
     @property
     def pos(self):
@@ -240,17 +272,18 @@ class Actor:
     @image.setter
     def image(self, image):
         self._image_name = image
-        self._orig_surf = self._surf = loaders.images.load(image)
+        self._orig_surf = loaders.images.load(image)
         self._update_pos()
 
     def _update_pos(self):
         p = self.pos
-        self.width, self.height = self._surf.get_size()
+        self.width, self.height = self._orig_surf.get_size()
         self._calc_anchor()
         self.pos = p
 
     def draw(self):
-        game.screen.blit(self._surf, self.topleft)
+        s = self._build_transformed_surf()
+        game.screen.blit(s, self.topleft)
 
     def angle_to(self, target):
         """Return the angle from this actors position to target, in degrees."""
