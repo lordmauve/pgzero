@@ -63,7 +63,6 @@ class PGZeroGame:
 
         """
         global screen
-        changed = False
         mod = self.mod
 
         icon = getattr(self.mod, 'ICON', DEFAULTICON)
@@ -91,8 +90,6 @@ class PGZeroGame:
         if title != self.title:
             pygame.display.set_caption(title)
             self.title = title
-
-        return changed
 
     @staticmethod
     def show_default_icon():
@@ -280,7 +277,7 @@ class PGZeroGame:
                     update(dt)
 
 
-            screen_change = self.reinit_screen()
+            self.reinit_screen()
             if pgzclock.fired or self.need_redraw:
                 draw()
                 pygame.display.flip()
