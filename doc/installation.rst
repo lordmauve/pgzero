@@ -51,6 +51,11 @@ In a Terminal window, type
    pip install pgzero
 
 
+Note that there are currently no wheels for pygame that support python 3.4 for mac,
+so you may need to you will need to upgrade python to >=3.6 (or use python 2.7) in
+order to be able to install pygame. For a list of available wheels, please visit
+.. _pyPi: Pihttps://pypi.org/project/Pygame/#files.
+
 Linux
 '''''
 
