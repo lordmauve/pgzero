@@ -77,6 +77,7 @@ class PGZeroGame:
         w = getattr(mod, 'WIDTH', 800)
         h = getattr(mod, 'HEIGHT', 600)
         if w != self.width or h != self.height:
+            self.need_redraw = True
             self.screen = pygame.display.set_mode((w, h), DISPLAY_FLAGS)
             if hasattr(self.mod, 'screen'):
                 self.mod.screen.surface = self.screen
@@ -199,9 +200,13 @@ class PGZeroGame:
         except AttributeError:
             return None
         else:
-            if update.__code__.co_argcount == 0:
-                return lambda dt: update()
-            return update
+            def update_wrapper(dt):
+                if update.__code__.co_argcount == 0:
+                    update()
+                else:
+                    update(dt)
+                self.need_redraw = True
+            return update_wrapper
 
     def get_draw_func(self):
         """Get a draw function.
@@ -250,7 +255,7 @@ class PGZeroGame:
 
         pgzclock = pgzero.clock.clock
 
-        self.need_redraw = not paused
+        self.need_redraw = True
         while True:
             # TODO: Use asyncio.sleep() for frame delay if accurate enough
             yield from asyncio.sleep(0)
@@ -268,13 +273,15 @@ class PGZeroGame:
                     self.keyboard._release(event.key)
                 self.dispatch_event(event)
 
-
-            if update and not paused:
+            if not paused:
                 pgzclock.tick(dt)
-                update(dt)
+
+                if update:
+                    update(dt)
+
 
             screen_change = self.reinit_screen()
-            if screen_change or update or pgzclock.fired or self.need_redraw:
+            if pgzclock.fired or self.need_redraw:
                 draw()
                 pygame.display.flip()
                 self.need_redraw = False

@@ -3,7 +3,6 @@ import json
 import operator
 
 from pygame.math import Vector2
-from pgzero.builtins import pause, is_paused
 
 from space import create_star_scape
 from actors import Player, Asteroid
