@@ -72,3 +72,7 @@ div.sphinxsidebar h3 a {
 ol li {
     margin: 1em 0;
 }
+
+.pyweek .admonition-title {
+    display: none;
+}

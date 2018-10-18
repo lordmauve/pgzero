@@ -45,6 +45,25 @@ User Guide
     other-libs
     changelog
 
+.. rst-class:: pyweek
+
+    .. tip::
+
+        .. image:: _static/pyweek.png
+            :alt: Pyweek Game Jam
+            :height: 50
+            :target: https://pyweek.org/
+
+        If you're ready to try writing a full game, an event to look out for is
+        PyWeek_, which happens twice a year at https://pyweek.org/.
+
+        It's an online game programming challenge: you have a week to write a
+        game in Python, using Pygame Zero or other libraries. Lots of other
+        people will be writing games too, and you can watch their progress and
+        play and rate the finished results after the competition.
+
+.. _PyWeek: https://pyweek.org/
+
 
 Stickers by |Sticker Mule|
 --------------------------
