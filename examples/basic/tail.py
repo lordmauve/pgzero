@@ -1,13 +1,13 @@
 from math import sin, cos
 
 # Constants that control the wobble effect
-SEGMENT_SIZE = 50
-ANGLE = 2.5
-PHASE_STEP = 0.3
-WOBBLE_AMOUNT = 0.5
-SPEED = 4.0
+SEGMENT_SIZE = 50  # pixels from one segment to the next
+ANGLE = 2.5  # Base direction for the tail (radians)
+PHASE_STEP = 0.3  # How much the phase differs in each tail piece (radians)
+WOBBLE_AMOUNT = 0.5  # How much of a wobble there is (radians)
+SPEED = 4.0  # How fast the wobble moves (radians per second)
 
-# Dimensions of the screen
+# Dimensions of the screen (pixels)
 WIDTH = 800
 HEIGHT = 800
 
@@ -18,7 +18,7 @@ tail = [Actor('tail_piece') for _ in range(10)]
 tail += [Actor('tail_hook')]
 
 # Keep track of time
-t = 0
+t = 0  # seconds
 
 
 def draw():
