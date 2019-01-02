@@ -28,6 +28,12 @@ draw images to the screen ("blit" them).
 
         .. _`Pygame surface`: https://www.pygame.org/docs/ref/surface.html
 
+    .. method:: bounds()
+
+        .. versionadded:: 1.3
+
+        Return a ZRect representing the bounds of the screen.
+
     .. method:: clear()
 
         Reset the screen to black.
