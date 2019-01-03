@@ -175,7 +175,7 @@ dimensions and so on::
     forest = []
     for i in range(5):
         forest.append(
-            Actor('tree', topleft=(images.tree.width * i, 0))
+            Actor('tree', topleft=(images.tree.get_width() * i, 0))
         )
 
 Each loaded image is a Pygame ``Surface``. You will typically use
