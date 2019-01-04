@@ -1,5 +1,15 @@
 import random
 import math
+import sys
+
+
+# The constant math.tau was introduced in python 3.6. Since pgzero supports
+# some earlier verions of python (i.e. 3.4 and 3.5) a tau constant needs
+# exist for those versions.
+if 3 <= sys.version_info.major and 6 <= sys.version_info.minor:
+    TAU = math.tau
+else:
+    TAU = math.pi * 2
 
 WIDTH, HEIGHT = 800, 600  # set the window dimensions
 
@@ -18,17 +28,17 @@ particles = []
 
 def explode(x, y, speed=300, num=200):
     """Create a particle explosion at (x, y).
-    
+
     `num` is the number of particles to spawn.
     `speed` is the maximum speed of a particle in pixels per second.
-       
+
     """
     age = 0
     # Pick a random colour
     color = tuple(random.randint(128, 255) for _ in range(3))
     for _ in range(num):  # spawn 300 particles
         # Choose a random angle anywhere in the circle
-        angle = random.uniform(0, math.tau)
+        angle = random.uniform(0, TAU)
         # Choose a random radius using a controllable distribution
         radius = random.uniform(0, 1) ** RADIUS_EXP
 
