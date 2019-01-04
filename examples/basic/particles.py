@@ -1,15 +1,6 @@
 import random
 import math
-import sys
 
-
-# The math.tau constant was introduced in python 3.6. Some pre-3.6 versions
-# of python are supported by pgzero (i.e. 3.4 and 3.5), so a tau constant needs
-# exist for those versions.
-if 3 <= sys.version_info.major and 6 <= sys.version_info.minor:
-    TAU = math.tau
-else:
-    TAU = math.pi * 2
 
 WIDTH, HEIGHT = 800, 600  # set the window dimensions
 
@@ -21,6 +12,7 @@ MAX_AGE = 3  # lifetime of a particle
 # 0.5 = uniform coverage of the circle
 # >0.5 = weighted towards the inside
 RADIUS_EXP = 0.5
+TAU = math.pi * 2  # math.tau is available in python 3.6+
 
 # A global list to hold all our particles
 particles = []
