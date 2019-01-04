@@ -16,14 +16,16 @@ bird.dead = False
 bird.score = 0
 bird.vy = 0
 
-pipe_top = Actor('top', anchor=('left', 'bottom'), pos=(-100, 0))
-pipe_bottom = Actor('bottom', anchor=('left', 'top'), pos=(-100, 0))
-
 
 def reset_pipes():
     pipe_gap_y = random.randint(200, HEIGHT - 200)
     pipe_top.pos = (WIDTH, pipe_gap_y - GAP // 2)
     pipe_bottom.pos = (WIDTH, pipe_gap_y + GAP // 2)
+
+
+pipe_top = Actor('top', anchor=('left', 'bottom'))
+pipe_bottom = Actor('bottom', anchor=('left', 'top'))
+reset_pipes()  # Set initial pipe positions.
 
 
 def update_pipes():
