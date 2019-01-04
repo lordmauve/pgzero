@@ -5,7 +5,7 @@ The :ref:`screen`'s ``draw.text()`` method has a very rich set of methods for
 position and formatting of text. Some examples::
 
     screen.draw.text("Text color", (50, 30), color="orange")
-    screen.draw.text("Font name and size", (20, 100), fontname="Boogaloo", fontsize=60)
+    screen.draw.text("Font name and size", (20, 100), fontname="boogaloo", fontsize=60)
     screen.draw.text("Positioned text", topright=(840, 20))
     screen.draw.text("Allow me to demonstrate wrapped text.", (90, 210), width=180, lineheight=1.5)
     screen.draw.text("Outlined text", (400, 70), owidth=1.5, ocolor=(255,255,0), color=(0,0,0))
@@ -14,7 +14,7 @@ position and formatting of text. Some examples::
     screen.draw.text("Transparency", (700, 240), alpha=0.1)
     screen.draw.text("Vertical text", midleft=(40, 440), angle=90)
     screen.draw.text("All together now:\nCombining the above options",
-        midbottom=(427,460), width=360, fontname="Boogaloo", fontsize=48,
+        midbottom=(427,460), width=360, fontname="boogaloo", fontsize=48,
         color="#AAFF00", gcolor="#66AA00", owidth=1.5, ocolor="black", alpha=0.8)
 
 In its simplest usage, ``screen.draw.text`` requires the string you want to
