@@ -218,8 +218,8 @@ class Actor:
     def angle(self, angle):
         self._angle = angle
         w,h = self._orig_surf.get_size()
-        self.width = abs(w * sin(radians(angle))) + abs(h * cos(radians(angle)))
-        self.height = abs(w * cos(radians(angle))) + abs(h * sin(radians(angle)))
+        self.height = abs(w * sin(radians(angle))) + abs(h * cos(radians(angle)))
+        self.width = abs(w * cos(radians(angle))) + abs(h * sin(radians(angle)))
         ax, ay = self._untransformed_anchor
         p = self.pos
         self._anchor = transform_anchor(ax, ay, w, h, angle)
