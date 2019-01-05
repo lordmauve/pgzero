@@ -52,7 +52,7 @@ In a Terminal window, type
 
 
 Note that there are currently no Wheels for Pygame that support python 3.4 for Mac,
-so you may need to you will need to upgrade Python to >=3.6 (or use python 2.7) in
+so you will need to upgrade Python to >=3.6 (or use python 2.7) in
 order to be able to install pygame. For a list of available Wheels, please visit
 `pyPI_`
 
