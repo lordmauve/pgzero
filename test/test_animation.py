@@ -138,3 +138,118 @@ class SuggestionTest(TestCase):
         gc.collect()
         self.assertEqual(anim2_alivelist, [])
         self.assertEqual(obj_alivelist, [])
+
+    def test_running(self):
+        """Test getting the running attribute."""
+        obj = SimpleNamespace()
+        anim = animate(obj, duration=2)
+        self.assertTrue(anim.running)
+        clock.tick(1)
+        self.assertTrue(anim.running)
+        clock.tick(1.1)  # Add extra time to make sure it's done.
+        self.assertFalse(anim.running)
+
+    def test_running_read_only(self):
+        """Test that the running attribute is read only."""
+        obj = SimpleNamespace()
+        anim = animate(obj)
+
+        for running in (False, True):
+            with self.assertRaises(AttributeError, msg="can't set attribute"):
+                anim.running = running
+
+
+class AnimationStopTest(TestCase):
+    """Tests for stopping animation."""
+    attr_start_val = 0
+    attr_finish_val = 1
+    stop_loop_cnt = 5
+    complete_values = (False, True)  # Possible stop(complete) values.
+
+    def setUp(self):
+        self.test_obj = SimpleNamespace()
+
+    def _multiple_stop(self, anim, complete, exp_attr_val):
+        """Method to reduce code duplication in the test cases."""
+        # Stop multiple times to ensure it can be handled.
+        for _ in range(self.stop_loop_cnt):
+            anim.stop(complete=complete)
+
+            # Animation has stopped and attr updated as expected.
+            self.assertFalse(anim.running)
+            self.assertEqual(self.test_obj.attr, exp_attr_val)
+
+    def test_stop_after_creation(self):
+        """Test stopping an animation right after it is created."""
+        for complete in self.complete_values:
+            self.test_obj.attr = self.attr_start_val
+            exp_attr_val = self.attr_start_val
+            anim = animate(self.test_obj, attr=self.attr_finish_val)
+
+            # Animation is running and attr hasn't changed.
+            self.assertTrue(anim.running)
+            self.assertEqual(self.test_obj.attr, exp_attr_val)
+
+            if complete:
+                # The animation will update the attr value when the complete
+                # flag is True.
+                exp_attr_val = self.attr_finish_val
+
+            self._multiple_stop(anim, complete, exp_attr_val)
+
+    def test_stop_after_tick(self):
+        """Test stopping an animation after it has run a bit."""
+        anim_duration = 5
+        tick_duration = 1
+
+        for complete in self.complete_values:
+            self.test_obj.attr = self.attr_start_val
+            exp_attr_val = self.attr_start_val
+            anim = animate(self.test_obj, duration=anim_duration,
+                    attr=self.attr_finish_val)
+
+            # Animation is running and attr hasn't changed.
+            self.assertTrue(anim.running)
+            self.assertEqual(self.test_obj.attr, exp_attr_val)
+
+            clock.tick(tick_duration)
+
+            # Update the expected value after the tick.
+            exp_attr_val = self.attr_finish_val * tick_duration / anim_duration
+
+            # Animation is running and attr updated as expected.
+            self.assertTrue(anim.running)
+            self.assertEqual(self.test_obj.attr, exp_attr_val)
+
+            if complete:
+                # The animation will update the attr value when the complete
+                # flag is True.
+                exp_attr_val = self.attr_finish_val
+
+            self._multiple_stop(anim, complete, exp_attr_val)
+
+    def test_stop_after_finished(self):
+        """Test stopping an animation after it has finished."""
+        anim_duration = 1
+        tick_duration = 1.1  # Add extra time to make sure it's done.
+
+        for complete in self.complete_values:
+            self.test_obj.attr = self.attr_start_val
+            exp_attr_val = self.attr_start_val
+            anim = animate(self.test_obj, duration=anim_duration,
+                    attr=self.attr_finish_val)
+
+            # Animation is running and attr hasn't changed.
+            self.assertTrue(anim.running)
+            self.assertEqual(self.test_obj.attr, exp_attr_val)
+
+            clock.tick(tick_duration)
+
+            # Update the expected value after the tick.
+            exp_attr_val = self.attr_finish_val
+
+            # Animation has stopped and attr updated as expected.
+            self.assertFalse(anim.running)
+            self.assertEqual(self.test_obj.attr, exp_attr_val)
+
+            self._multiple_stop(anim, complete, exp_attr_val)

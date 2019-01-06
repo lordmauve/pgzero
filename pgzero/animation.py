@@ -137,7 +137,7 @@ class Animation:
     the duration of the animation.
 
     """
-    animations = []
+    animations = []  # Stores strong references to objects being animated.
 
     # Animations are stored in _animation_dict under (object id, target
     # attribute) keys. Objects may not be hashable, so the id, rather than
@@ -165,7 +165,7 @@ class Animation:
         self.t = 0
         self.object = object
         self.initial = {}
-        self.running = True
+        self._running = True
         for k in self.targets:
             try:
                 a = getattr(object, k)
@@ -179,6 +179,15 @@ class Animation:
             self._animation_dict[key] = self
         each_tick(self.update)
         self.animations.append(self)
+
+    @property
+    def running(self):
+        """Running state of the animation.
+
+        True if the animation is running.
+        False if the duration has elapsed or the stop() method was called.
+        """
+        return self._running
 
     def update(self, dt):
         self.t += dt
@@ -203,7 +212,11 @@ class Animation:
             targets will be set to some value between the start and
             end values.
         """
-        self.running = False
+        if not self._running:
+            # Don't do anything if already stopped.
+            return
+
+        self._running = False
         if complete:
             for k in self.targets:
                 setattr(self.object, k, self.targets[k])
