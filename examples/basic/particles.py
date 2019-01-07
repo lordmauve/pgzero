@@ -1,6 +1,7 @@
 import random
 import math
 
+
 WIDTH, HEIGHT = 800, 600  # set the window dimensions
 
 DRAG = 0.7  # fraction of speed lost per second
@@ -11,6 +12,7 @@ MAX_AGE = 3  # lifetime of a particle
 # 0.5 = uniform coverage of the circle
 # >0.5 = weighted towards the inside
 RADIUS_EXP = 0.5
+TAU = math.pi * 2  # math.tau is available in python 3.6+
 
 # A global list to hold all our particles
 particles = []
@@ -18,17 +20,17 @@ particles = []
 
 def explode(x, y, speed=300, num=200):
     """Create a particle explosion at (x, y).
-    
+
     `num` is the number of particles to spawn.
     `speed` is the maximum speed of a particle in pixels per second.
-       
+
     """
     age = 0
     # Pick a random colour
     color = tuple(random.randint(128, 255) for _ in range(3))
     for _ in range(num):  # spawn 300 particles
         # Choose a random angle anywhere in the circle
-        angle = random.uniform(0, math.tau)
+        angle = random.uniform(0, TAU)
         # Choose a random radius using a controllable distribution
         radius = random.uniform(0, 1) ** RADIUS_EXP
 
