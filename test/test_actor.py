@@ -2,7 +2,8 @@ import unittest
 
 import pygame
 
-from pgzero.actor import calculate_anchor, Actor
+from pgzero.actor import (calculate_anchor, Actor, MIN_OPACITY, MAX_OPACITY,
+        DEFAULT_OPACITY)
 from pgzero.loaders import set_root
 
 
@@ -109,6 +110,41 @@ class ActorTest(unittest.TestCase):
         for _ in range(360):
             a.angle += 1.0
         self.assertEqual(a.pos, (100.0, 100.0))
+
+    def test_opacity_default(self):
+        """Ensure opacity is initially set to its default value."""
+        expected_opacity = DEFAULT_OPACITY
+
+        a = Actor('alien')
+
+        self.assertEqual(a.opacity, expected_opacity)
+
+    def test_opacity_value(self):
+        """Ensure opacity gives the value it was set to."""
+        a = Actor('alien')
+        expected_opacity = 0.54321
+
+        a.opacity = expected_opacity
+
+        self.assertEqual(a.opacity, expected_opacity)
+
+    def test_opacity_min_boundry(self):
+        """Ensure opacity is not set below minimum allowable level."""
+        a = Actor('alien')
+        expected_opacity = MIN_OPACITY
+
+        a.opacity = MIN_OPACITY - 0.1
+
+        self.assertEqual(a.opacity, expected_opacity)
+
+    def test_opacity_max_boundry(self):
+        """Ensure opacity is not set above maximum allowable level."""
+        a = Actor('alien')
+        expected_opacity = MAX_OPACITY
+
+        a.opacity = MAX_OPACITY + 0.1
+
+        self.assertEqual(a.opacity, expected_opacity)
 
     def test_dir_correct(self):
         """Everything returned by dir should be indexable as an attribute."""

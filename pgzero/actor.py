@@ -45,6 +45,11 @@ SYMBOLIC_POSITIONS = set((
 POS_TOPLEFT = None
 ANCHOR_CENTER = None
 
+# Opacity constants.
+MIN_OPACITY = 0.0
+MAX_OPACITY = 1.0
+DEFAULT_OPACITY = MAX_OPACITY
+
 
 def transform_anchor(ax, ay, w, h, angle):
     """Transform anchor based upon a rotation of a surface of size w x h."""
@@ -73,12 +78,17 @@ def transform_anchor(ax, ay, w, h, angle):
 
 def _set_angle(actor, current_surface):
     if actor._angle % 360 == 0:
+        # No changes required for default angle.
         return current_surface
     return pygame.transform.rotate(current_surface, actor._angle)
 
 def _set_opacity(actor, current_surface):
-    alpha_img = pygame.Surface(current_surface.get_rect().size, pygame.SRCALPHA)
-    alpha_img.fill((255, 255, 255, actor._opacity))
+    if actor.opacity == DEFAULT_OPACITY:
+        # No changes required for default opacity.
+        return current_surface
+
+    alpha_img = pygame.Surface(current_surface.get_size(), pygame.SRCALPHA)
+    alpha_img.fill((255, 255, 255, actor.opacity * 255))
     alpha_img.blit(current_surface, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
     return alpha_img
 
@@ -89,12 +99,12 @@ class Actor:
     function_order = [_set_opacity, _set_angle]
     _anchor = _anchor_value = (0, 0)
     _angle = 0.0
-    _opacity = 255
+    _opacity = DEFAULT_OPACITY
 
     def _build_transformed_surf(self):
         cache_len = len(self._surface_cache)
         if cache_len == 0:
-            last = self._orig_surf 
+            last = self._orig_surf
         else:
             last = self._surface_cache[-1]
         for f in self.function_order[cache_len:]:
@@ -229,11 +239,22 @@ class Actor:
 
     @property
     def opacity(self):
-        return int(self._opacity/255)
+        """Get/set the current opacity value.
+
+        The allowable range for opacity is any number between and including
+        0.0 and 1.0 (i.e. [0.0, 1.0]). Values outside of this will be clamped
+        to the range.
+
+        0.0 makes the image completely transparent (i.e. invisible).
+        1.0 makes the image completely opaque (i.e. fully viewable).
+        Values between 0.0 and 1.0 will give varying levels of transparency.
+        """
+        return self._opacity
 
     @opacity.setter
     def opacity(self, opacity):
-        self._opacity = opacity*255
+        # Clamp the opacity to the allowable range.
+        self._opacity = min(MAX_OPACITY, max(MIN_OPACITY, opacity))
         self._update_transform(_set_opacity)
 
     @property
