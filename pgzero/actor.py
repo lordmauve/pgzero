@@ -49,6 +49,7 @@ ANCHOR_CENTER = None
 MIN_OPACITY = 0.0
 MAX_OPACITY = 1.0
 DEFAULT_OPACITY = MAX_OPACITY
+MAX_ALPHA = 255  # Based on pygame's max alpha.
 
 
 def transform_anchor(ax, ay, w, h, angle):
@@ -82,15 +83,20 @@ def _set_angle(actor, current_surface):
         return current_surface
     return pygame.transform.rotate(current_surface, actor._angle)
 
+
 def _set_opacity(actor, current_surface):
-    if actor.opacity == DEFAULT_OPACITY:
-        # No changes required for default opacity.
+    alpha = int(actor.opacity * MAX_ALPHA + 0.5)  # +0.5 for rounding up.
+
+    if alpha == MAX_ALPHA:
+        # No changes required for fully opaque surfaces (corresponds to the
+        # default opacity of the current_surface).
         return current_surface
 
     alpha_img = pygame.Surface(current_surface.get_size(), pygame.SRCALPHA)
-    alpha_img.fill((255, 255, 255, actor.opacity * 255))
+    alpha_img.fill((255, 255, 255, alpha))
     alpha_img.blit(current_surface, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
     return alpha_img
+
 
 class Actor:
     EXPECTED_INIT_KWARGS = SYMBOLIC_POSITIONS
