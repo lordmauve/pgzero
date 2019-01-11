@@ -273,6 +273,7 @@ class Actor:
     def image(self, image):
         self._image_name = image
         self._orig_surf = loaders.images.load(image)
+        self._surface_cache.clear()  # Clear out old image's cache.
         self._update_pos()
 
     def _update_pos(self):
