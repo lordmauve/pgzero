@@ -1,12 +1,15 @@
 import random
 from collections import deque
 from itertools import tee
-from math import sin
+from math import sin, floor
 WIDTH = 800
 HEIGHT = 400
 
 GRAVITY = 5
-TRAIL_LENGTH = 400
+TRAIL_LENGTH = 500
+WIND_SCALE = 8
+WIND_AMOUNT_X = 2.5
+WIND_AMOUNT_Y = 1.5
 
 TRAIL_BRIGHTNESS = 100
 FLARE_COLOR = (255, 220, 160)
@@ -32,6 +35,11 @@ class Missile:
         self.x += self.vx * dt
         self.trail.appendleft((self.x, self.y))
 
+        for i, (x, y) in enumerate(self.trail):
+            nx = x + wind_x.get((x, y)) * dt
+            ny = y + wind_y.get((x, y)) * dt
+            self.trail[i] = nx, ny
+
         # If the trail is off the bottom of the screen, kill the missile
         if self.trail[-1][1] > HEIGHT:
             missiles.remove(self)
@@ -56,6 +64,32 @@ class Missile:
             (self.x + flare_length, self.y),
             FLARE_COLOR
         )
+
+
+class Perlin:
+    def __init__(self, amount=1.0):
+        self.seed = random.randrange(1000000)
+        self.amount = amount
+
+    def _rnd(self, i):
+        n = 982451653
+        d = 67867967
+        return (self.seed + i) * n % d / d - 0.5
+
+    def _get(self, p):
+        n = int(floor(p / WIND_SCALE))
+        frac = (p - n * WIND_SCALE) / WIND_SCALE
+        l = self._rnd(n)
+        r = self._rnd(n + 1)
+        return r * frac + (1.0 - frac) * l
+
+    def get(self, p):
+        x, y = p
+        return (self._get(x) - self._get(y + 1000000)) * self.amount
+
+
+wind_x = Perlin(WIND_AMOUNT_X)
+wind_y = Perlin(WIND_AMOUNT_Y)
 
 
 def draw():
