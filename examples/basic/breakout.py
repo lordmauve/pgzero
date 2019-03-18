@@ -3,7 +3,7 @@ import colorsys
 
 WIDTH = 600
 HEIGHT = 800
-BALL_SIZE = 4
+BALL_SIZE = 10
 MARGIN = 50
 
 BRICKS_X = 10
@@ -25,7 +25,7 @@ def reset():
         for y in range(BRICKS_Y):
             brick = ZRect(
                 (x * BRICK_W + MARGIN, y * BRICK_H + MARGIN),
-                (BRICK_W, BRICK_H)
+                (BRICK_W - 1, BRICK_H - 1)
             )
             hue = (x + y) / BRICKS_X
             saturation = (y / BRICKS_Y) * 0.5 + 0.5
@@ -60,7 +60,7 @@ def draw():
         screen.draw.line(brick.topleft, brick.topright, brick.highlight)
 
     screen.draw.filled_rect(bat, 'pink')
-    screen.draw.filled_circle(ball.center, 4, 'white')
+    screen.draw.filled_circle(ball.center, BALL_SIZE // 2, 'white')
 
 
 def update():
@@ -105,8 +105,6 @@ def update_step():
             vx = random.uniform(-300, -50)
     else:
         for brick in bricks:
-            # There are faster ways to find the brick we are intersecting
-            # Left as an exercise for the reader
             if ball.colliderect(brick):
                 # Work out what side we collided on
                 dx = (ball.centerx - brick.centerx) / BRICK_W
