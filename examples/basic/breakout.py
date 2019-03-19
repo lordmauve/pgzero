@@ -1,5 +1,6 @@
 import random
 import colorsys
+from math import copysign
 
 WIDTH = 600
 HEIGHT = 800
@@ -17,6 +18,12 @@ bat = ZRect(WIDTH / 2, HEIGHT - 50, 80, 12)
 bricks = []
 
 
+def hsv_color(h, s, v):
+    """Return an RGB color from HSV."""
+    r, g, b = colorsys.hsv_to_rgb(h, s, v)
+    return r * 255, g * 255, b * 255
+
+
 def reset():
     """Reset bricks and ball."""
     # First, let's do bricks
@@ -29,18 +36,8 @@ def reset():
             )
             hue = (x + y) / BRICKS_X
             saturation = (y / BRICKS_Y) * 0.5 + 0.5
-            r, g, b = colorsys.hsv_to_rgb(
-                h=hue,
-                s=saturation,
-                v=0.8,
-            )
-            brick.color = r * 255, g * 255, b * 255
-            r, g, b = colorsys.hsv_to_rgb(
-                h=hue,
-                s=saturation * 0.7,
-                v=1.0,
-            )
-            brick.highlight = r * 255, g * 255, b * 255
+            brick.highlight = hsv_color(hue, saturation * 0.7, 1.0)
+            brick.color = hsv_color(hue, saturation, 0.8)
             bricks.append(brick)
 
     # Now reset the ball
@@ -68,10 +65,10 @@ def update():
     # is to run the update step several times per frame with tiny time steps.
     # This makes it more likely that collisions will be handled correctly.
     for _ in range(3):
-        update_step()
+        update_step(1 / 180)
 
 
-def update_step():
+def update_step(dt):
     x, y = ball.center
     vx, vy = ball.vel
 
@@ -80,8 +77,8 @@ def update_step():
         return
 
     # Update ball based on previous velocity
-    x += vx / 180
-    y += vy / 180
+    x += vx * dt
+    y += vy * dt
     ball.center = (x, y)
 
     # Check for and resolve collisions
@@ -98,23 +95,21 @@ def update_step():
 
     if ball.colliderect(bat):
         vy = -abs(vy)
-        # randomise the x velocity
-        if vx > 0:
-            vx = random.uniform(50, 300)
-        else:
-            vx = random.uniform(-300, -50)
+        # randomise the x velocity but keep the sign
+        vx = copysign(random.uniform(50, 300), vx)
     else:
-        for brick in bricks:
-            if ball.colliderect(brick):
-                # Work out what side we collided on
-                dx = (ball.centerx - brick.centerx) / BRICK_W
-                dy = (ball.centery - brick.centery) / BRICK_H
-                if abs(dx) > abs(dy):
-                    vx = abs(vx) if dx > 0 else -abs(vx)
-                else:
-                    vy = abs(vy) if dy > 0 else -abs(vy)
-                bricks.remove(brick)
-                break
+        # Find first collision
+        idx = ball.collidelist(bricks)
+        if idx != -1:
+            brick = bricks[idx]
+            # Work out what side we collided on
+            dx = (ball.centerx - brick.centerx) / BRICK_W
+            dy = (ball.centery - brick.centery) / BRICK_H
+            if abs(dx) > abs(dy):
+                vx = copysign(abs(vx), dx)
+            else:
+                vy = copysign(abs(vy), dy)
+            del bricks[idx]
 
     # Write back updated position and velocity
     ball.center = (x, y)
