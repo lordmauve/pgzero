@@ -1,5 +1,6 @@
 import random
 import colorsys
+from collections import deque
 from math import copysign
 
 WIDTH = 600
@@ -13,7 +14,7 @@ BRICK_W = (WIDTH - 2 * MARGIN) // BRICKS_X
 BRICK_H = 25
 
 ball = ZRect(WIDTH / 2, HEIGHT / 2, BALL_SIZE, BALL_SIZE)
-bat = ZRect(WIDTH / 2, HEIGHT - 50, 80, 12)
+bat = ZRect(WIDTH / 2, HEIGHT - 50, 120, 12)
 
 bricks = []
 
@@ -41,7 +42,7 @@ def reset():
             bricks.append(brick)
 
     # Now reset the ball
-    ball.center = (WIDTH / 2, HEIGHT / 2)
+    ball.center = (WIDTH / 2, HEIGHT / 3)
     ball.vel = (random.uniform(-200, 200), 400)
 
 
@@ -66,6 +67,7 @@ def update():
     # This makes it more likely that collisions will be handled correctly.
     for _ in range(3):
         update_step(1 / 180)
+    update_bat_vx()
 
 
 def update_step(dt):
@@ -95,8 +97,8 @@ def update_step(dt):
 
     if ball.colliderect(bat):
         vy = -abs(vy)
-        # randomise the x velocity but keep the sign
-        vx = copysign(random.uniform(50, 300), vx)
+        # Add some spin off the paddle
+        vx += -30 * bat.vx
     else:
         # Find first collision
         idx = ball.collidelist(bricks)
@@ -111,9 +113,25 @@ def update_step(dt):
                 vy = copysign(abs(vy), dy)
             del bricks[idx]
 
-    # Write back updated position and velocity
-    ball.center = (x, y)
     ball.vel = (vx, vy)
+
+
+# Keep bat vx history over 5 frames
+bat.recent_vxs = deque(maxlen=5)
+bat.vx = 0
+bat.prev_centerx = bat.centerx
+
+
+def update_bat_vx():
+    """Recalculate average bat vx."""
+    x = bat.centerx
+    dx = x - bat.prev_centerx
+    bat.prev_centerx = x
+
+    history = bat.recent_vxs
+    history.append(dx)
+    vx = sum(history) / len(history)
+    bat.vx = min(10, max(-10, vx))
 
 
 def on_mouse_move(pos):
