@@ -69,7 +69,7 @@ class ZRect:
         elif len(args) == 1:
             self.x, self.y, self.w, self.h = args[0]
         else:
-            raise TypeError("%s should be called with one, two or four arguments" % (cls.__name__))
+            raise TypeError("%s should be called with one, two or four arguments" % (self.__class__.__name__))
 
         self.rect = self
 
