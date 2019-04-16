@@ -5,7 +5,7 @@ WIDTH = 1000
 HEIGHT = 1000 * 9 // 16
 ACCEL = 1.0  # Warp factor per second
 DRAG = 0.71  # Fraction of speed per second
-TRAIL_LENGTH = 3
+TRAIL_LENGTH = 2
 MIN_WARP_FACTOR = 0.1
 BOUNDS = Rect(0, 0, WIDTH, HEIGHT)
 
@@ -35,8 +35,8 @@ class Star:
         vx, vy = self.vel
 
         return (
-            x - vx * warp_factor / 30,
-            y - vy * warp_factor / 30,
+            x - vx * warp_factor * TRAIL_LENGTH / 60,
+            y - vy * warp_factor * TRAIL_LENGTH / 60,
         )
 
 
@@ -87,7 +87,7 @@ def update(dt):
         # Turn the direction into position and velocity vectors
         dx = math.cos(angle)
         dy = math.sin(angle)
-        d = random.uniform(25, 100)
+        d = random.uniform(25 + TRAIL_LENGTH, 100)
         pos = centerx + dx * d, centery + dy * d
         vel = speed * dx, speed * dy
 
