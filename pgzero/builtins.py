@@ -3,6 +3,7 @@ from . import clock
 from . import music
 from . import tone
 from .actor import Actor
+from .storage import storage
 from .keyboard import keyboard
 from .animation import animate
 from .rect import Rect, ZRect
