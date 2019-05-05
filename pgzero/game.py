@@ -70,12 +70,13 @@ class PGZeroGame:
         w = getattr(mod, 'WIDTH', 800)
         h = getattr(mod, 'HEIGHT', 600)
         if w != self.width or h != self.height:
-            self.screen = pygame.display.set_mode((w, h), DISPLAY_FLAGS)
+            surface = pygame.display.set_mode((w, h), DISPLAY_FLAGS)
             if hasattr(self.mod, 'screen'):
-                self.mod.screen.surface = self.screen
+                self.mod.screen.surface = surface
             else:
-                self.mod.screen = pgzero.screen.Screen(self.screen)
-            screen = self.screen     # KILL ME
+                self.mod.screen = pgzero.screen.Screen(surface)
+            self.screen = self.mod.screen
+            screen = self.screen
             self.width = w
             self.height = h
 
