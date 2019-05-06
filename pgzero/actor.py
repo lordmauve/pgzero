@@ -45,10 +45,6 @@ SYMBOLIC_POSITIONS = set((
 POS_TOPLEFT = None
 ANCHOR_CENTER = None
 
-# Opacity constants.
-MIN_OPACITY = 0.0
-MAX_OPACITY = 1.0
-DEFAULT_OPACITY = MAX_OPACITY
 MAX_ALPHA = 255  # Based on pygame's max alpha.
 
 
@@ -94,18 +90,24 @@ def _set_opacity(actor, current_surface):
 
     alpha_img = pygame.Surface(current_surface.get_size(), pygame.SRCALPHA)
     alpha_img.fill((255, 255, 255, alpha))
-    alpha_img.blit(current_surface, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
+    alpha_img.blit(
+        current_surface,
+        (0, 0),
+        special_flags=pygame.BLEND_RGBA_MULT
+    )
     return alpha_img
 
 
 class Actor:
     EXPECTED_INIT_KWARGS = SYMBOLIC_POSITIONS
-    DELEGATED_ATTRIBUTES = [a for a in dir(rect.ZRect) if not a.startswith("_")]
+    DELEGATED_ATTRIBUTES = [
+        a for a in dir(rect.ZRect) if not a.startswith("_")
+    ]
 
     function_order = [_set_opacity, _set_angle]
     _anchor = _anchor_value = (0, 0)
     _angle = 0.0
-    _opacity = DEFAULT_OPACITY
+    _opacity = 1.0
 
     def _build_transformed_surf(self):
         cache_len = len(self._surface_cache)
@@ -155,8 +157,11 @@ class Actor:
         )
 
     def __dir__(self):
-        standard_attributes = [key for key in self.__dict__.keys()
-            if not key.startswith("_")]
+        standard_attributes = [
+            key
+            for key in self.__dict__.keys()
+            if not key.startswith("_")
+        ]
         return standard_attributes + self.__class__.DELEGATED_ATTRIBUTES
 
     def _handle_unexpected_kwargs(self, kwargs):
@@ -183,7 +188,10 @@ class Actor:
             # No positional information given, use sensible top-left default
             self.topleft = (0, 0)
         elif pos and symbolic_pos_args:
-            raise TypeError("'pos' argument cannot be mixed with 'topleft', 'topright' etc. argument.")
+            raise TypeError(
+                "'pos' argument cannot be mixed with 'topleft', "
+                "'topright' etc. argument."
+            )
         elif pos:
             self.pos = pos
         else:
@@ -191,9 +199,14 @@ class Actor:
 
     def _set_symbolic_pos(self, symbolic_pos_dict):
         if len(symbolic_pos_dict) == 0:
-            raise TypeError("No position-setting keyword arguments ('topleft', 'topright' etc) found.")
+            raise TypeError(
+                "No position-setting keyword arguments ('topleft', "
+                "'topright' etc) found."
+            )
         if len(symbolic_pos_dict) > 1:
-            raise TypeError("Only one 'topleft', 'topright' etc. argument is allowed.")
+            raise TypeError(
+                "Only one 'topleft', 'topright' etc. argument is allowed."
+            )
 
         setter_name, position = symbolic_pos_dict.popitem()
         setattr(self, setter_name, position)
@@ -234,9 +247,13 @@ class Actor:
     @angle.setter
     def angle(self, angle):
         self._angle = angle
-        w,h = self._orig_surf.get_size()
-        self.height = abs(w * sin(radians(angle))) + abs(h * cos(radians(angle)))
-        self.width = abs(w * cos(radians(angle))) + abs(h * sin(radians(angle)))
+        w, h = self._orig_surf.get_size()
+
+        ra = radians(angle)
+        sin_a = sin(ra)
+        cos_a = cos(ra)
+        self.height = abs(w * sin_a) + abs(h * cos_a)
+        self.width = abs(w * cos_a) + abs(h * sin_a)
         ax, ay = self._untransformed_anchor
         p = self.pos
         self._anchor = transform_anchor(ax, ay, w, h, angle)
@@ -260,7 +277,7 @@ class Actor:
     @opacity.setter
     def opacity(self, opacity):
         # Clamp the opacity to the allowable range.
-        self._opacity = min(MAX_OPACITY, max(MIN_OPACITY, opacity))
+        self._opacity = min(1.0, max(0.0, opacity))
         self._update_transform(_set_opacity)
 
     @property
