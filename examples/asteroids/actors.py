@@ -3,30 +3,9 @@ import random
 
 from pygame import transform
 from pygame.math import Vector2
-from pgzero.actor import Actor
 
 
-class Actor2(Actor):
-    def __init__(self, *args, **kwargs):
-        super(Actor2, self).__init__(*args, **kwargs)
-        self._angle = 0.0
-        self._orig_surf = self._surf
-
-    @property
-    def angle(self):
-        return self._angle
-
-    @angle.setter
-    def angle(self, angle):
-        self._angle = angle
-        pos = self.pos
-        self._surf = transform.rotate(self._orig_surf, angle)
-        self.width, self.height = self._surf.get_size()
-        self._calc_anchor()
-        self.pos = pos
-
-
-class Player(Actor2):
+class Player(Actor):
     def __init__(self, **kwargs):
         super(Player, self).__init__('player', **kwargs)
         self.thrust = False
@@ -66,7 +45,7 @@ class Player(Actor2):
         self.exact_pos = self.pos
 
 
-class Asteroid(Actor2):
+class Asteroid(Actor):
     INITIAL_MASS = 3
     ASTEROIDS = 3
 
