@@ -80,6 +80,11 @@ class Clock:
         self.events = []
         self._each_tick = []
 
+    def clear(self):
+        """Remove all handlers from this clock."""
+        self.events.clear()
+        self._each_tick.clear()
+
     def schedule(self, callback, delay):
         """Schedule callback to be called once, at `delay` seconds from now.
 

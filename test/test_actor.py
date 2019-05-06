@@ -10,10 +10,6 @@ TEST_MODULE = "pgzero.actor"
 TEST_DISP_W, TEST_DISP_H = (200, 100)
 
 
-pygame.init()
-pygame.display.set_mode((TEST_DISP_W, TEST_DISP_H))
-
-
 class ModuleTest(unittest.TestCase):
     def test_calculate_anchor_with_float(self):
         self.assertEqual(
@@ -37,7 +33,13 @@ class ModuleTest(unittest.TestCase):
 class ActorTest(unittest.TestCase):
     @classmethod
     def setUpClass(self):
+        pygame.init()
+        pygame.display.set_mode((TEST_DISP_W, TEST_DISP_H))
         set_root(__file__)
+
+    @classmethod
+    def tearDownClass(self):
+        pygame.display.quit()
 
     def test_sensible_init_defaults(self):
         a = Actor("alien")

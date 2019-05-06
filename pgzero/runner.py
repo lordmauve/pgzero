@@ -11,7 +11,7 @@ from types import ModuleType
 
 from .game import PGZeroGame, DISPLAY_FLAGS
 from . import loaders
-from . import builtins
+from . import clock
 
 
 # The base URL for Pygame Zero documentation
@@ -98,8 +98,12 @@ def main():
     if __debug__:
         warnings.simplefilter('default', DeprecationWarning)
     path = args.script
+    load_and_run(path, repl=args.repl)
 
-    with open(path) as f:
+
+def load_and_run(path, repl=False):
+    """Load and run the given Python file as the main PGZero game module."""
+    with open(path, 'rb') as f:
         src = f.read()
 
     code = compile(src, os.path.basename(path), 'exec', dont_inherit=True)
@@ -114,25 +118,39 @@ def main():
     # This disables the 'import pgzrun' module
     sys._pgzrun = True
 
-    prepare_mod(mod)
+    loaders.set_root(path)
+    prepare()
     exec(code, mod.__dict__)
-    run_mod(mod, repl=args.repl)
+
+    pygame.display.init()
+    try:
+        run_mod(mod, repl=repl)
+    finally:
+        # Clean some of the state we created, useful in testing
+        pygame.display.quit()
+        clock.clock.clear()
+        del sys.modules[name]
 
 
-def prepare_mod(mod):
-    """Prepare a module to run as a Pygame Zero program.
+def prepare():
+    """Prepare to execute the module code for Pygame Zero.
 
-    mod is a loaded module object.
+    When executing the module some things need to already exist:
 
-    This sets up things like screen, loaders and builtins, which need to be
-    set before the module globals are run.
+    * Our extra builtins need to be defined (by copying them into Python's
+      `builtins` module)
+    * A screen needs to be created (because we use convert_alpha() to convert
+      Sprite surfaces for blitting to the screen).
 
     """
-    loaders.set_root(mod.__file__)
+    # An icon needs to exist before the window is created.
     PGZeroGame.show_default_icon()
     pygame.display.set_mode((100, 100), DISPLAY_FLAGS)
+
+    # Copy pgzero builtins into system builtins
+    from . import builtins as pgzero_builtins
     import builtins as python_builtins
-    for k, v in builtins.__dict__.items():
+    for k, v in vars(pgzero_builtins).items():
         python_builtins.__dict__.setdefault(k, v)
 
 

@@ -5,17 +5,22 @@ import pygame.image
 from pgzero.screen import Screen
 from pgzero.loaders import set_root, images
 
-pygame.init()
-surf = pygame.display.set_mode((200, 100))
-
 
 class ScreenTest(unittest.TestCase):
     @classmethod
-    def setUpClass(self):
+    def setUpClass(cls):
+        """Initialise the display and set loaders to target the current dir."""
+        pygame.init()
+        cls.surf = pygame.display.set_mode((200, 100))
         set_root(__file__)
 
+    @classmethod
+    def tearDownClass(cls):
+        """Shut down the display."""
+        pygame.display.quit()
+
     def setUp(self):
-        self.screen = Screen(surf)
+        self.screen = Screen(self.surf)
         self.screen.clear()
 
     def assertImagesAlmostEqual(self, a, b):
@@ -29,7 +34,7 @@ class ScreenTest(unittest.TestCase):
     def test_blit_surf(self):
         """We can blit a surface to the screen."""
         self.screen.blit(images.alien, (0, 0))
-        self.assertImagesAlmostEqual(surf, images.expected_alien_blit)
+        self.assertImagesAlmostEqual(self.surf, images.expected_alien_blit)
 
     def test_blit_name(self):
         """screen.blit() accepts an image name instead of a Surface."""
