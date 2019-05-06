@@ -42,8 +42,10 @@ draw images to the screen ("blit" them).
 
         Fill the screen with a solid color.
 
-        If ``gcolor`` is given then fill with a gradient, from ``color`` at the
-        top of the screen to ``gcolor`` at the bottom.
+        .. versionadded:: 1.3
+
+            If ``gcolor`` is given then fill with a gradient, from ``color`` at
+            the top of the screen to ``gcolor`` at the bottom.
 
     .. method:: blit(image, (left, top))
 
