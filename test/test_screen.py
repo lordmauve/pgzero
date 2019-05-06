@@ -33,7 +33,7 @@ class ScreenTest(unittest.TestCase):
         comp_surf = pygame.surfarray.array3d(computed)
         exp_surf = pygame.surfarray.array3d(expected)
 
-        if np.allclose(comp_surf, exp_surf, atol=1):
+        if np.allclose(comp_surf, exp_surf, atol=2):
             return
 
         tmpdir = Path(tempfile.mkdtemp())
@@ -52,7 +52,10 @@ class ScreenTest(unittest.TestCase):
     def test_blit_name(self):
         """screen.blit() accepts an image name instead of a Surface."""
         self.screen.blit('alien', (0, 0))
-        self.assertImagesAlmostEqual(self.screen.surface, images.expected_alien_blit)
+        self.assertImagesAlmostEqual(
+            self.screen.surface,
+            images.expected_alien_blit
+        )
 
     def test_bounds(self):
         """test that the bounds method is present / works and that the return
@@ -70,6 +73,25 @@ class ScreenTest(unittest.TestCase):
         self.assertImagesAlmostEqual(
             self.screen.surface,
             images.expected_gradient
+        )
+
+    def test_wrapped_gradient_text(self):
+        """We can draw wrapped gradient text.
+
+        Relates to issue #165 https://github.com/lordmauve/pgzero/issues/165
+
+        """
+        self.screen.draw.text(
+            'gradient\ntext',
+            (0, 0),
+            fontname='eunomia_regular',
+            fontsize=18,
+            color='red',
+            gcolor='blue'
+        )
+        self.assertImagesAlmostEqual(
+            self.screen.surface,
+            images.expected_wrapped_gradient_text
         )
 
 

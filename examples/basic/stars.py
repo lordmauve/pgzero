@@ -8,6 +8,7 @@ DRAG = 0.71  # Fraction of speed per second
 TRAIL_LENGTH = 2
 MIN_WARP_FACTOR = 0.1
 BOUNDS = Rect(0, 0, WIDTH, HEIGHT)
+FONT = 'eunomia_regular'
 
 
 warp_factor = MIN_WARP_FACTOR
@@ -51,16 +52,20 @@ def draw():
 
     # Head-up-display
     screen.draw.text(
-        "||| Warp {:0.1f} |||".format(warp_factor),
+        "III Warp {:0.1f} III".format(warp_factor),
         fontsize=40,
+        fontname=FONT,
         midbottom=(WIDTH // 2, HEIGHT - 40),
         color=(180, 160, 0),
+        gcolor=(120, 100, 0),
     )
     screen.draw.text(
         "Hold SPACE to accelerate",
         fontsize=30,
+        fontname=FONT,
         midbottom=(WIDTH // 2, HEIGHT - 8),
         color=(90, 80, 0),
+        gcolor=(50, 40, 0),
     )
 
 

@@ -340,9 +340,9 @@ def getsurf(text, fontname=None, fontsize=None, sysfontname=None, bold=None, ita
                                   background).convert_alpha() for text in texts]
         if gcolor is not None:
             import numpy
-            m = numpy.clip(numpy.arange(
-                lsurfs[0].get_height()) * 2.0 / font.get_ascent() - 1.0, 0, 1)
             for lsurf in lsurfs:
+                m = numpy.clip(numpy.arange(
+                    lsurf.get_height()) * 2.0 / font.get_ascent() - 1.0, 0, 1)
                 array = pygame.surfarray.pixels3d(lsurf)
                 for j in (0, 1, 2):
                     array[:, :, j] = (
