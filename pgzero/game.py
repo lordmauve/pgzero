@@ -2,6 +2,7 @@ import sys
 import operator
 import time
 import asyncio
+import builtins
 
 import pygame
 import pgzero.clock
@@ -11,7 +12,6 @@ import pgzero.screen
 from . import constants
 
 
-screen = None
 DISPLAY_FLAGS = 0
 
 
@@ -55,7 +55,6 @@ class PGZeroGame:
         Return True if the dimensions of the screen changed.
 
         """
-        global screen
         changed = False
         mod = self.mod
 
@@ -74,8 +73,8 @@ class PGZeroGame:
             if hasattr(self.mod, 'screen'):
                 self.mod.screen.surface = self.screen
             else:
-                self.mod.screen = pgzero.screen.Screen(self.screen)
-            screen = self.screen     # KILL ME
+                screen = pgzero.screen.Screen(self.screen)
+                self.mod.screen = builtins.screen = screen
             self.width = w
             self.height = h
 
@@ -215,7 +214,7 @@ class PGZeroGame:
 
     def run(self):
         """Invoke the main loop, and then clean up."""
-        loop = asyncio.get_event_loop()
+        loop = asyncio.SelectorEventLoop()
         try:
             loop.run_until_complete(self.run_as_coroutine())
         finally:

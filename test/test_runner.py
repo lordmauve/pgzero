@@ -21,3 +21,9 @@ class RunnerTest(unittest.TestCase):
         clock.schedule_unique(sys.exit, 0.05)
         with self.assertRaises(SystemExit):
             load_and_run(str(game_tests / 'utf8.py'))
+
+    def test_import(self):
+        """Games can import other modules, which can acccess the builtins."""
+        clock.schedule_unique(sys.exit, 0.05)
+        with self.assertRaises(SystemExit):
+            load_and_run(str(game_tests / 'importing.py'))
