@@ -136,6 +136,17 @@ These will not work::
     my-cat.png
     sam's dog.png
 
+The resource loader caches loaded images and sounds. To clear the cache (for
+instance, if you are running into memory issues), use the `unload()` and
+`unload_all()` functions.
+
+Example::
+
+    cow = Actor('cow')
+    loader.images.unload('cow')  # clears the cache of cow.png
+    loader.images.unload_all()  # clears all cached image files
+
+
 Images
 ''''''
 
