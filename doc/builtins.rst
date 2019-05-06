@@ -583,6 +583,8 @@ Likewise -180 degrees == 180 degrees.
 Distance and angle to
 '''''''''''''''''''''
 
+.. versionadded:: 1.2
+
 Actors have convenient methods for calculating their distance or angle to other
 Actors or ``(x, y)`` coordinate pairs.
 
@@ -603,6 +605,40 @@ Actors or ``(x, y)`` coordinate pairs.
     * Left is 180 degrees.
     * Up is 90 degrees.
     * Down is -90 degrees.
+
+
+Transparency
+''''''''''''
+
+.. versionadded:: 1.3
+
+In some cases it is useful to make an Actor object partially transparent. This
+can be used to fade it in or out, or to indicate that it is "disabled".
+
+The ``.opacity`` attribute of an Actor controls how transparent or opaque it
+is.
+
+* When an actor is not at all transparent, we say it is "opaque" and it has
+  ``opacity`` of ``1.0``, and you can't see through it at all.
+* When an actor is completely transparent, it has an ``opacity`` of ``0.0``.
+  This will make it completely invisible.
+
+To make an actor that is half-transparent (like a ghost), you could write::
+
+    ghost = Actor('ghost')
+    ghost.opacity = 0.5
+
+This diagram shows the scale; the grey checkerboard is used to give the sense
+of transparency:
+
+.. image:: _static/opacity.svg
+    :alt: The opacity scale in Pygame Zero.
+
+.. tip::
+
+    The order in which you draw overlapping transparent objects still matters.
+    A ghost seen through a window looks slightly different to a window seen
+    through a ghost.
 
 
 The Keyboard
