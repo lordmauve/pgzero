@@ -217,8 +217,6 @@ text's color will be ``color`` at the top and ``gcolor`` at the bottom.
 Positioning of the gradient stops and orientation of the gradient are
 hard coded and cannot be specified.
 
-Requries ``pygame.surfarray`` module, which uses numpy or Numeric
-library.
 
 Alpha transparency
 ''''''''''''''''''
@@ -235,8 +233,6 @@ Keyword argument:
 In order to maximize reuse of cached transparent surfaces, the value of
 ``alpha`` is rounded.
 
-Requires ``pygame.surfarray`` module, which uses numpy or Numeric
-library.
 
 Anchored positioning
 ''''''''''''''''''''

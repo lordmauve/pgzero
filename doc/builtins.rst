@@ -38,9 +38,12 @@ draw images to the screen ("blit" them).
 
         Reset the screen to black.
 
-    .. method:: fill((red, green, blue))
+    .. method:: fill((red, green, blue), [gcolor=(r, g, b)])
 
         Fill the screen with a solid color.
+
+        If ``gcolor`` is given then fill with a gradient, from ``color`` at the
+        top of the screen to ``gcolor`` at the bottom.
 
     .. method:: blit(image, (left, top))
 

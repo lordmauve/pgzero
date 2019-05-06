@@ -1,6 +1,12 @@
 Changelog
 =========
 
+1.3 - unreleased
+----------------
+
+* New: screen.fill() now takes ``gcolor``, creating a vertical-linear gradient
+
+
 1.2 - 2018-02-24
 ----------------
 

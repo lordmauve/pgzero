@@ -1,5 +1,7 @@
+import numpy as np
 import pygame
 import pygame.draw
+
 from . import ptext
 from .rect import RECT_CLASSES, ZRect
 from . import loaders
@@ -80,9 +82,20 @@ class Screen:
         """Clear the screen to black."""
         self.fill((0, 0, 0))
 
-    def fill(self, color):
+    def fill(self, color, gcolor=None):
         """Fill the screen with a colour."""
-        self.surface.fill(make_color(color))
+        if gcolor:
+            start = make_color(color)
+            stop = make_color(gcolor)
+            pixs = pygame.surfarray.pixels3d(self.surface)
+            h = self.height
+
+            gradient = np.dstack(
+                [np.linspace(a, b, h) for a, b in zip(start, stop)][:3]
+            )
+            pixs[...] = gradient
+        else:
+            self.surface.fill(make_color(color))
 
     def blit(self, image, pos):
         """Draw a sprite onto the screen.

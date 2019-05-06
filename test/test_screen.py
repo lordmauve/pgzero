@@ -1,6 +1,11 @@
 import unittest
+import tempfile
+from pathlib import Path
+
+import numpy as np
 import pygame
 import pygame.image
+import pygame.surfarray
 
 from pgzero.screen import Screen
 from pgzero.loaders import set_root, images
@@ -23,13 +28,21 @@ class ScreenTest(unittest.TestCase):
         self.screen = Screen(self.surf)
         self.screen.clear()
 
-    def assertImagesAlmostEqual(self, a, b):
-        """Check that 2 images are equal besides 1 bit alpha blending rounding errors"""
-        zdata = zip(pygame.image.tostring(a, 'RGB'), pygame.image.tostring(b, 'RGB'))
+    def assertImagesAlmostEqual(self, computed, expected):
+        """Check that 2 images are approximately equal."""
+        comp_surf = pygame.surfarray.array3d(computed)
+        exp_surf = pygame.surfarray.array3d(expected)
 
-        for z in zdata:
-            if abs(z[0] - z[1]) > 1:
-                raise AssertionError("Images differ")
+        if np.allclose(comp_surf, exp_surf, atol=1):
+            return
+
+        tmpdir = Path(tempfile.mkdtemp())
+        pygame.image.save(computed, str(tmpdir / 'computed.png'))
+        pygame.image.save(expected, str(tmpdir / 'expected.png'))
+
+        raise AssertionError(
+            "Images differ; saved comparison images to {}".format(tmpdir)
+        )
 
     def test_blit_surf(self):
         """We can blit a surface to the screen."""
@@ -50,6 +63,14 @@ class ScreenTest(unittest.TestCase):
         self.assertEqual(b.top, 0)
         self.assertGreater(b.width, 0)
         self.assertGreater(b.height, 0)
+
+    def test_fill_gradient(self):
+        """We can fill the screen with a gradient."""
+        self.screen.fill('black', gcolor='blue')
+        self.assertImagesAlmostEqual(
+            self.screen.surface,
+            images.expected_gradient
+        )
 
 
 if __name__ == '__main__':
