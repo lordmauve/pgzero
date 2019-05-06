@@ -3,7 +3,7 @@ from pgzero import spellcheck
 
 
 class SuggestionTest(TestCase):
-    HOOKS = spellcheck.HOOKS
+    HOOKS = spellcheck.HOOKS + spellcheck.EVENT_HOOKS
 
     def assert_suggestions(self, w, candidates, expected):
         suggestions = spellcheck.suggest(w, candidates)
@@ -44,6 +44,7 @@ class LoggingSpellCheckResult:
     def __init__(self):
         self.warnings = []
         self.errors = []
+        self.bad_handlers = []
 
     def warn(self, msg, found, suggestion):
         self.warnings.append((found, suggestion))
@@ -51,11 +52,18 @@ class LoggingSpellCheckResult:
     def error(self, msg, found, suggestion):
         self.errors.append((found, suggestion))
 
+    def warn_event_handlers(self, typos, missing):
+        self.warnings.extend(typos)
+        self.bad_handlers.extend(missing)
+
     def has_error(self, found, suggestion):
         return (found, suggestion) in self.errors
 
     def has_warning(self, found, suggestion):
         return (found, suggestion) in self.warnings
+
+    def has_bad_handler(self, handler):
+        return handler in self.bad_handlers
 
     def get_report(self):
         lines = []
@@ -93,6 +101,15 @@ class SpellCheckerTest(TestCase):
             self.result.get_report()
         )
 
+    def assert_has_handler_warning(self, handler):
+        if self.result.has_bad_handler(handler):
+            return
+
+        raise AssertionError(
+            'Expected warning for hander %s\n' % handler +
+            self.result.get_report()
+        )
+
     def spellcheck(self, namespace):
         spellcheck.spellcheck(namespace, self.result)
 
@@ -125,3 +142,11 @@ class SpellCheckerTest(TestCase):
             'on_mouse_down': lambda buton: None,
         })
         self.assert_has_error('buton', 'button')
+
+    def test_invalid_event_handler(self):
+        self.spellcheck({
+            'on_key_press': lambda: None,
+            'onKeyPress': lambda: None
+        })
+        self.assert_has_handler_warning('on_key_press')
+        self.assert_has_handler_warning('onKeyPress')

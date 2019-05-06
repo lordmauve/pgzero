@@ -148,8 +148,9 @@ class Actor:
         if not unexpected_kwargs:
             return
 
-        for found, suggested in spellcheck.compare(
-                unexpected_kwargs, self.EXPECTED_INIT_KWARGS):
+        typos, _ = spellcheck.compare(
+            unexpected_kwargs, self.EXPECTED_INIT_KWARGS)
+        for found, suggested in typos:
             raise TypeError(
                 "Unexpected keyword argument '{}' (did you mean '{}'?)".format(
                     found, suggested))

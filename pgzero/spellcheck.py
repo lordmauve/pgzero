@@ -1,3 +1,5 @@
+import re
+
 from operator import itemgetter
 
 from .game import PGZeroGame, positional_parameters
@@ -60,25 +62,32 @@ def compare(have, want):
     This is a greedy algorithm that will take the best answer for each word
     in have in turn.
 
+    Returns (typos with suggestions, unrecognised functions)
     """
     want = set(want)
     have = set(have)
     matched = want & have
     want -= matched
     have -= matched
+    typos = []
     for w in have:
         suggestions = suggest(w, want)
         if suggestions:
             s = suggestions[0]
-            yield w, s
+            typos.append((w, s))
             want.discard(s)
+    have -= set(w for w, s in typos)
+    return typos, have
 
 
 # The list of hooks we support
+
+EVENT_HOOKS = list(PGZeroGame.EVENT_HANDLERS.values())
+
 HOOKS = [
     'draw',
     'update',
-] + list(PGZeroGame.EVENT_HANDLERS.values())
+]
 
 
 # The list of magic module-level constants
@@ -116,6 +125,18 @@ class SpellCheckResult:
             suggestion=suggestion
         ))
 
+    def warn_event_handlers(self, typos, missing):
+        if not typos or missing:
+            return
+        print(
+            "Warning: Found some 'on' functions that are not "
+            "valid event handlers.")
+        for found, suggestion in typos:
+            print("    {found} (did you mean {suggestion}?)".format(
+                found=found, suggestion=suggestion))
+        for f in missing_hooks:
+            print("   ", f)
+
     def error(self, msg, found, suggestion):
         raise InvalidParameter(msg.format(
             found=found,
@@ -138,14 +159,21 @@ def spellcheck(namespace, result=SpellCheckResult()):
         elif isinstance(val, (str, int)):
             consts.append(name)
 
-    for found, suggestion in compare(funcs, HOOKS):
+    typos, _ = compare(funcs, HOOKS)
+    for found, suggestion in typos:
         result.warn(
             "Warning: found function named {found}: "
             "did you mean {suggestion}?",
             found, suggestion
         )
 
-    for found, suggestion in compare(consts, CONSTS):
+    typos, missing = compare(funcs, EVENT_HOOKS)
+    maybe_hook = re.compile("on[A-Z_]")
+    missing_hooks = [f for f in missing if re.match(maybe_hook, f)]
+    result.warn_event_handlers(typos, missing_hooks)
+
+    typos, _ = compare(consts, CONSTS)
+    for found, suggestion in typos:
         result.warn(
             "Warning: found constant named {found}: "
             "did you mean {suggestion}?",
