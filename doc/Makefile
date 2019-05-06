@@ -52,7 +52,7 @@ clean:
 	rm -rf $(BUILDDIR)/*
 
 plots:
-	cd ..; python update_tweener_plots.py
+	@-/bin/true && (cd ..; python update_tweener_plots.py) || echo "WARNING: Could not build images; reusing cached files"
 
 html: plots
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
