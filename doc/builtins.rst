@@ -607,6 +607,8 @@ Actors or ``(x, y)`` coordinate pairs.
     * Down is -90 degrees.
 
 
+.. _transparency:
+
 Transparency
 ''''''''''''
 

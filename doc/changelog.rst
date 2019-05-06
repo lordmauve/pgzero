@@ -4,7 +4,11 @@ Changelog
 1.3 - unreleased
 ----------------
 
+* New: :ref:`Actors can be made transparent <transparency>` by assigning to
+  ``actor.opacity``.
 * New: screen.fill() now takes ``gcolor``, creating a vertical-linear gradient
+* New: a :doc:`REPL <repl>` has been added, which allows exploring a game's
+  state while it is running.
 
 
 1.2 - 2018-02-24

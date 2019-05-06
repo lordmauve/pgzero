@@ -265,11 +265,11 @@ class Actor:
         """Get/set the current opacity value.
 
         The allowable range for opacity is any number between and including
-        0.0 and 1.0 (i.e. [0.0, 1.0]). Values outside of this will be clamped
-        to the range.
+        0.0 and 1.0. Values outside of this will be clamped to the range.
 
-        0.0 makes the image completely transparent (i.e. invisible).
-        1.0 makes the image completely opaque (i.e. fully viewable).
+        * 0.0 makes the image completely transparent (i.e. invisible).
+        * 1.0 makes the image completely opaque (i.e. fully viewable).
+
         Values between 0.0 and 1.0 will give varying levels of transparency.
         """
         return self._opacity
