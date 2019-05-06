@@ -701,27 +701,27 @@ screen to the position ``(100, 100)``::
 
 The tween argument can be one of the following:
 
-+--------------------+------------------------------------------------------+
-| 'linear'           | Animate at a constant speed from start to finish     |
-+--------------------+------------------------------------------------------+
-| 'accelerate'       | Start slower and accelerate to finish                |
-+--------------------+------------------------------------------------------+
-| 'decelerate'       | Start fast and decelerate to finish                  |
-+--------------------+------------------------------------------------------+
-| 'accel_decel'      | Accelerate to mid point and decelerate to finish     |
-+--------------------+------------------------------------------------------+
-| 'in_elastic'       | Give a little wobble at the end                      |
-+--------------------+------------------------------------------------------+
-| 'out_elastic'      | Have a little wobble at the start                    |
-+--------------------+------------------------------------------------------+
-| 'in_out_elastic'   | Have a wobble at both ends                           |
-+--------------------+------------------------------------------------------+
-| 'bounce_end'       | Accelerate to the finish and bounce there            |
-+--------------------+------------------------------------------------------+
-| 'bounce_start'     | Bounce at the start                                  |
-+--------------------+------------------------------------------------------+
-| 'bounce_start_end' | Bounce at both ends                                  |
-+--------------------+------------------------------------------------------+
++--------------------+------------------------------------------------------+----------------------------------------+
+| 'linear'           | Animate at a constant speed from start to finish     | .. image:: images/linear.png           |
++--------------------+------------------------------------------------------+----------------------------------------+
+| 'accelerate'       | Start slower and accelerate to finish                | .. image:: images/accelerate.png       |
++--------------------+------------------------------------------------------+----------------------------------------+
+| 'decelerate'       | Start fast and decelerate to finish                  | .. image:: images/decelerate.png       |
++--------------------+------------------------------------------------------+----------------------------------------+
+| 'accel_decel'      | Accelerate to mid point and decelerate to finish     | .. image:: images/accel_decel.png      | 
++--------------------+------------------------------------------------------+----------------------------------------+
+| 'in_elastic'       | Give a little wobble at the end                      | .. image:: images/in_elastic.png       |
++--------------------+------------------------------------------------------+----------------------------------------+
+| 'out_elastic'      | Have a little wobble at the start                    | .. image:: images/out_elastic.png      |
++--------------------+------------------------------------------------------+----------------------------------------+
+| 'in_out_elastic'   | Have a wobble at both ends                           | .. image:: images/in_out_elastic.png   |
++--------------------+------------------------------------------------------+----------------------------------------+
+| 'bounce_end'       | Accelerate to the finish and bounce there            | .. image:: images/bounce_end.png       |
++--------------------+------------------------------------------------------+----------------------------------------+
+| 'bounce_start'     | Bounce at the start                                  | .. image:: images/bounce_start.png     |
++--------------------+------------------------------------------------------+----------------------------------------+
+| 'bounce_start_end' | Bounce at both ends                                  | .. image:: images/bounce_start_end.png |
++--------------------+------------------------------------------------------+----------------------------------------+
 
 The ``animate()`` function returns an ``Animation`` instance:
 
