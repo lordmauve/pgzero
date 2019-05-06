@@ -12,6 +12,7 @@ import pgzero.screen
 from . import constants
 
 
+screen = None  # This global surface is what actors draw to
 DISPLAY_FLAGS = 0
 
 
@@ -55,6 +56,7 @@ class PGZeroGame:
         Return True if the dimensions of the screen changed.
 
         """
+        global screen
         changed = False
         mod = self.mod
 

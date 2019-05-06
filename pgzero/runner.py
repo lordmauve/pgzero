@@ -102,7 +102,12 @@ def main():
 
 
 def load_and_run(path, repl=False):
-    """Load and run the given Python file as the main PGZero game module."""
+    """Load and run the given Python file as the main PGZero game module.
+
+    Note that the 'import pgzrun' IDE mode doesn't pass through this entry
+    point, as the module is already loaded.
+
+    """
     with open(path, 'rb') as f:
         src = f.read()
 
@@ -118,8 +123,7 @@ def load_and_run(path, repl=False):
     # This disables the 'import pgzrun' module
     sys._pgzrun = True
 
-    loaders.set_root(path)
-    prepare()
+    prepare_mod(mod)
     exec(code, mod.__dict__)
 
     pygame.display.init()
@@ -132,8 +136,11 @@ def load_and_run(path, repl=False):
         del sys.modules[name]
 
 
-def prepare():
+def prepare_mod(mod):
     """Prepare to execute the module code for Pygame Zero.
+
+    To allow the module to load assets, we configure the loader path to
+    load relative to the module's __file__ path.
 
     When executing the module some things need to already exist:
 
@@ -143,6 +150,8 @@ def prepare():
       Sprite surfaces for blitting to the screen).
 
     """
+    loaders.set_root(mod.__file__)
+
     # An icon needs to exist before the window is created.
     PGZeroGame.show_default_icon()
     pygame.display.set_mode((100, 100), DISPLAY_FLAGS)

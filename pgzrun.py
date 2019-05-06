@@ -9,7 +9,6 @@ __main__).
 
 """
 import sys
-import os
 from pgzero.runner import prepare_mod, run_mod
 
 
