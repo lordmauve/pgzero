@@ -120,7 +120,7 @@ Let's set the alien off-screen; change the ``alien.pos`` line to read::
     alien.topright = 0, 10
 
 Note how you can assign to ``topright`` to move the alien actor by its
-top-right corner. If the right-hand edge of the alien is at ``0``, the the
+top-right corner. If the right-hand edge of the alien is at ``0``, the
 alien is just offscreen to the left.  Now let's make it move. Add the following
 code to the bottom of the file::
 
@@ -134,8 +134,9 @@ alien a small number of pixels every frame will cause it to slide across the
 screen. Once it slides off the right-hand side of the screen, we reset it back
 to the left.
 
-Your functions ``draw()`` and ``update()`` work in similar ways but are designed for two different purposes.
-The ``draw()`` function draws the current position of the alien while the ``update()`` function is used to show the alien
+Your functions ``draw()`` and ``update()`` work in similar ways but are
+designed for two different purposes.  The ``draw()`` function draws the current
+position of the alien while the ``update()`` function is used to show the alien
 moving on the screen.
 
 
