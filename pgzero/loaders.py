@@ -139,6 +139,14 @@ class ResourceLoader:
         res = self._cache[key] = self._load(p, *args, **kwargs)
         return res
 
+    def unload(self, name, *args, **kwargs):
+        key = self.cache_key(name, args, kwargs)
+        if key in self._cache:
+            del self._cache[key]
+
+    def unload_all(self):
+        self._cache.clear()
+
     def __getattr__(self, name):
         p = os.path.join(self._root(), name)
         if os.path.isdir(p):

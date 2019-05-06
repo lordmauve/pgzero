@@ -352,3 +352,6 @@ class Actor:
         dx = tx - myx
         dy = ty - myy
         return sqrt(dx * dx + dy * dy)
+
+    def unload_image(self):
+        loaders.images.unload(self._image_name)
