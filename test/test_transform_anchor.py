@@ -1,8 +1,15 @@
 from math import sin, cos, radians
 from unittest import TestCase
-from pgzero.actor import transform_anchor
+from pgzero.actor import BoundingBox
 
 root2 = 2 ** 0.5
+
+
+def transform_anchor(ax, ay, w, h, angle):
+    """Transform anchor based upon a rotation of a surface of size w x h."""
+    box = BoundingBox(w, h, (ax, ay))
+    box.rotate(angle)
+    return box.anchor
 
 
 def assertVecEqual(a, b, decimal_places=7):

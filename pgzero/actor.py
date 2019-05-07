@@ -48,29 +48,40 @@ ANCHOR_CENTER = None
 MAX_ALPHA = 255  # Based on pygame's max alpha.
 
 
-def transform_anchor(ax, ay, w, h, angle):
-    """Transform anchor based upon a rotation of a surface of size w x h."""
-    theta = -radians(angle)
+class BoundingBox:
+    def __init__(self, width, height, anchor):
+        self.width = width
+        self.height = height
+        self.anchor = anchor
 
-    sintheta = sin(theta)
-    costheta = cos(theta)
+    def rotate(self, angle):
+        """Rotate the box and calculate the new height, width and anchor."""
+        theta = -radians(angle)
+        w, h = self.width, self.height
+        ax, ay = self.anchor
 
-    # Dims of the transformed rect
-    tw = abs(w * costheta) + abs(h * sintheta)
-    th = abs(w * sintheta) + abs(h * costheta)
+        sintheta = sin(theta)
+        costheta = cos(theta)
 
-    # Offset of the anchor from the center
-    cax = ax - w * 0.5
-    cay = ay - h * 0.5
+        # Dims of the transformed rect
+        tw = abs(w * costheta) + abs(h * sintheta)
+        th = abs(w * sintheta) + abs(h * costheta)
 
-    # Rotated offset of the anchor from the center
-    rax = cax * costheta - cay * sintheta
-    ray = cax * sintheta + cay * costheta
+        # Offset of the anchor from the center
+        cax = ax - w * 0.5
+        cay = ay - h * 0.5
 
-    return (
-        tw * 0.5 + rax,
-        th * 0.5 + ray
-    )
+        # Rotated offset of the anchor from the center
+        rax = cax * costheta - cay * sintheta
+        ray = cax * sintheta + cay * costheta
+
+        # Update the bounding box
+        self.width = tw
+        self.height = th
+        self.anchor = (
+            tw * 0.5 + rax,
+            th * 0.5 + ray
+        )
 
 
 def _set_angle(actor, current_surface):
@@ -125,9 +136,10 @@ class Actor:
         self._handle_unexpected_kwargs(kwargs)
 
         self._surface_cache = []
-        self.__dict__["_rect"] = rect.ZRect((0, 0), (0, 0))
-        # Initialise it at (0, 0) for size (0, 0).
+
+        # Initialise rect at (0, 0) for size (0, 0).
         # We'll move it to the right place and resize it later
+        self.__dict__["_rect"] = rect.ZRect((0, 0), (0, 0))
 
         self.image = image
         self._init_position(pos, anchor, **kwargs)
@@ -227,18 +239,29 @@ class Actor:
     @anchor.setter
     def anchor(self, val):
         self._anchor_value = val
-        self._calc_anchor()
+        self._update_orig_anchor()
+        self._update_box()
 
-    def _calc_anchor(self):
+    def _update_orig_anchor(self):
         ax, ay = self._anchor_value
-        ow, oh = self._orig_surf.get_size()
-        ax = calculate_anchor(ax, 'x', ow)
-        ay = calculate_anchor(ay, 'y', oh)
-        self._untransformed_anchor = ax, ay
-        if self._angle == 0.0:
-            self._anchor = self._untransformed_anchor
-        else:
-            self._anchor = transform_anchor(ax, ay, ow, oh, self._angle)
+        ax = calculate_anchor(ax, 'x', self._orig_width)
+        ay = calculate_anchor(ay, 'y', self._orig_height)
+        self._orig_anchor = ax, ay
+
+    def _update_box(self):
+        b = BoundingBox(
+                self._orig_width,
+                self._orig_height,
+                self._orig_anchor)
+        if self._angle != 0.0:
+            b.rotate(self._angle)
+        self._box = b
+        self.height = self._box.height
+        self.width = self._box.width
+        # Now move the topleft so that the anchor stays in position
+        p = self.pos
+        self._anchor = self._box.anchor
+        self.pos = p
 
     @property
     def angle(self):
@@ -247,17 +270,7 @@ class Actor:
     @angle.setter
     def angle(self, angle):
         self._angle = angle
-        w, h = self._orig_surf.get_size()
-
-        ra = radians(angle)
-        sin_a = sin(ra)
-        cos_a = cos(ra)
-        self.height = abs(w * sin_a) + abs(h * cos_a)
-        self.width = abs(w * cos_a) + abs(h * sin_a)
-        ax, ay = self._untransformed_anchor
-        p = self.pos
-        self._anchor = transform_anchor(ax, ay, w, h, angle)
-        self.pos = p
+        self._update_box()
         self._update_transform(_set_angle)
 
     @property
@@ -319,13 +332,13 @@ class Actor:
         self._image_name = image
         self._orig_surf = loaders.images.load(image)
         self._surface_cache.clear()  # Clear out old image's cache.
-        self._update_pos()
+        self._update_orig()
 
-    def _update_pos(self):
-        p = self.pos
-        self.width, self.height = self._orig_surf.get_size()
-        self._calc_anchor()
-        self.pos = p
+    def _update_orig(self):
+        """Set original properties based on the image dimensions."""
+        self._orig_width, self._orig_height = self._orig_surf.get_size()
+        self._update_orig_anchor()
+        self._update_box()
 
     def draw(self):
         s = self._build_transformed_surf()
