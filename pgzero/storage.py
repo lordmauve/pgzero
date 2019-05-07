@@ -49,6 +49,7 @@ class Storage(dict):
 
     def __init__(self, filename=None):
         super().__init__()
+        self.loaded = False
         self._save_file = filename
         self.storages.append(self)
 
@@ -113,9 +114,12 @@ class Storage(dict):
             )
         else:
             self.update(data)
+            self.loaded = True
 
     def save(self):
         """Save data to disk."""
+        if not self and not self.loaded:
+            return
         try:
             data = json.dumps(self)
         except TypeError:
