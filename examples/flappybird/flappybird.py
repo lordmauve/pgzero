@@ -1,6 +1,7 @@
 import pgzrun
 import random
 
+
 TITLE = 'Flappy Bird'
 WIDTH = 400
 HEIGHT = 708
@@ -15,6 +16,8 @@ bird = Actor('bird1', (75, 200))
 bird.dead = False
 bird.score = 0
 bird.vy = 0
+
+storage.setdefault('highscore', 0)
 
 
 def reset_pipes():
@@ -33,7 +36,10 @@ def update_pipes():
     pipe_bottom.left -= SPEED
     if pipe_top.right < 0:
         reset_pipes()
-        bird.score += 1
+        if not bird.dead:
+            bird.score += 1
+            if bird.score > storage['highscore']:
+                storage['highscore'] = bird.score
 
 
 def update_bird():
@@ -80,6 +86,13 @@ def draw():
         color='white',
         midtop=(WIDTH // 2, 10),
         fontsize=70,
+        shadow=(1, 1)
+    )
+    screen.draw.text(
+        "Best: {}".format(storage['highscore']),
+        color=(200, 170, 0),
+        midbottom=(WIDTH // 2, HEIGHT - 10),
+        fontsize=30,
         shadow=(1, 1)
     )
 
