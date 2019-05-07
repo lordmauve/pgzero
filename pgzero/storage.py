@@ -1,6 +1,7 @@
 import json
 import os
 import platform
+from hashlib import sha1
 
 
 __all__ = ['StorageCorruptionException', 'JSONEncodingException', 'Storage']
@@ -14,33 +15,90 @@ class JSONEncodingException(Exception):
     """The data in the storage is corrupted."""
 
 
-class Storage(dict):
-    """Behaves like a dictionary with a few extra functions.
+def _get_platform_pgzero_path():
+    r"""Get the storage directory for pgzero save data.
 
-    It's possible to load/save the data to disk.
+    Under Windows, return %APPDATA%\pgzero. Under Linux/MacOS, return
+    ~/.config/pgzero/saves.
 
-    The name of the file will be the script's name hashed.
-
-    NOTE: If two scripts have the same name, they will load/save from/to
-    the same file.
     """
+    if platform.system() == 'Windows':
+        try:
+            appdata = os.environ['APPDATA']
+        except KeyError:
+            raise KeyError(
+                "Couldn't find the AppData directory for Pygame Zero save "
+                "data. Please set the %APPDATA% environment variable."
+            )
+        return os.path.join(appdata, 'pgzero')
+    return os.path.expanduser(os.path.join('~', '.config/pgzero/saves'))
 
-    path = ''
 
-    def __init__(self):
+class Storage(dict):
+    """Behaves like a dictionary that serialises itself to disk.
+
+    The name of the file will be based on the basename of the script plus
+    a hash of the script's path, ensuring that each script on the filesystem
+    has a unique save file.
+
+    """
+    STORAGE_DIR = _get_platform_pgzero_path()
+
+    # Keep a reference to all defined storages
+    storages = []
+
+    def __init__(self, filename=None):
         super().__init__()
-
-        storage_path = self._get_platform_pgzero_path()
-        if not os.path.exists(storage_path):
-            os.makedirs(storage_path)
+        self._save_file = filename
+        self.storages.append(self)
 
     @classmethod
-    def set_app_hash(cls, name):
+    def save_all(cls):
+        """Save all instances of Storage."""
+        for storage in cls.storages:
+            storage.save()
+
+    @classmethod
+    def _ensure_save_path(cls):
+        """Ensure that the directory for all save game data exists."""
         storage_path = cls._get_platform_pgzero_path()
-        cls.path = os.path.join(storage_path, '{}.json'.format(name))
+        try:
+            os.makedirs(storage_path)
+        except IsADirectoryError:
+            pass
+
+    def _set_filename_from_path(self, file_path):
+        """Set the path to save to from the given filename.
+
+        We include the basename of the game script, to help with identifying
+        the save data, as well as the sha1 hash of the full path of the file on
+        disk, to ensure that every separate game has its own storage.
+
+        """
+        if not os.path.isabs(file_path):
+            file_path = os.path.abspath(file_path)
+
+        fn_hash = sha1(file_path.encode('utf-8')).hexdigest()
+        base, _ = os.path.splitext(os.path.basename(file_path))
+        self._save_file = '{}-{}.json'.format(base, fn_hash)
+        self.load()
+
+    @property
+    def path(self):
+        """Get the path for data data."""
+        if self._save_file is None:
+            raise ValueError(
+                "Cannot save/load storage as no filename is set."
+            )
+        return os.path.join(self.STORAGE_DIR, self._save_file)
 
     def load(self):
-        """Load data from disk."""
+        """Load data into the storage from disk.
+
+        This replaces all previous contents of the storage. If there is no save
+        file found then the storage will be empty.
+
+        """
         self.clear()
 
         try:
@@ -65,6 +123,9 @@ class Storage(dict):
                 "{} - type {}".format(*item)
                 for item in self._get_json_error_keys(self)
             ]
+            if not msgs:
+                # Didn't find an explanation, so let original error propagate
+                raise
             raise JSONEncodingException(
                 "The following storage entries cannot be stored, because "
                 "they are not JSON serializable types:\n{}\n\n"
@@ -74,8 +135,10 @@ class Storage(dict):
                 )
             )
         else:
-            with open(self.path, 'w+') as f:
+            path = self.path
+            with open(path, 'w+') as f:
                 f.write(data)
+            print("Saved storage to", path)
 
     # Constants for use with isinstance in _get_json_error_keys()
     JSON_PRIMITIVES = (float, int, str, bool, type(None))
@@ -86,10 +149,12 @@ class Storage(dict):
     def _get_json_error_keys(cls, obj, json_path='storage'):
         """Identify the paths with the storage which failed to be JSON encoded.
 
-        Return an iterable of pairs (path, typename).
+        Return an iterable of message strings.
 
         """
         if isinstance(obj, dict):
+            # TODO: also check/report that k is a string, as only strings are
+            # valid as object keys in JSON.
             for k, v in obj.items():
                 if isinstance(v, cls.JSON_PRIMITIVES):
                     continue
@@ -115,18 +180,6 @@ class Storage(dict):
             else:
                 typename = t.__qualname__
             yield json_path, typename
-
-    @staticmethod
-    def _get_platform_pgzero_path():
-        r"""Get the storage directory for pgzero save data.
-
-        Under Windows, return %APPDATA%\pgzero. Under Linux/MacOS, return
-        ~/.config/pgzero/saves.
-
-        """
-        if platform.system() == 'Windows':
-            return os.path.join(os.environ['APPDATA'], 'pgzero')
-        return os.path.expanduser(os.path.join('~', '.config/pgzero/saves'))
 
 
 storage = Storage()

@@ -5,4 +5,4 @@ use 'pgzrun' to run the game file.
 
 """
 
-__version__ = '1.2'
+__version__ = '1.3.dev0'

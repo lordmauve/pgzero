@@ -13,7 +13,7 @@ from .game import PGZeroGame, DISPLAY_FLAGS
 from . import loaders
 from . import clock
 from . import builtins
-from .storage import Storage
+from . import storage
 
 
 # The base URL for Pygame Zero documentation
@@ -152,8 +152,7 @@ def prepare_mod(mod):
       Sprite surfaces for blitting to the screen).
 
     """
-    fn_hash = hash(mod.__file__) % ((sys.maxsize + 1) * 2)
-    Storage.set_app_hash(format(fn_hash, 'x'))
+    storage.storage._set_filename_from_path(mod.__file__)
     loaders.set_root(mod.__file__)
 
     # An icon needs to exist before the window is created.
@@ -197,29 +196,32 @@ def run_mod(mod, repl=False):
     If `repl` is True, also run a REPL to interact with the module.
 
     """
-    game = PGZeroGame(mod)
-    if repl:
-        import asyncio
-        from ptpython.repl import embed
-        loop = asyncio.get_event_loop()
+    try:
+        game = PGZeroGame(mod)
+        if repl:
+            import asyncio
+            from ptpython.repl import embed
+            loop = asyncio.get_event_loop()
 
-        # Make sure the game runs
-        # NB. if the game exits, the REPL will keep running, which allows
-        # inspecting final state
-        game_task = loop.create_task(game.run_as_coroutine())
+            # Make sure the game runs
+            # NB. if the game exits, the REPL will keep running, which allows
+            # inspecting final state
+            game_task = loop.create_task(game.run_as_coroutine())
 
-        # Wait for the REPL to exit
-        loop.run_until_complete(embed(
-            globals=vars(mod),
-            return_asyncio_coroutine=True,
-            patch_stdout=True,
-            title="Pygame Zero REPL",
-            configure=configure_repl,
-        ))
+            # Wait for the REPL to exit
+            loop.run_until_complete(embed(
+                globals=vars(mod),
+                return_asyncio_coroutine=True,
+                patch_stdout=True,
+                title="Pygame Zero REPL",
+                configure=configure_repl,
+            ))
 
-        # Ask game loop to shut down (if it has not) and wait for it
-        if game.running:
-            pygame.event.post(pygame.event.Event(pygame.QUIT))
-            loop.run_until_complete(game_task)
-    else:
-        game.run()
+            # Ask game loop to shut down (if it has not) and wait for it
+            if game.running:
+                pygame.event.post(pygame.event.Event(pygame.QUIT))
+                loop.run_until_complete(game_task)
+        else:
+            game.run()
+    finally:
+        storage.Storage.save_all()

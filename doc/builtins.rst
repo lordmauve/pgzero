@@ -719,7 +719,7 @@ The tween argument can be one of the following:
 +--------------------+------------------------------------------------------+----------------------------------------+
 | 'decelerate'       | Start fast and decelerate to finish                  | .. image:: images/decelerate.png       |
 +--------------------+------------------------------------------------------+----------------------------------------+
-| 'accel_decel'      | Accelerate to mid point and decelerate to finish     | .. image:: images/accel_decel.png      | 
+| 'accel_decel'      | Accelerate to mid point and decelerate to finish     | .. image:: images/accel_decel.png      |
 +--------------------+------------------------------------------------------+----------------------------------------+
 | 'in_elastic'       | Give a little wobble at the end                      | .. image:: images/in_elastic.png       |
 +--------------------+------------------------------------------------------+----------------------------------------+
@@ -806,55 +806,96 @@ This could be used in a Pygame Zero program like this::
 Data Storage
 ------------
 
-The ``storage`` object behaves just like a dictionary but has two additional methods to
-allow to save/load the data to/from the disk.
+The ``storage`` object behaves just like a Python dictionary but its contents
+are preserved across game sessions. The values you assign to storage will be
+saved as JSON_, which means you can only store certain types of objects in it:
+``list``/``tuple``, ``dict``, ``str``, ``float``/``int``, ``bool``, and
+``None``.
 
-Because it's a dictionary-like object, it supports all operations a dictionary does.
-For example, you can update the storage with another dictionary, like so::
+.. _JSON: https://en.wikipedia.org/wiki/JSON
 
-    my_data = {'player_turn': 1, 'level': 10}
-    storage.update(my_data)
+The ``storage`` for a game is initially empty. Your code will need to handle
+the case that values are loaded as well as the case that no values are found.
 
-On windows the data is saved under ``%APPDATA%/pgzero/saves/`` and on Linux/MacOS under ``~/.config/pgzero/saves/``.
+A tip is to use ``setdefault()``, which inserts a default if there is none::
 
-The saved files will be named after their module name.
+    storage.setdefault('highscore', 0)
 
-**NOTE:** Make sure your scripts have different names, otherwise they will be picking each other data.
+Now, ``storage['highscore']`` will contain a value - ``0`` if there was no
+value loaded, or the loaded value otherwise. You could add all of your
+``setdefault`` lines towards the top of your game, before anything else looks
+at ``storage``::
 
-.. class:: Storage
+    storage.setdefault('level', 1)
+    storage.setdefault('player_name', 'Anonymous')
+    storage.setdefault('inventory', [])
+
+Now, during gameplay we can update some values::
+
+    if player.colliderect(mushroom):
+        score += 5
+        if score > storage['highscore']:
+            storage['highscore'] = score
+
+You can read them back at any time::
+
+    def draw():
+        ...
+        screen.draw.text('Highscore: ' + storage['highscore'], ...)
+
+...and of course, they'll be preserved when the game next launches.
+
+These are some of the most useful methods of ``storage``:
+
+.. class:: Storage(dict)
+
+    .. method:: storage[key] = value
+
+        Set a value in the storage.
+
+    .. method:: storage[key]
+
+        Get a value from the storage. Raise KeyError if there is no such key
+        in the storage.
+
+    .. method:: get(key, default=None)
+
+        Get a value from the storage. If there is no such key, return default,
+        or None if no default was given.
+
+    .. method:: clear()
+
+        Remove all stored values. Use this if you get into a bad state.
+
+    .. method:: setdefault(key, default)
+
+        Insert a default value into the storage, only if no value already
+        exists for this key.
 
     .. method:: save()
 
-        Saves the data to disk.
+        Saves the data to disk now. You don't usually need to call this, unless
+        you're planning on using ``load()`` to reload a checkpoint, for
+        example.
 
     .. method:: load()
 
-        Loads the data from disk.
+        Reload the contents of the storage with data from the save file. This
+        will replace any existing data in the storage.
 
-Example of usage::
+    .. attribute:: path
 
-    # Setting some values
-    storage['my_score'] = 500
-    storage['level'] = 1
-
-    # You can have nested lists and dictionaries
-    storage['high_scores'] = []
-    storage['high_scores'].append(10)
-    storage['high_scores'].append(12)
-    storage['high_scores'].append(11)
-    storage['high_scores'].sort()
-
-    # Save storage to disk.
-    storage.save()
+        The actual path to which the save data will be written.
 
 
-Following on the previous example, when starting your program, you can load that data back in::
+.. caution::
 
-    storage.load()
+    As you make changes to your game, ``storage`` could contain values that
+    don't work with your current code. You can either check for this, or call
+    ``.clear()`` to remove all old values, or delete the save game file.
 
-    my_score = storage['my_score']
 
-    level = storage['level']
+.. tip::
 
-    # Can use the get method from dicts to return a default value
-    storage.get('lifes', 3)
+    Remember to check that your game still works if the storage is empty!
+

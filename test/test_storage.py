@@ -48,7 +48,7 @@ class StorageTest(unittest.TestCase):
     @patch('pgzero.storage.os.path.exists')
     def setUp(self, exists_mock):
         exists_mock.return_value = True
-        self.storage = Storage()
+        self.storage = Storage('asdf')
 
     @patch('builtins.open', mock.mock_open(read_data='{"a": "hello"}'))
     def test_get(self):
