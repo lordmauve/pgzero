@@ -817,15 +817,17 @@ saved as JSON_, which means you can only store certain types of objects in it:
 The ``storage`` for a game is initially empty. Your code will need to handle
 the case that values are loaded as well as the case that no values are found.
 
-A tip is to use ``setdefault()``, which inserts a default if there is no value for
-the key, but does nothing if there is::
+A tip is to use ``setdefault()``, which inserts a default if there is no value
+for the key, but does nothing if there is.
+
+For example, we could write::
 
     storage.setdefault('highscore', 0)
 
-Now, ``storage['highscore']`` will contain a value - ``0`` if there was no
-value loaded, or the loaded value otherwise. You could add all of your
-``setdefault`` lines towards the top of your game, before anything else looks
-at ``storage``::
+After this line is executed, ``storage['highscore']`` will contain a value -
+``0`` if there was no value loaded, or the loaded value otherwise. You could
+add all of your ``setdefault`` lines towards the top of your game, before
+anything else looks at ``storage``::
 
     storage.setdefault('level', 1)
     storage.setdefault('player_name', 'Anonymous')
@@ -859,6 +861,11 @@ These are some of the most useful methods of ``storage``:
         Get a value from the storage. Raise KeyError if there is no such key
         in the storage.
 
+    .. method:: setdefault(key, default)
+
+        Insert a default value into the storage, only if no value already
+        exists for this key.
+
     .. method:: get(key, default=None)
 
         Get a value from the storage. If there is no such key, return default,
@@ -867,11 +874,6 @@ These are some of the most useful methods of ``storage``:
     .. method:: clear()
 
         Remove all stored values. Use this if you get into a bad state.
-
-    .. method:: setdefault(key, default)
-
-        Insert a default value into the storage, only if no value already
-        exists for this key.
 
     .. method:: save()
 
