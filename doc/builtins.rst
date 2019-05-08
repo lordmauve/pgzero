@@ -817,7 +817,8 @@ saved as JSON_, which means you can only store certain types of objects in it:
 The ``storage`` for a game is initially empty. Your code will need to handle
 the case that values are loaded as well as the case that no values are found.
 
-A tip is to use ``setdefault()``, which inserts a default if there is none::
+A tip is to use ``setdefault()``, which inserts a default if there is no value for
+the key, but does nothing if there is::
 
     storage.setdefault('highscore', 0)
 
