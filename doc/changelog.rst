@@ -5,12 +5,12 @@ Changelog
 ----------------
 
 * New: :ref:`Actors can be made transparent <transparency>` by assigning to
-  ``actor.opacity``.
+  ``actor.opacity`` (based on work by Rhys Puddephatt and charlesej)
 * New: screen.fill() now takes ``gcolor``, creating a vertical-linear gradient
 * New: a :doc:`REPL <repl>` has been added, which allows exploring a game's
   state while it is running.
 * New: Added a :ref:`storage API <data-storage>`, which preserves data across
-  game runs.
+  game runs (based on work by Ian Salmons and Gustavo Ferreira)
 
 
 1.2 - 2018-02-24

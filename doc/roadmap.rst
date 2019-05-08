@@ -65,6 +65,11 @@ work better with custom surfaces.
 Storage
 -------
 
+.. note::
+
+    A :ref:`storage API <data-storage>` has now been developed and is planned
+    for inclusion in Pygame Zero 1.3.
+
 Github Issue: `#33 <https://github.com/lordmauve/pgzero/issues/33>`_
 
 It would be useful for users to be able to save and load data.
