@@ -624,12 +624,6 @@ will restore the original image. The flipped state can be accessed or set
 directly via the `.xflip` and `.yflip` attributes.
 
 
-.. image:: _static/rotation.svg
-    :alt: Diagram showing how to set up sprites for rotation with angle_to()
-
-Remember that angles loop round, so 0 degrees == 360 degrees == 720 degrees.
-Likewise -180 degrees == 180 degrees.
-
 Distance and angle to
 '''''''''''''''''''''
 
