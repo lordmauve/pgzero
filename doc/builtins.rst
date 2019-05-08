@@ -621,7 +621,7 @@ Note that ``flip_x`` and ``flip_y`` toggle the current flipped state; calling::
     actor.flip_x()
 
 will restore the original image. The flipped state can be accessed or set
-directly via the `.xflip` and `.yflip` attributes.
+directly via the ``.xflip`` and ``.yflip`` attributes.
 
 
 Distance and angle to
