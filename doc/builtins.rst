@@ -591,6 +591,45 @@ Remember that angles loop round, so 0 degrees == 360 degrees == 720 degrees.
 Likewise -180 degrees == 180 degrees.
 
 
+Scaling
+'''''''
+
+.. versionadded:: 1.3
+
+The ``.dimensions`` attribute of an Actor controls the size of the sprite, in pixels.
+
+The centre of scaling is the Actor's :ref:`anchor point <anchor>`.
+
+Note that the dimensions are not identical to the ``width`` and ``height`` of
+the Actor; if the Actor is rotated, ``actor.dimensions`` will be the size of
+the image itself, along its "natural" axes, not the size of the bounding box
+after rotation.
+
+Flipping
+''''''''
+
+.. versionadded:: 1.3
+
+The ``.flip_x()`` and ``.flip_y()`` methods of an Actor mirror the image in the
+x and y directions respectively.
+
+The image is flipped in both directions around the Actor's :ref:`anchor point <anchor>`.
+
+Note that ``flip_x`` and ``flip_y`` toggle the current flipped state; calling::
+
+    actor.flip_x()
+    actor.flip_x()
+
+will restore the original image. The flipped state can be accessed or set
+directly via the `.xflip` and `.yflip` attributes.
+
+
+.. image:: _static/rotation.svg
+    :alt: Diagram showing how to set up sprites for rotation with angle_to()
+
+Remember that angles loop round, so 0 degrees == 360 degrees == 720 degrees.
+Likewise -180 degrees == 180 degrees.
+
 Distance and angle to
 '''''''''''''''''''''
 

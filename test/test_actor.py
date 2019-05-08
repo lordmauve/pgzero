@@ -146,3 +146,26 @@ class ActorTest(unittest.TestCase):
         a = Actor("alien")
         for attribute in dir(a):
             a.__getattr__(attribute)
+
+    def test_intitial_dimensions(self):
+        a = Actor("alien")
+        self.assertEqual(a.width, 66)
+        self.assertEqual(a.height, 92)
+        self.assertEqual(a.dimensions, (66, 92))
+
+    def test_multiple_transforms(self):
+        a = Actor("alien")
+        self.assertEqual(a.image, "alien")
+        self.assertEqual(a.topleft, (0, 0))
+        self.assertEqual(a.pos, (33.0, 46.0))
+        self.assertEqual(a.width, 66)
+        self.assertEqual(a.height, 92)
+        a.angle += 90.0
+        x, y = a.dimensions
+        a.dimensions = (x * 2, y * 2)
+        a.flip_y()
+        self.assertEqual(a.angle, 90.0)
+        self.assertEqual(a.topleft, (-59.0, -20.0))
+        self.assertEqual(a.pos, (33.0, 46.0))
+        self.assertEqual(a.width, 184)
+        self.assertEqual(a.height, 132)

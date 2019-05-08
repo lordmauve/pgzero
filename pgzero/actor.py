@@ -54,7 +54,7 @@ class BoundingBox:
         self.height = height
         self.anchor = anchor
 
-    def rotate(self, angle):
+    def set_angle(self, angle):
         """Rotate the box and calculate the new height, width and anchor."""
         theta = -radians(angle)
         w, h = self.width, self.height
@@ -82,6 +82,35 @@ class BoundingBox:
             tw * 0.5 + rax,
             th * 0.5 + ray
         )
+
+    def set_dimensions(self, dimensions):
+        w, h = dimensions
+        ax, ay = self.anchor
+        xscale = (1.0 * w) / self.width
+        yscale = (1.0 * h) / self.height
+        self.width = w
+        self.height = h
+        self.anchor = (ax * xscale, ay * yscale)
+
+    def set_flip(self, xflip, yflip):
+        ax, ay = self.anchor
+        if xflip:
+            ax = self.width - ax
+        if yflip:
+            ay = self.height - ay
+        self.anchor = ax, ay
+
+
+def _set_dimensions(actor, current_surface):
+    if actor.dimensions == (actor._orig_width, actor._orig_height):
+        return current_surface
+    return pygame.transform.scale(current_surface, actor._dimensions)
+
+
+def _set_flip(actor, current_surface):
+    if not (actor._xflip or actor._yflip):
+        return current_surface
+    return pygame.transform.flip(current_surface, actor._xflip, actor._yflip)
 
 
 def _set_angle(actor, current_surface):
@@ -115,10 +144,12 @@ class Actor:
         a for a in dir(rect.ZRect) if not a.startswith("_")
     ]
 
-    function_order = [_set_opacity, _set_angle]
+    function_order = [_set_opacity, _set_dimensions, _set_flip, _set_angle]
     _anchor = _anchor_value = (0, 0)
     _angle = 0.0
     _opacity = 1.0
+    _xflip = False
+    _yflip = False
 
     def _build_transformed_surf(self):
         cache_len = len(self._surface_cache)
@@ -253,14 +284,18 @@ class Actor:
                 self._orig_width,
                 self._orig_height,
                 self._orig_anchor)
-        if self._angle != 0.0:
-            b.rotate(self._angle)
-        self._box = b
-        self.height = self._box.height
-        self.width = self._box.width
+        # This order of operations must be preserved
+        b.set_dimensions(self._dimensions)
+        b.set_flip(self._xflip, self._yflip)
+        b.set_angle(self._angle)
+
+        # Copy the transformed height and width
+        self.height = b.height
+        self.width = b.width
+
         # Now move the topleft so that the anchor stays in position
         p = self.pos
-        self._anchor = self._box.anchor
+        self._anchor = b.anchor
         self.pos = p
 
     @property
@@ -272,6 +307,42 @@ class Actor:
         self._angle = angle
         self._update_box()
         self._update_transform(_set_angle)
+
+    @property
+    def dimensions(self):
+        return self._dimensions
+
+    @dimensions.setter
+    def dimensions(self, dimensions):
+        self._dimensions = dimensions
+        self._update_box()
+        self._update_transform(_set_dimensions)
+
+    @property
+    def xflip(self):
+        return self._xflip
+
+    @xflip.setter
+    def xflip(self, flipped):
+        self._xflip = flipped
+        self._update_box()
+        self._update_transform(_set_flip)
+
+    @property
+    def yflip(self):
+        return self._yflip
+
+    @yflip.setter
+    def yflip(self, flipped):
+        self._yflip = flipped
+        self._update_box()
+        self._update_transform(_set_flip)
+
+    def flip_x(self):
+        self.xflip = not self.xflip
+
+    def flip_y(self):
+        self.yflip = not self.yflip
 
     @property
     def opacity(self):
@@ -333,12 +404,13 @@ class Actor:
         self._orig_surf = loaders.images.load(image)
         self._surface_cache.clear()  # Clear out old image's cache.
         self._update_orig()
+        self._dimensions = self._orig_surf.get_size()
+        self._update_box()
 
     def _update_orig(self):
         """Set original properties based on the image dimensions."""
         self._orig_width, self._orig_height = self._orig_surf.get_size()
         self._update_orig_anchor()
-        self._update_box()
 
     def draw(self):
         s = self._build_transformed_surf()
