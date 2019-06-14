@@ -67,6 +67,8 @@ class Storage(dict):
             os.makedirs(storage_path)
         except IsADirectoryError:
             pass
+        except FileExistsError:
+            pass
 
     def _set_filename_from_path(self, file_path):
         """Set the path to save to from the given filename.
