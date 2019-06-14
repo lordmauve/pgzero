@@ -56,6 +56,7 @@ class Storage(dict):
     @classmethod
     def save_all(cls):
         """Save all instances of Storage."""
+        cls._ensure_save_path()
         for storage in cls.storages:
             storage.save()
 
