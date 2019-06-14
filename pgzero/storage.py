@@ -63,9 +63,8 @@ class Storage(dict):
     @classmethod
     def _ensure_save_path(cls):
         """Ensure that the directory for all save game data exists."""
-        storage_path = cls._get_platform_pgzero_path()
         try:
-            os.makedirs(storage_path)
+            os.makedirs(cls.SOTRAGE_DIR)
         except IsADirectoryError:
             pass
         except FileExistsError:
