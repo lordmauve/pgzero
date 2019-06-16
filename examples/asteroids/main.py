@@ -105,8 +105,7 @@ def update(dt):
             game.stage = GameStage.game_over
 
     if game.stage is GameStage.leader_board and not game.leader_board:
-        with open('leaderboard.json', 'r') as lb:
-            leader_board = json.load(lb) or []
+        leader_board = storage.setdefault("leader_board", [])
         max_leaders = {}
         for initial, score in leader_board:
             max_leaders[initial] = max(score, max_leaders.get(initial, 0))
@@ -147,14 +146,8 @@ def on_key_down(key):
         if key == keys.BACKSPACE:
             game.initials = game.initials[:-1]
         elif key == keys.RETURN and game.initials:
-            try:
-                with open('leaderboard.json', 'r') as lb:
-                    leader_board = json.load(lb)
-            except (ValueError, FileNotFoundError):
-                leader_board = []
+            leader_board = storage.setdefault("leader_board", [])
             leader_board.append((game.initials, game.score))
-            with open('leaderboard.json', 'w') as lb:
-                json.dump(leader_board, lb)
             game.leader_board = {}
             game.stage = GameStage.leader_board
         elif len(game.initials) < 3 and keys.A <= key <= keys.Z:
