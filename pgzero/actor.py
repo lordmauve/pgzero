@@ -353,5 +353,16 @@ class Actor:
         dy = ty - myy
         return sqrt(dx * dx + dy * dy)
 
+    def scale_up(self, value):
+        """Scales up the image by a factor of the inputted value."""
+        self._surf = pygame.transform.scale(self._surf, (int(self._surf.get_width() * value), int(self._surf.get_height() * value)))
+        self._update_pos()
+
+    def scale_down(self, value):
+        """Scales down the image by a factor of the inputted value."""
+        self._surf = pygame.transform.scale(self._surf, (self._surf.get_width() // value, self._surf.get_height() // value))
+        self._update_pos()
+
+
     def unload_image(self):
         loaders.images.unload(self._image_name)
