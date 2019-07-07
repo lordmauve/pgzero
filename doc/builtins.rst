@@ -591,6 +591,24 @@ Remember that angles loop round, so 0 degrees == 360 degrees == 720 degrees.
 Likewise -180 degrees == 180 degrees.
 
 
+Scaling
+'''''''
+.. versionadded:: 1.3
+
+To resize and Actor, use ``scale_up`` and ``scale_down``. These will change the
+dimensions of the Actor by a given factor. For example, ``scale_up(2)``
+will increase Actor's width and height 2x.::
+
+    alien = Actor('alien')
+    alien.scale_up(2)
+
+    def draw():
+        alien.draw()
+
+Scaling the Actor does not change the file size of the image. Significantly
+scaling images with large file sizes will not reduce the memory taken by the
+images.::
+
 Distance and angle to
 '''''''''''''''''''''
 
