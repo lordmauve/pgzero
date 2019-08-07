@@ -110,6 +110,31 @@ class ActorTest(unittest.TestCase):
             a.angle += 1.0
         self.assertEqual(a.pos, (100.0, 100.0))
 
+    def test_move_forwards_ne(self):
+        """move fwd should change pos correctly when facing roughly NE"""
+        a = Actor('alien', pos=(100.0, 200.0))
+        # the angle for a 3 4 5 triangle
+        a.angle = 53.1301024
+        a.move_forwards(5)
+        self.assertAlmostEqual(a.x, 103)
+        self.assertAlmostEqual(a.y, 196)
+
+    def test_move_forwards_sw(self):
+        """Move fwd should change pos correctly when facing roughly SW"""
+        a = Actor('alien', pos=(100.0, 200.0))
+        a.angle = 180 + 53.1301024
+        a.move_forwards(5)
+        self.assertAlmostEqual(a.x, 97)
+        self.assertAlmostEqual(a.y, 204)
+
+    def test_move_forwards_zero(self):
+        """"""
+        a = Actor('alien', pos=(100.0, 200.0))
+        a.angle = 53.1301024
+        a.move_forwards(0)
+        self.assertEqual(a.x, 100.0)
+        self.assertEqual(a.y, 200.0)
+
     def test_opacity_default(self):
         """Ensure opacity is initially set to its default value."""
         a = Actor('alien')
