@@ -49,6 +49,17 @@ MAX_ALPHA = 255  # Based on pygame's max alpha.
 
 
 class BoundingBox:
+    """Calculate bounding box and anchor transformations.
+
+    An Actor stores a sprite as a pygame surface with an anchor point and a
+    stack of transformations. This class pulls the code for the purely
+    geometric transformations out of the Actor class - the idea is to
+    initialize a BoundingBox with the surface's original dimensions, set an
+    anchor point, and then call pygame.transform.* to update the surface and
+    call the corresponding methods on the bounding box to update the Actor's
+    internal geometrical details.
+    """
+
     def __init__(self, width, height, anchor):
         self.width = width
         self.height = height
