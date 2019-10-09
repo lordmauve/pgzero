@@ -1,5 +1,6 @@
 from pygame import Surface
 from pygame import transform
+from collections import deque
 
 WIDTH = 800
 HEIGHT = 800
@@ -26,7 +27,7 @@ trails = Surface(screen_to_grid(WIDTH, HEIGHT))
 
 
 speed = GRID_SIZE
-bike = Actor('bike', anchor_x=24)
+bike = Actor('bike', anchor_x=28)
 
 # Cardinal directions -> (angle, velocity, reverse)
 DIRECTIONS = {
@@ -42,6 +43,7 @@ def reset_bike():
     bike.pos = (WIDTH + GRID_SIZE) // 2, (HEIGHT + GRID_SIZE) // 2
     bike.dead = False
     bike.angle, bike.v, bike.reverse = DIRECTIONS[keys.RIGHT]
+    bike.trail = deque(maxlen=200)
 
 
 def kill_bike():
@@ -54,6 +56,12 @@ reset_bike()
 
 
 def update():
+    # Fade down the trail
+    for t in bike.trail:
+        r, g, b, *_ = trails.get_at(t)
+        c = round(g * 0.99)
+        trails.set_at(t, (round(r * 0.97), c, c))
+
     if bike.dead:
         bike.explosion_radius += 20
         return
@@ -66,17 +74,18 @@ def update():
     trail_pos = screen_to_grid(x, y)
 
     try:
-        current_value = trails.get_at(trail_pos)
+        current_value = trails.get_at(trail_pos)[2]
     except IndexError:
         # Out of bounds! we crashed
         kill_bike()
         return
 
-    if current_value == CYAN:
+    if current_value:
         # We've already set this pixel, so this is a crash
         kill_bike()
     else:
-        trails.set_at(trail_pos, CYAN)
+        trails.set_at(trail_pos, (255, 255, 255))
+        bike.trail.append(trail_pos)
 
 
 def draw():
@@ -88,12 +97,11 @@ def draw():
             color=CYAN,
         )
         screen.draw.text(
-            'You are dead!\nPress SPACE to restart.',
+            'YOU ARE DEREZZED!\nPRESS SPACE TO RESTART',
             center=(WIDTH // 2, 100),
-            color=(0, 30, 60),
-            fontsize=70,
-            owidth=0.1,
-            ocolor=(100, 255, 255),
+            color=CYAN,
+            fontsize=50,
+            fontname="tr2n"
         )
     else:
         bike.draw()
