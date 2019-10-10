@@ -18,11 +18,6 @@ def screen_to_grid(x, y):
     return round(x / GRID_SIZE), round(y / GRID_SIZE)
 
 
-def grid_to_screen(x, y):
-    """Convert screen coordinates x, y to grid coords."""
-    return (x + 0.5) * GRID_SIZE, (y + 0.5) * GRID_SIZE
-
-
 trails = Surface(screen_to_grid(WIDTH, HEIGHT))
 
 
