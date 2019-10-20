@@ -176,6 +176,9 @@ class ImageLoader(ResourceLoader):
     def _load(self, path):
         return pygame.image.load(path).convert_alpha()
 
+    def __repr__(self):
+        return "<Images images={}>".format(self.__dir__())
+
 
 class UnsupportedFormat(Exception):
     """The resource was not in a supported format."""
@@ -208,6 +211,13 @@ Ogg Vorbis files. Try re-encoding the sound file, for example using Audacity:
     http://audacityteam.org/
 """.format(path, fmt).strip()) from None
             raise
+
+    def __repr__(self):
+        try:
+            sound_list = self.__dir__()
+        except OSError:
+            sound_list = []
+        return "<Sounds sounds={}>".format(sound_list)
 
 
 class FontLoader(ResourceLoader):

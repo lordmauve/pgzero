@@ -58,5 +58,8 @@ class Keyboard:
             )
             return getattr(self, k)
 
+    def __repr__(self):
+        return "<Keyboard pressed={}>".format(self._pressed)
+
 
 keyboard = Keyboard()
