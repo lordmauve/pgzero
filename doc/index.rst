@@ -43,6 +43,7 @@ User Guide
     installation
     repl
     ide-mode
+    examples
     other-libs
     changelog
 
