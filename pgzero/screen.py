@@ -47,15 +47,19 @@ class SurfacePainter:
 
     def polygon(self, points, color):
         """Draw a polygon."""
-        if not isinstance(points, list):
-            raise TypeError("screen.draw.polygon() requires a list to draw")
+        try:
+            iter(points)
+        except TypeError:
+            raise TypeError("screen.draw.filled_polygon() requires an iterable of points to draw")
         points = [round_pos(point) for point in points]
         pygame.draw.polygon(self._surf, make_color(color), points, 1)
 
     def filled_polygon(self, points, color):
         """Draw a filled polygon."""
-        if not isinstance(points, list):
-            raise TypeError("screen.draw.filled_polygon() requires a list to draw")
+        try:
+            iter(points)
+        except TypeError:
+            raise TypeError("screen.draw.filled_polygon() requires an iterable of points to draw")
         points = [round_pos(point) for point in points]
         pygame.draw.polygon(self._surf, make_color(color), points, 0)
 
