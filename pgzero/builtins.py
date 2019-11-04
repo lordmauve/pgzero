@@ -12,4 +12,4 @@ from .loaders import images, sounds
 
 from .constants import mouse, keys, keymods
 
-from .game import exit
+from .game import exit, pause, is_paused
