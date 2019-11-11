@@ -9,8 +9,14 @@ from . import loaders
 
 def round_pos(pos):
     """Round a tuple position so it can be used for drawing."""
-    x, y = pos
-    return round(x), round(y)
+    try:
+        x, y = pos
+    except TypeError:
+        raise TypeError("Coordinate must be a tuple (not {!r})".format(pos)) from None
+    try:
+        return round(x), round(y)
+    except TypeError:
+        raise TypeError("Coordinate values must be numbers (not {!r})".format(pos)) from None
 
 
 def make_color(arg):
