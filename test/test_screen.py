@@ -95,6 +95,15 @@ class ScreenTest(unittest.TestCase):
             images.expected_filled_polygon
         )
 
+    def test_polygon_errors(self):
+        """draw.polygon raises errors as expected."""
+        yellow = (255, 255, 0)
+        with self.assertRaises(TypeError):
+            self.screen.draw.polygon(2, yellow)
+        with self.assertRaises(TypeError):
+            self.screen.draw.polygon([2], yellow)
+
+
     def test_wrapped_gradient_text(self):
         """We can draw wrapped gradient text.
 
