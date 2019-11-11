@@ -83,6 +83,26 @@ class ScreenTest(unittest.TestCase):
             images.expected_gradient
         )
 
+    def test_polygon(self):
+        poly = [(0, 99), (49, 0), (99, 99)]
+        yellow = (255, 255, 0)
+        """We can draw a polygon."""
+        self.screen.draw.polygon(poly, yellow)
+        self.assertImagesAlmostEqual(
+            self.screen.surface,
+            images.expected_polygon
+        )
+
+    def test_filled_polygon(self):
+        poly = [(0, 99), (49, 0), (99, 99)]
+        yellow = (255, 255, 0)
+        """We can draw a polygon."""
+        self.screen.draw.filled_polygon(poly, yellow)
+        self.assertImagesAlmostEqual(
+            self.screen.surface,
+            images.expected_filled_polygon
+        )
+
     def test_wrapped_gradient_text(self):
         """We can draw wrapped gradient text.
 
