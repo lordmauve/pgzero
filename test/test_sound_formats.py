@@ -1,4 +1,3 @@
-import sys
 from unittest import TestCase, expectedFailure, skip
 import pygame
 from pgzero.loaders import sounds, set_root, UnsupportedFormat
@@ -14,10 +13,10 @@ class SoundFormatsTest(TestCase):
 
     def assert_loadable(self, name):
         s = sounds.load(name)
-        l = s.get_length()
+        duration = s.get_length()
 
-        assert 0.85 < l < 1.0, \
-            "Failed to correctly load sound (got length %0.1fs)" % l
+        assert 0.85 < duration < 1.0, \
+            "Failed to correctly load sound (got length %0.1fs)" % duration
 
     def assert_errmsg(self, name, pattern):
         with self.assertRaisesRegex(UnsupportedFormat, pattern):

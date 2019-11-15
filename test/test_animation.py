@@ -292,4 +292,3 @@ class AnimationTest(TestCase):
         # Ensure animation stopped and attr as expected.
         self.assertFalse(anim.running)
         self.assertEqual(test_obj.attr, expected_attr_val)
-

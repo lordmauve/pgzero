@@ -1,4 +1,3 @@
-from math import sin, cos, radians
 from unittest import TestCase
 from pgzero.actor import transform_anchor
 

@@ -6,6 +6,7 @@ from pgzero.constants import mouse
 
 class Event:
     """Mock event."""
+
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
 

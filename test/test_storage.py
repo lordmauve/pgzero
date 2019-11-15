@@ -18,8 +18,8 @@ class StorageStaticMethodsTest(unittest.TestCase):
 
         result = list(Storage._get_json_error_keys(obj))
         self.assertEqual(
-             result,
-             [("storage['obj']", "object")]
+            result,
+            [("storage['obj']", "object")]
         )
 
     def test_dict_with_nested_dicts_errors(self):

@@ -5,4 +5,3 @@ assert helper.RECT
 
 def draw():
     helper.circle()
-
