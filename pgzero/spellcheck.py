@@ -134,7 +134,7 @@ class SpellCheckResult:
         for found, suggestion in typos:
             print("    {found} (did you mean {suggestion}?)".format(
                 found=found, suggestion=suggestion))
-        for f in missing_hooks:
+        for f in missing:
             print("   ", f)
 
     def error(self, msg, found, suggestion):

@@ -142,6 +142,7 @@ def wrap(text, fontname=None, fontsize=None, sysfontname=None,
             lines.append(line)
     return lines
 
+
 _fit_cache = {}
 
 
@@ -199,6 +200,7 @@ def _resolveangle(angle):
     angle %= 360
     return int(round(angle / ANGLE_RESOLUTION_DEGREES)) * ANGLE_RESOLUTION_DEGREES
 
+
 # Return the set of points in the circle radius r, using Bresenham's
 # circle algorithm
 _circle_cache = {}
@@ -223,6 +225,7 @@ def _circlepoints(r):
     points += [(x, -y) for x, y in points if y]
     points.sort()
     return points
+
 
 _surf_cache = {}
 _surf_tick_usage = {}
@@ -369,6 +372,7 @@ def getsurf(text, fontname=None, fontsize=None, sysfontname=None, bold=None, ita
         _surf_tick_usage[key] = _tick
         _tick += 1
     return surf
+
 
 _default_surf_sentinel = ()
 

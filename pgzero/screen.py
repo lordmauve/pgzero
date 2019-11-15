@@ -59,17 +59,18 @@ class SurfacePainter:
 
     def text(self, *args, **kwargs):
         """Draw text to the screen."""
-        #FIXME: expose ptext parameters, for autocompletion and autodoc
+        # FIXME: expose ptext parameters, for autocompletion and autodoc
         ptext.draw(*args, surf=self._surf, **kwargs)
 
     def textbox(self, *args, **kwargs):
         """Draw text to the screen, wrapped to fit a box"""
-        #FIXME: expose ptext parameters, for autocompletion and autodoc
+        # FIXME: expose ptext parameters, for autocompletion and autodoc
         ptext.drawbox(*args, surf=self._surf, **kwargs)
 
 
 class Screen:
     """Interface to the screen."""
+
     def __init__(self, surface):
         self.surface = surface
         self.width, self.height = surface.get_size()

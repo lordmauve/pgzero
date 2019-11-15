@@ -50,6 +50,7 @@ class Event:
     Events are ordered by their scheduled execution time.
 
     """
+
     def __init__(self, time, cb, repeat=None):
         self.time = time
         self.repeat = repeat
@@ -82,6 +83,7 @@ class Clock:
     scaling dt before passing it to tick().
 
     """
+
     def __init__(self):
         self.t = 0
         self.fired = False

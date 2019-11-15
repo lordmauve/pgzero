@@ -6,6 +6,7 @@ from .constants import keys
 DEPRECATED_KEY_RE = re.compile(r'[A-Z]')
 PREFIX_RE = re.compile(r'^K_(?!\d$)')
 
+
 class Keyboard:
     """The current state of the keyboard.
 
@@ -23,7 +24,7 @@ class Keyboard:
     def __getattr__(self, kname):
         # return is a reserved word, so alias enter to return
         if kname == 'enter':
-                kname = 'return'
+            kname = 'return'
         elif DEPRECATED_KEY_RE.match(kname):
             warn(
                 "Uppercase keyboard attributes (eg. keyboard.%s) are "

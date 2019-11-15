@@ -20,8 +20,6 @@ with numpy operations this should allow at least part of this work to happen
 on another CPU core, if present.
 
 """
-
-from timeit import default_timer
 import re
 from functools import lru_cache
 
@@ -75,6 +73,7 @@ def _play_thread():
         with cache_lock:
             note = _create(*args)
         note.play()
+
 
 player_thread = Thread(target=_play_thread)
 player_thread.setDaemon(True)
@@ -185,7 +184,7 @@ def play(pitch, duration):
 
 
 if np is None:
-    def play(hz, length):
+    def play(hz, length):  # noqa: conditional redefinition
         raise RuntimeError(
             'Tone generation depends on Numpy, which is not available'
         )

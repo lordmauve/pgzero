@@ -27,6 +27,7 @@ class _MusicLoader(ResourceLoader):
     def _load(self, path):
         return path
 
+
 _loader = _MusicLoader('music')
 
 

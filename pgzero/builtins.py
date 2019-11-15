@@ -13,3 +13,13 @@ from .loaders import images, sounds
 from .constants import mouse, keys, keymods
 
 from .game import exit
+
+__all__ = [
+    'Actor', 'images',  # graphics
+    'sounds', 'music', 'tone',  # sound
+    'clock', 'animate',  # timing
+    'Rect', 'ZRect',  # geometry
+    'keyboard', 'mouse', 'keys', 'keymods',  # input
+    'storage',  # persistence
+    'exit',
+]

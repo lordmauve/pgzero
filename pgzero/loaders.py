@@ -2,7 +2,6 @@ import os
 import os.path
 import sys
 
-from types import ModuleType
 import pygame.image
 import pygame.mixer
 
@@ -32,6 +31,7 @@ def set_root(path):
 
 class InvalidCase(Exception):
     """Indicate case errors early so they don't bite cross-platform users."""
+
 
 try:
     import win32api
@@ -86,6 +86,7 @@ class ResourceLoader:
     Dotted paths can be used to traverse directories.
 
     """
+
     def __init__(self, subpath):
         self._subpath = subpath
         self._cache = {}
@@ -162,12 +163,13 @@ class ResourceLoader:
 
     def __dir__(self):
         standard_attributes = [key for key in self.__dict__.keys()
-            if not key.startswith("_")]
+                               if not key.startswith("_")]
         resources = os.listdir(self._root())
         resource_names = [os.path.splitext(r) for r in resources]
         loadable_names = [name for name, ext in resource_names
-            if name.isidentifier() and ext[1:] in self.EXTNS]
+                          if name.isidentifier() and ext[1:] in self.EXTNS]
         return standard_attributes + loadable_names
+
 
 class ImageLoader(ResourceLoader):
     EXTNS = ['png', 'gif', 'jpg', 'jpeg', 'bmp']
@@ -231,6 +233,7 @@ class FontLoader(ResourceLoader):
 images = ImageLoader('images')
 sounds = SoundLoader('sounds')
 fonts = FontLoader('fonts')
+
 
 def getfont(
         fontname=None,

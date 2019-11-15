@@ -49,6 +49,7 @@ def in_elastic(n):
     q -= 1.0
     return -(pow(2, 10 * q) * sin((q - s) * (2 * pi) / p))
 
+
 @tweener
 def out_elastic(n):
     p = .3
@@ -57,6 +58,7 @@ def out_elastic(n):
     if q == 1:
         return 1.0
     return pow(2, -10 * q) * sin((q - s) * (2 * pi) / p) + 1.0
+
 
 @tweener
 def in_out_elastic(n):
@@ -116,9 +118,9 @@ def tween(n, start, end):
 
 def tween_attr(n, start, end):
     if isinstance(start, tuple):
-        return tuple(tween(n, a, b) for a,b in zip(start, end))
+        return tuple(tween(n, a, b) for a, b in zip(start, end))
     elif isinstance(start, list):
-        return [tween(n, a, b) for a,b in zip(start, end)]
+        return [tween(n, a, b) for a, b in zip(start, end)]
     else:
         return tween(n, start, end)
 

@@ -1,19 +1,15 @@
+from . import storage
+from . import clock
+from . import loaders
+from .game import PGZeroGame, DISPLAY_FLAGS
+from types import ModuleType
+import argparse
+import warnings
+import sys
+import os
 import pygame
 pygame.mixer.pre_init(frequency=22050, size=-16, channels=2)
 pygame.init()
-
-
-import os
-import sys
-import warnings
-import argparse
-from types import ModuleType
-
-from .game import PGZeroGame, DISPLAY_FLAGS
-from . import loaders
-from . import clock
-from . import builtins
-from . import storage
 
 
 # The base URL for Pygame Zero documentation
@@ -63,7 +59,6 @@ def _substitute_full_framework_python():
     os.execv(framework_python, ['python', '-m', 'pgzero'] + sys.argv[1:])
 
 
-
 def main():
     # Pygame won't run from a normal virtualenv copy of Python on a Mac
     if not _check_python_ok_for_pygame():
@@ -71,7 +66,7 @@ def main():
 
     parser = argparse.ArgumentParser()
     try:
-        import ptpython
+        import ptpython  # noqa: checking if this is importable
     except ImportError:
         replhelp = argparse.SUPPRESS
         have_repl = False
