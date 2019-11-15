@@ -25,6 +25,7 @@ at revision {sha}
 and used under CC0.
 
 """
+# flake8: noqa: E501
 '''
 
 

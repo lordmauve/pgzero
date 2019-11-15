@@ -157,7 +157,10 @@ class Animation:
         except KeyError:
             suggested_tween = suggest(tween, TWEEN_FUNCTIONS.keys())
             if len(suggested_tween) > 0:
-                raise KeyError('No tween called %s found, did you mean %s?' % (tween, suggested_tween[0]))
+                raise KeyError(
+                    'No tween called %s found, did you mean %s?'
+                    % (tween, suggested_tween[0])
+                )
             else:
                 raise KeyError('No tween called %s found.' % tween)
         self.duration = duration
@@ -170,7 +173,9 @@ class Animation:
             try:
                 a = getattr(object, k)
             except AttributeError:
-                raise ValueError('object %r has no attribute %s to animate' % (object, k))
+                raise ValueError(
+                    'object %r has no attribute %s to animate' % (object, k)
+                )
             self.initial[k] = a
             key = id(object), k
             previous_animation = self._animation_dict.get(key)

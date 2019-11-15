@@ -131,7 +131,11 @@ class Clock:
         If scheduled multiple times all instances will be unscheduled.
 
         """
-        self.events = [e for e in self.events if e.callback != callback and e.callback is not None]
+        self.events = [
+            e for e in self.events
+            if e.callback != callback
+            if e.callback is not None
+        ]
         heapq.heapify(self.events)
         self._each_tick = [e for e in self._each_tick if e() != callback]
 

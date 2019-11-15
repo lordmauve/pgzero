@@ -15,6 +15,7 @@ and used under CC0.
 # Please see README.md for explanation of options.
 # https://github.com/cosmologicon/pygame-text
 
+# flake8: noqa: E501
 from __future__ import division
 
 from math import ceil, sin, cos, radians

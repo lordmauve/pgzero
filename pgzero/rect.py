@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import pygame.rect
+import operator
 
 
 class Rect(pygame.rect.Rect):
@@ -26,6 +27,7 @@ class Rect(pygame.rect.Rect):
             if suggestions:
                 msg += "; did you mean {!r}?".format(suggestions[0])
             raise AttributeError(msg) from None
+
 
 Rect.__doc__ = pygame.rect.Rect.__doc__
 
@@ -69,7 +71,10 @@ class ZRect:
         elif len(args) == 1:
             self.x, self.y, self.w, self.h = args[0]
         else:
-            raise TypeError("%s should be called with one, two or four arguments" % (self.__class__.__name__))
+            raise TypeError(
+                "%s should be called with one, two or four arguments"
+                % (self.__class__.__name__)
+            )
 
         self.rect = self
 
@@ -108,7 +113,8 @@ class ZRect:
         return arg
 
     def __repr__(self):
-        return "<%s (x: %s, y: %s, w: %s, h: %s)>" % (self.__class__.__name__, self.x, self.y, self.w, self.h)
+        return "<%s (x: %s, y: %s, w: %s, h: %s)>" % (
+            self.__class__.__name__, self.x, self.y, self.w, self.h)
 
     def __reduce__(self):
         return self.__class__, (self.x, self.y, self.w, self.h)
@@ -492,7 +498,8 @@ class ZRect:
                 return k, v
 
     def collidedictall(self, dict, use_values=True):
-        return [(k, v) for (k, v) in dict.items() if self.colliderect(v if use_values else k)]
+        val = operator.itemgetter(1 if use_values else 0)
+        return [i for i in dict.items() if self.colliderect(val(i))]
 
 
 RECT_CLASSES = (pygame.rect.Rect, ZRect)
