@@ -29,7 +29,7 @@ def hue_name(color):
     if s == 0:
         return 'Greys'
 
-    if h < 0.-35:
+    if h < 0.02:
         return 'Reds'
     elif h < 0.11:
         return "Oranges"

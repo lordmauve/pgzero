@@ -7,8 +7,8 @@ Below is a list of the 135 colour names supported in Pygame [1]_ .
 
 
 
-Oranges
--------
+Reds
+----
 
 .. raw:: html
 
@@ -109,6 +109,10 @@ Oranges
         <code>#fa8072</code>
     </div>
 
+
+
+Oranges
+-------
 
 .. raw:: html
 
@@ -767,7 +771,7 @@ Turquoises
     <div class="color-swatch"
          style="color: white; background-color: #2f4f4f;
                 border-color: #172727">
-        darkslategray / darkslategrey<br>
+        darkslategrey / darkslategray<br>
         <code>#2f4f4f</code>
     </div>
 
@@ -991,7 +995,7 @@ Blues
     <div class="color-swatch"
          style="color: white; background-color: #000080;
                 border-color: #000040">
-        navyblue / navy<br>
+        navy / navyblue<br>
         <code>#000080</code>
     </div>
 
@@ -1319,7 +1323,7 @@ Greys
     <div class="color-swatch"
          style="color: white; background-color: #696969;
                 border-color: #343434">
-        dimgray / dimgrey<br>
+        dimgrey / dimgray<br>
         <code>#696969</code>
     </div>
 
@@ -1329,7 +1333,7 @@ Greys
     <div class="color-swatch"
          style="color: black; background-color: #a9a9a9;
                 border-color: #545454">
-        darkgray / darkgrey<br>
+        darkgrey / darkgray<br>
         <code>#a9a9a9</code>
     </div>
 
