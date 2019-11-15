@@ -28,3 +28,7 @@ jobs:
         xvfb-run --auto-servernum python setup.py test
     - name: Cleanup xvfb pidx
       uses: bcomnes/cleanup-xvfb@v1
+    - uses: actions/upload-artifact@master
+      with:
+          name: failed-image
+          path: test/failed-image

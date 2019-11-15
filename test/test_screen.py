@@ -1,5 +1,5 @@
+import sys
 import unittest
-import tempfile
 from pathlib import Path
 
 import numpy as np
@@ -36,9 +36,17 @@ class ScreenTest(unittest.TestCase):
         if np.allclose(comp_surf, exp_surf, atol=2):
             return
 
-        tmpdir = Path(tempfile.mkdtemp())
-        pygame.image.save(computed, str(tmpdir / 'computed.png'))
-        pygame.image.save(expected, str(tmpdir / 'expected.png'))
+        name = sys._getframe(1).f_code.co_name
+        tmpdir = Path(__file__).parent / 'failed-image'
+        tmpdir.mkdir(exist_ok=True)
+        pygame.image.save(
+            computed,
+            str(tmpdir / '{}-computed.png'.format(name))
+        )
+        pygame.image.save(
+            expected,
+            str(tmpdir / '{}-expected.png'.format(name))
+        )
 
         raise AssertionError(
             "Images differ; saved comparison images to {}".format(tmpdir)
