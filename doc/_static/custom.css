@@ -79,3 +79,23 @@ div.sphinxsidebar h3 a {
 ol li {
     margin: 1em 0;
 }
+
+h2 {
+    clear: both;
+}
+
+.color-swatch {
+    float: left;
+    width: 160px;
+    height: 40px;
+    padding: 20px;
+    text-align: center;
+    border-style: solid;
+    border-width: 1px;
+    margin: 0 5px 5px 0;
+}
+
+.color-swatch code {
+    color: inherit;
+    background-color: transparent;
+}

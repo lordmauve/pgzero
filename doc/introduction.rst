@@ -47,7 +47,8 @@ sets the window size to be 300 pixels in each dimension.
 ``screen.fill()`` method call is filling the screen with a solid colour,
 specified as a ``(red, green, blue)`` colour tuple. ``(128, 0, 0)`` will be a
 medium-dark red. Try changing these values with numbers between 0 and 255
-and see what colors you can create.
+and see what colors you can create. You can also use a string to name a
+:doc:`built-in colour name <colors_ref>`.
 
 Let's set up a sprite that we can animate.
 

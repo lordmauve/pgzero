@@ -91,6 +91,11 @@ draw images to the screen ("blit" them).
         There's an extremely rich API for formatting text; see
         :doc:`ptext` for full details.
 
+.. tip::
+
+    All of the colours can be specified as ``(r, g, b)`` tuples, or by
+    name, using one of :doc:`Pygame's colour names <colors_ref>`
+
 .. _rect:
 
 Rect
