@@ -6,8 +6,6 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-    env:
-      SDL_VIDEODRIVER: dummy
     steps:
     - uses: actions/checkout@v1
     - name: Set up Python 3.7
@@ -22,6 +20,11 @@ jobs:
       run: |
         # stop the build if there are Python syntax errors or undefined names
         flake8 --count pgzero pgzrun.py test
-    - name: Run tests
+    - name: Install xvfb
       run: |
-        python setup.py test
+          sudo apt-get install xvfb
+    - name: Run tests under xvfb
+      run: |
+        xvfb-run --auto-servernum python setup.py test
+    - name: Cleanup xvfb pidx
+      uses: bcomnes/cleanup-xvfb@v1
