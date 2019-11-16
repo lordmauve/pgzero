@@ -935,7 +935,7 @@ Blues
     <div class="color-swatch"
          style="color: white; background-color: #708090;
                 border-color: #384048">
-        slategrey / slategray<br>
+        slategray / slategrey<br>
         <code>#708090</code>
     </div>
 
@@ -945,7 +945,7 @@ Blues
     <div class="color-swatch"
          style="color: black; background-color: #778899;
                 border-color: #3b444c">
-        lightslategray / lightslategrey<br>
+        lightslategrey / lightslategray<br>
         <code>#778899</code>
     </div>
 
@@ -995,7 +995,7 @@ Blues
     <div class="color-swatch"
          style="color: white; background-color: #000080;
                 border-color: #000040">
-        navy / navyblue<br>
+        navyblue / navy<br>
         <code>#000080</code>
     </div>
 
@@ -1323,7 +1323,7 @@ Greys
     <div class="color-swatch"
          style="color: white; background-color: #696969;
                 border-color: #343434">
-        dimgrey / dimgray<br>
+        dimgray / dimgrey<br>
         <code>#696969</code>
     </div>
 
@@ -1343,7 +1343,7 @@ Greys
     <div class="color-swatch"
          style="color: black; background-color: #bebebe;
                 border-color: #5f5f5f">
-        grey / gray<br>
+        gray / grey<br>
         <code>#bebebe</code>
     </div>
 

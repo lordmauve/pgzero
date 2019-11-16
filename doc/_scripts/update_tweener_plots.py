@@ -9,14 +9,13 @@ IMAGE_SIZE = 64, 64
 
 
 def plot(f, filename):
-    num_points = 64
-    ix = np.array(range(num_points))
-    x = ix/num_points
+    num_points = 256
+    x = np.linspace(0, 1, num_points)
     y = np.vectorize(f)(x)
-    plt.tight_layout()
-    plt.figure(figsize=(1, 1), dpi=num_points)
+    plt.figure(figsize=(3, 1.5), dpi=num_points)
     plt.axis('off')
-    plt.plot(x, y)
+    plt.plot(x, y, color='#3a76a8')
+    plt.tight_layout()
     plt.savefig(filename, dpi=num_points)
     plt.close()
 
