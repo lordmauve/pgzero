@@ -771,7 +771,7 @@ Turquoises
     <div class="color-swatch"
          style="color: white; background-color: #2f4f4f;
                 border-color: #172727">
-        darkslategrey / darkslategray<br>
+        darkslategray / darkslategrey<br>
         <code>#2f4f4f</code>
     </div>
 
@@ -945,7 +945,7 @@ Blues
     <div class="color-swatch"
          style="color: black; background-color: #778899;
                 border-color: #3b444c">
-        lightslategrey / lightslategray<br>
+        lightslategray / lightslategrey<br>
         <code>#778899</code>
     </div>
 
@@ -995,7 +995,7 @@ Blues
     <div class="color-swatch"
          style="color: white; background-color: #000080;
                 border-color: #000040">
-        navyblue / navy<br>
+        navy / navyblue<br>
         <code>#000080</code>
     </div>
 
@@ -1333,7 +1333,7 @@ Greys
     <div class="color-swatch"
          style="color: black; background-color: #a9a9a9;
                 border-color: #545454">
-        darkgrey / darkgray<br>
+        darkgray / darkgrey<br>
         <code>#a9a9a9</code>
     </div>
 

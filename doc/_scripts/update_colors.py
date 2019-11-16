@@ -56,7 +56,8 @@ def simplified_color_table():
         by_hex.setdefault(html, []).append(name)
 
     return {
-        ' / '.join(names): THECOLORS[names[0]] for names in by_hex.values()
+        ' / '.join(sorted(names)): THECOLORS[names[0]]
+        for names in by_hex.values()
     }
 
 
