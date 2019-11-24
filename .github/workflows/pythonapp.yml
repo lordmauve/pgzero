@@ -16,7 +16,7 @@ jobs:
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
-        flake8 --count .
+        flake8 --count pgzero pgzrun.py setup.py test
     - name: Install xvfb
       run: |
           sudo apt-get install xvfb
