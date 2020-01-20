@@ -1,4 +1,16 @@
-"""Game to solve a randomly generated maze."""
+"""Game to solve a randomly generated maze.
+
+Ideas for improvement:
+
+* Change maze colour every game
+* Randomize the position of the start and goal.
+* Add more collectibles, eg. coins.
+* Count the number of moves.
+* Generate more interesting mazes by biasing the algorithm. Instead of
+  `random.choice()`, try a weighted random choice, perhaps with higher weight
+  for horizontal moves, or going "straight ahead".
+
+"""
 
 from itertools import product
 import random
@@ -55,8 +67,11 @@ def generate_maze():
     This algorithm is guaranteed to provide a route from the start point to
     all points in the grid.
 
-    We store the available moves as a set of edges. If `frozenset([a, b])` is
-    in `edges`, then there is a route between a and b.
+    See https://en.wikipedia.org/wiki/Maze_generation_algorithm for more on
+    maze generation.
+
+    We store the available moves as a set of edges. If `frozenset([a, b])`
+    is in `edges`, then there is a route between a and b.
 
     Seperately, we compute a list of lines to draw, based on the edges that
     are *not* available. We add a line in each such case. Calculating the
