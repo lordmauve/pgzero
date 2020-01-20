@@ -1,3 +1,5 @@
+"""Game to solve a randomly generated maze."""
+
 from itertools import product
 import random
 
@@ -42,7 +44,27 @@ def neighbours(pos):
         yield (x, y + 1)
 
 
-def generate_grid():
+def generate_maze():
+    """Generate a new maze.
+
+    We use a simple maze generation algorithm that fills all squares in the
+    grid, visiting each one once. When we have a choice of where to go next,
+    we pick at random. If we have no choices, we backtrack to where we last
+    had a choice, and if we still have a choice, we pick a different choice.
+
+    This algorithm is guaranteed to provide a route from the start point to
+    all points in the grid.
+
+    We store the available moves as a set of edges. If `frozenset([a, b])` is
+    in `edges`, then there is a route between a and b.
+
+    Seperately, we compute a list of lines to draw, based on the edges that
+    are *not* available. We add a line in each such case. Calculating the
+    lines to draw one time after the maze is generated makes the game run
+    faster than doing the same operation every frame.
+
+    """
+    # Generate the grid
     edges.clear()
     unvisited = set(cells())
     pos = (0, 0)
@@ -68,25 +90,38 @@ def generate_grid():
         edges.add(edge)
         pos = next_pos
 
-
-def draw():
-    screen.clear()
+    # Generate the lines
+    lines.clear()
     for pos in cells():
         r = cell_to_rect(pos)
         x, y = pos
         if x == 0:
-            screen.draw.line(r.topleft, r.bottomleft, LINE_COLOR)
+            lines.append((r.topleft, r.bottomleft))
         if y == 0:
-            screen.draw.line(r.topleft, r.topright, LINE_COLOR)
+            lines.append((r.topleft, r.topright))
         if frozenset((pos, (x + 1, y))) not in edges:
-            screen.draw.line(r.topright, r.bottomright, LINE_COLOR)
+            lines.append((r.topright, r.bottomright))
         if frozenset((pos, (x, y + 1))) not in edges:
-            screen.draw.line(r.bottomleft, r.bottomright, LINE_COLOR)
+            lines.append((r.bottomleft, r.bottomright))
+
+
+def draw():
+    """Draw the screen.
+
+    Because we save a list of the lines to draw when the grid is generated,
+    here we just have to iterate through that list.
+
+    We also draw the PC and target sprites.
+
+    """
+    screen.clear()
+    for start, end in lines:
+        screen.draw.line(start, end, LINE_COLOR)
     target.draw()
     pc.draw()
 
 
-generate_grid()
+generate_maze()
 
 pc = Actor('pc')
 pc.topleft = (0, 0)
@@ -96,6 +131,13 @@ target = Actor('target', topleft=cell_to_rect(TARGET).topleft)
 
 
 def on_key_down(key):
+    """When a direction key is pressed, move the actor.
+
+    We must check if the actor can move in that direction, ie. that there is
+    an edge between the current position and the position we want to move it
+    to.
+
+    """
     px, py = pc.grid_pos
     dest = None
     if key is keys.UP:
@@ -119,10 +161,16 @@ def on_key_down(key):
             pc.grid_pos = dest
             if dest == TARGET:
                 clock.schedule_unique(reset, 0.3)
+                tone.play('A4', 0.3)
+            else:
+                tone.play('E3', 0.05)
+        else:
+            tone.play('Ab3', 0.2)
 
 
 def reset():
-    generate_grid()
+    """Reset by generating a new maze and moving the PC back to the start."""
+    generate_maze()
     pc.topleft = pc.grid_pos = (0, 0)
 
 
