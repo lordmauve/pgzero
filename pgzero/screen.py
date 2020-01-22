@@ -29,33 +29,33 @@ class SurfacePainter:
     def _surf(self):
         return self._screen.surface
 
-    def line(self, start, end, color):
+    def line(self, start, end, color, width=1):
         """Draw a line from start to end."""
         start = round_pos(start)
         end = round_pos(end)
-        pygame.draw.line(self._surf, make_color(color), start, end, 1)
+        pygame.draw.line(self._surf, make_color(color), start, end, width)
 
-    def circle(self, pos, radius, color):
+    def circle(self, pos, radius, color, width=1):
         """Draw a circle."""
         pos = round_pos(pos)
-        pygame.draw.circle(self._surf, make_color(color), pos, radius, 1)
+        pygame.draw.circle(self._surf, make_color(color), pos, radius, width)
 
-    def filled_circle(self, pos, radius, color):
+    def filled_circle(self, pos, radius, color, width=0):
         """Draw a filled circle."""
         pos = round_pos(pos)
-        pygame.draw.circle(self._surf, make_color(color), pos, radius, 0)
+        pygame.draw.circle(self._surf, make_color(color), pos, radius, width)
 
-    def rect(self, rect, color):
+    def rect(self, rect, color, width=1):
         """Draw a rectangle."""
         if not isinstance(rect, RECT_CLASSES):
             raise TypeError("screen.draw.rect() requires a rect to draw")
-        pygame.draw.rect(self._surf, make_color(color), rect, 1)
+        pygame.draw.rect(self._surf, make_color(color), rect, width)
 
-    def filled_rect(self, rect, color):
+    def filled_rect(self, rect, color, width=0):
         """Draw a filled rectangle."""
         if not isinstance(rect, RECT_CLASSES):
             raise TypeError("screen.draw.filled_rect() requires a rect to draw")
-        pygame.draw.rect(self._surf, make_color(color), rect, 0)
+        pygame.draw.rect(self._surf, make_color(color), rect, width)
 
     def text(self, *args, **kwargs):
         """Draw text to the screen."""
