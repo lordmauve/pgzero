@@ -16,7 +16,7 @@ def round_pos(pos):
     try:
         return round(x), round(y)
     except TypeError:
-        raise TypeError("Coordinate values must be numbers (not {!r})".format(pos)) from None
+        raise TypeError("Coordinate values must be numbers (not {!r})".format(pos)) from None # noqa
 
 
 def make_color(arg):
@@ -56,7 +56,7 @@ class SurfacePainter:
         try:
             iter(points)
         except TypeError:
-            raise TypeError("screen.draw.filled_polygon() requires an iterable of points to draw") from None
+            raise TypeError("screen.draw.filled_polygon() requires an iterable of points to draw") from None # noqa
         points = [round_pos(point) for point in points]
         pygame.draw.polygon(self._surf, make_color(color), points, 1)
 
@@ -65,7 +65,7 @@ class SurfacePainter:
         try:
             iter(points)
         except TypeError:
-            raise TypeError("screen.draw.filled_polygon() requires an iterable of points to draw") from None
+            raise TypeError("screen.draw.filled_polygon() requires an iterable of points to draw") from None # noqa
         points = [round_pos(point) for point in points]
         pygame.draw.polygon(self._surf, make_color(color), points, 0)
 

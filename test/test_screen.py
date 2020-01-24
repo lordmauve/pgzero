@@ -83,6 +83,49 @@ class ScreenTest(unittest.TestCase):
             images.expected_gradient
         )
 
+    def test_line(self):
+        yellow = (255, 255, 0)
+        """We can draw a line."""
+        self.screen.draw.line(start=(0, 50), end=(100, 30), color=yellow, width=9)
+        self.assertImagesAlmostEqual(
+            self.screen.surface,
+            images.expected_line
+        )
+
+    def test_line_errors(self):
+        """draw.line raises errors as expected."""
+        yellow = (255, 255, 0)
+        with self.assertRaises(TypeError):
+            self.screen.draw.line(2, yellow)
+        with self.assertRaises(TypeError):
+            self.screen.draw.line([2], yellow)
+
+    def test_circle(self):
+        yellow = (255, 255, 0)
+        """We can draw a circle."""
+        self.screen.draw.circle(pos=(50, 50), radius=50, color=yellow, width=9)
+        self.assertImagesAlmostEqual(
+            self.screen.surface,
+            images.expected_circle
+        )
+
+    def test_filled_circle(self):
+        yellow = (255, 255, 0)
+        """We can draw a filled circle."""
+        self.screen.draw.filled_circle(pos=(50, 50), radius=50, color=yellow)
+        self.assertImagesAlmostEqual(
+            self.screen.surface,
+            images.expected_filled_circle
+        )
+
+    def test_circle_errors(self):
+        """draw.circle raises errors as expected."""
+        yellow = (255, 255, 0)
+        with self.assertRaises(TypeError):
+            self.screen.draw.circle(2, yellow)
+        with self.assertRaises(TypeError):
+            self.screen.draw.circle([2], yellow)
+
     def test_polygon(self):
         poly = [(0, 99), (49, 0), (99, 99)]
         yellow = (255, 255, 0)
@@ -96,7 +139,7 @@ class ScreenTest(unittest.TestCase):
     def test_filled_polygon(self):
         poly = [(0, 99), (49, 0), (99, 99)]
         yellow = (255, 255, 0)
-        """We can draw a polygon."""
+        """We can draw a filled polygon."""
         self.screen.draw.filled_polygon(poly, yellow)
         self.assertImagesAlmostEqual(
             self.screen.surface,
@@ -111,6 +154,31 @@ class ScreenTest(unittest.TestCase):
         with self.assertRaises(TypeError):
             self.screen.draw.polygon([2], yellow)
 
+    def test_rect(self):
+        yellow = (255, 255, 0)
+        """We can draw a rectangle."""
+        self.screen.draw.rect(rect=Rect((0, 0), (100, 100)), color=yellow, width=9)
+        self.assertImagesAlmostEqual(
+            self.screen.surface,
+            images.expected_rect
+        )
+
+    def test_filled_rect(self):
+        yellow = (255, 255, 0)
+        """We can draw a filled rectangle."""
+        self.screen.draw.filled_rect(rect=Rect((0, 0), (100, 100)), color=yellow)
+        self.assertImagesAlmostEqual(
+            self.screen.surface,
+            images.expected_filled_rect
+        )
+
+    def test_rect_errors(self):
+        """draw.rect raises errors as expected."""
+        yellow = (255, 255, 0)
+        with self.assertRaises(TypeError):
+            self.screen.draw.rect(2, yellow)
+        with self.assertRaises(TypeError):
+            self.screen.draw.rect([2], yellow)
 
     def test_wrapped_gradient_text(self):
         """We can draw wrapped gradient text.
