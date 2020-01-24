@@ -55,21 +55,21 @@ draw images to the screen ("blit" them).
         parameter. If ``image`` is a ``str`` then the named image will be
         loaded from the ``images/`` directory.
 
-    .. method:: draw.line(start, end, (r, g, b))
+    .. method:: draw.line(start, end, (r, g, b), width=1)
 
-        Draw a line from start to end.
+        Draw a line from start to end with a certain line width.
 
-    .. method:: draw.circle(pos, radius, (r, g, b))
+    .. method:: draw.circle(pos, radius, (r, g, b), width=1)
 
-        Draw the outline of a circle.
+        Draw the outline of a circle with a certain line width.
 
     .. method:: draw.filled_circle(pos, radius, (r, g, b))
 
         Draw a filled circle.
 
-    .. method:: draw.rect(rect, (r, g, b))
+    .. method:: draw.rect(rect, (r, g, b), width=1)
 
-        Draw the outline of a rectangle.
+        Draw the outline of a rectangle with a certain line width.
 
         Takes a :ref:`Rect <rect>`.
 
