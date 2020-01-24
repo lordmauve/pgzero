@@ -40,10 +40,10 @@ class SurfacePainter:
         pos = round_pos(pos)
         pygame.draw.circle(self._surf, make_color(color), pos, radius, width)
 
-    def filled_circle(self, pos, radius, color, width=0):
+    def filled_circle(self, pos, radius, color):
         """Draw a filled circle."""
         pos = round_pos(pos)
-        pygame.draw.circle(self._surf, make_color(color), pos, radius, width)
+        pygame.draw.circle(self._surf, make_color(color), pos, radius, 0)
 
     def rect(self, rect, color, width=1):
         """Draw a rectangle."""
@@ -51,11 +51,11 @@ class SurfacePainter:
             raise TypeError("screen.draw.rect() requires a rect to draw")
         pygame.draw.rect(self._surf, make_color(color), rect, width)
 
-    def filled_rect(self, rect, color, width=0):
+    def filled_rect(self, rect, color):
         """Draw a filled rectangle."""
         if not isinstance(rect, RECT_CLASSES):
             raise TypeError("screen.draw.filled_rect() requires a rect to draw")
-        pygame.draw.rect(self._surf, make_color(color), rect, width)
+        pygame.draw.rect(self._surf, make_color(color), rect, 0)
 
     def text(self, *args, **kwargs):
         """Draw text to the screen."""
