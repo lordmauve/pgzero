@@ -35,16 +35,16 @@ class SurfacePainter:
     def _surf(self):
         return self._screen.surface
 
-    def line(self, start, end, color):
+    def line(self, start, end, color, width=1):
         """Draw a line from start to end."""
         start = round_pos(start)
         end = round_pos(end)
-        pygame.draw.line(self._surf, make_color(color), start, end, 1)
+        pygame.draw.line(self._surf, make_color(color), start, end, width)
 
-    def circle(self, pos, radius, color):
+    def circle(self, pos, radius, color, width=1):
         """Draw a circle."""
         pos = round_pos(pos)
-        pygame.draw.circle(self._surf, make_color(color), pos, radius, 1)
+        pygame.draw.circle(self._surf, make_color(color), pos, radius, width)
 
     def filled_circle(self, pos, radius, color):
         """Draw a filled circle."""
@@ -69,11 +69,11 @@ class SurfacePainter:
         points = [round_pos(point) for point in points]
         pygame.draw.polygon(self._surf, make_color(color), points, 0)
 
-    def rect(self, rect, color):
+    def rect(self, rect, color, width=1):
         """Draw a rectangle."""
         if not isinstance(rect, RECT_CLASSES):
             raise TypeError("screen.draw.rect() requires a rect to draw")
-        pygame.draw.rect(self._surf, make_color(color), rect, 1)
+        pygame.draw.rect(self._surf, make_color(color), rect, width)
 
     def filled_rect(self, rect, color):
         """Draw a filled rectangle."""
