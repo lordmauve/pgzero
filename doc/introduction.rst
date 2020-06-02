@@ -267,7 +267,7 @@ Try it, and you'll see the alien revert to normal after 0.5 second. Try clicking
 rapidly and verify that the alien doesn't revert until 0.5 second after the last
 click.
 
-``clock.schedule_unique()`` accepts both integers and float numbers for the time interval. in the tutorial we are using
+``clock.schedule_unique()`` accepts both integers and float numbers for the time interval. In the tutorial we are using
 a float number to show this but feel free to use both to see the difference and effects the different values have.
 
 
