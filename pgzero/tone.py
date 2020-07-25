@@ -144,7 +144,7 @@ def validate_note(note):
     if match is None:
         raise InvalidNote(
             '%s is not a valid note. '
-            'notes are A-F, are either normal, flat (b) or sharp (#) '
+            'notes are A-G, are either normal, flat (b) or sharp (#) '
             'and of octave 0-8' % note
         )
     note, accidental, octave = match.group(1, 2, 3)
