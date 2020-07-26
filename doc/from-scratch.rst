@@ -9,9 +9,10 @@ The `Pygame Zero version`__ can be found in Pygame Zero repository.
 
 .. __: https://github.com/lordmauve/pgzero/blob/master/examples/flappybird/flappybird.py
 
-You can also download the `Scratch version`__ from the repository.
+You can also download the `Scratch 1.4 version`__ and `Scratch 3 version`__ from the repository.
 
 .. __: https://github.com/lordmauve/pgzero/raw/master/examples/flappybird/Flappy%20Bird.sb
+.. __: https://github.com/lordmauve/pgzero/raw/master/examples/flappybird/Flappy%20Bird.sb3
 
 The Pygame Zero version includes scoring logic, which is omitted in the code
 examples on this page to make it a closer comparison.
