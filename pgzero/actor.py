@@ -331,6 +331,12 @@ class Actor:
         s = self._build_transformed_surf()
         game.screen.blit(s, self.topleft)
 
+    def move_forwards(self, distance):
+        """Move this actor forwards a distance, according to its angle."""
+        angleInRads = radians(self.angle)
+        self.x += cos(angleInRads) * distance
+        self.y += sin(angleInRads) * -distance
+
     def angle_to(self, target):
         """Return the angle from this actors position to target, in degrees."""
         if isinstance(target, Actor):
