@@ -293,6 +293,11 @@ class Actor:
         self.topleft = px - ax, py - ay
 
     @property
+    def rect(self):
+        """Get a copy of the actor's rect object."""
+        return self._rect.copy()
+
+    @property
     def x(self):
         ax = self._anchor[0]
         return self.left + ax
