@@ -139,6 +139,10 @@ class ResourceLoader:
         validate_compatible_path(p)
         res = self._cache[key] = self._load(p, *args, **kwargs)
         return res
+    
+    def add(self, name, resource):
+        key = self.cache_key(name, (), {})
+        self.cache[key] = resource
 
     def unload(self, name, *args, **kwargs):
         key = self.cache_key(name, args, kwargs)
