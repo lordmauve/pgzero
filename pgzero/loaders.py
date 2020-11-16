@@ -142,7 +142,7 @@ class ResourceLoader:
     
     def add(self, name, resource):
         key = self.cache_key(name, (), {})
-        self.cache[key] = resource
+        self._cache[key] = resource
 
     def unload(self, name, *args, **kwargs):
         key = self.cache_key(name, args, kwargs)
