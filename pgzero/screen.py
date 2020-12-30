@@ -5,7 +5,7 @@ import pygame.draw
 from . import ptext
 from .rect import RECT_CLASSES, ZRect
 from . import loaders
-
+from .colors import ColorStr
 
 def round_pos(pos):
     """Round a tuple position so it can be used for drawing."""
@@ -22,6 +22,8 @@ def round_pos(pos):
 def make_color(arg):
     if isinstance(arg, tuple):
         return arg
+    if isinstance(arg, str):
+        return ColorStr.__getattribute__(ColorStr, arg)
     return tuple(pygame.Color(arg))
 
 
