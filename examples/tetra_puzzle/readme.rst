@@ -8,6 +8,10 @@ The license details for the code is specified in the beginning of main.py
 
 The license details for the music is specified in the music/HHavok-main.license.txt document
 
+Author
+------
+David Bern - drobban @ https://github.com/drobban
+
 User controls
 -------------
 - Key-left = Move active brick left
