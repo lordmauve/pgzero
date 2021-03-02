@@ -8,7 +8,7 @@ on:
     - published
 
 jobs:
-  dist:
+  buildpackage:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
@@ -17,52 +17,19 @@ jobs:
         python-version: 3.8
 
     - name: Install wheel and SDist requirements
-      run: python -m pip install "setuptools>=42.0" cython wheel twine
+      run: python -m pip install "setuptools>=42.0" wheel twine
 
     - name: Build SDist
-      run: python setup.py sdist
+      run: python setup.py sdist bdist_wheel
 
     - uses: actions/upload-artifact@v2
       with:
-        path: dist/*.tar.gz
-
-  build_wheels:
-    name: Wheel on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-18.04, windows-latest, macos-latest]
-
-    steps:
-    - uses: actions/checkout@v1
-      with:
-        submodules: true
-
-    - name: Setup Python
-      uses: actions/setup-python@v2
-
-    - name: Install cibuildwheel
-      run: python -m pip install cibuildwheel==1.5.5
-
-    - name: Build wheel
-      run: python -m cibuildwheel --output-dir wheelhouse
-      env:
-        CIBW_SKIP: pp* cp27*
-        CIBW_TEST_EXTRAS: test
-        CIBW_TEST_COMMAND: pytest {project}
-        CIBW_TEST_REQUIRES: pytest hypothesis
-        CIBW_BUILD_VERBOSITY: 1
-        CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
-        CIBW_MANYLINUX_I686_IMAGE: manylinux1
-
-    - name: Upload wheels
-      uses: actions/upload-artifact@v2
-      with:
-        path: wheelhouse/*.whl
+        path: |
+            dist/*.tar.gz
+            dist/*.whl
 
   publish:
-    needs: [dist, build_wheels]
+    needs: [buildpackage]
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
 
