@@ -19,7 +19,8 @@ jobs:
         python-version: 3.7
     - name: Install sound libraries
       run: |
-          sudo apt-get install libsndfile1 libvorbis0a
+          sudo apt-get install libsndfile1 libvorbis0a pulseaudio
+          pulseaudio -D --start
     - name: Install xvfb
       run: |
           sudo apt-get install xvfb
