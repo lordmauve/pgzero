@@ -18,6 +18,7 @@ jobs:
     - name: Cleanup xvfb pidx
       uses: bcomnes/cleanup-xvfb@v1
     - uses: actions/upload-artifact@master
+      if: ${{ failure() }}
       with:
           name: failed-image
           path: test/failed-image
