@@ -1,0 +1,31 @@
+name: Python application
+on: [push, pull_request]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python 3.x
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.x
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt -r requirements-dev.txt
+    - name: Lint with flake8
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 --count pgzero pgzrun.py test
+    - name: Install xvfb
+      run: |
+          sudo apt-get install xvfb
+    - name: Run tests under xvfb
+      run: |
+        xvfb-run --auto-servernum python setup.py test
+    - name: Cleanup xvfb pidx
+      uses: bcomnes/cleanup-xvfb@v1
+    - uses: actions/upload-artifact@master
+      with:
+          name: failed-image
+          path: test/failed-image
