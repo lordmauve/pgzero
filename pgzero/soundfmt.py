@@ -87,7 +87,12 @@ def riff_walk(f, offset):
 
 def identify(path):
     f = MagicReader(path)
-    if f.read_bytes(0) != b'RIFF':
+    magic = f.read_bytes(0)
+
+    if magic == b'OggS':
+        return "Ogg Vorbis"
+
+    if magic != b'RIFF':
         return 'Unknown format (not RIFF WAVE)'
 
     if f.read_bytes(8) != b'WAVE':
