@@ -34,7 +34,7 @@ class ScreenTest(unittest.TestCase):
         comp_surf = pygame.surfarray.array3d(computed)
         exp_surf = pygame.surfarray.array3d(expected)
 
-        if np.allclose(comp_surf, exp_surf, atol=2):
+        if np.allclose(comp_surf, exp_surf, atol=7):
             return
 
         name = sys._getframe(1).f_code.co_name
