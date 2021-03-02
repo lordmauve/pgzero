@@ -17,6 +17,9 @@ jobs:
       uses: actions/setup-python@v1
       with:
         python-version: 3.7
+    - name: Install sound libraries
+      run: |
+          sudo apt-get install libsndfile1 libvorbis0a
     - name: Install xvfb
       run: |
           sudo apt-get install xvfb

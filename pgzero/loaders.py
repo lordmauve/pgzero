@@ -185,8 +185,9 @@ It appears to be:
 
     {1}
 
-Pygame supports only uncompressed WAV files (PCM or ADPCM) and compressed
-Ogg Vorbis files. Try re-encoding the sound file, for example using Audacity:
+Pygame supports uncompressed WAV files (PCM or ADPCM), compressed Ogg Vorbis
+files, or MP3s, depending on the codecs installed. Try re-encoding the sound
+file, for example using Audacity:
 
     http://audacityteam.org/
 """.format(path, fmt).strip()) from None
