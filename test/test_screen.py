@@ -1,7 +1,9 @@
+import sys
 import unittest
 import pygame
 import pygame.image
 import numpy as np
+from pathlib import Path
 
 from pgzero.screen import Screen
 from pgzero.loaders import set_root, images
