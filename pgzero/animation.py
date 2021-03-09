@@ -238,7 +238,90 @@ class Animation:
         if not self.targets and stop:
             self.stop()
 
+class ImageAnimation:
+    _ACTOR_PROPERTIES = {'actor_x', 'actor_y'}
+    def __init__(self, actor, images, alt_images=None, every=1.0, source=None,
+            autostart=True, limit=None, on_finished=None):
+        self.actor = actor
+        self.main_images = images
+        self.alt_images = alt_images or []
+        self._images = images
+        self.freq = every
+        self.value = 0
+        self.count = len(images)
+        self._update_value = self._update_direct
+        self.running = False
+        self.limit = limit
+        self.on_finished = on_finished
+        self.finished = False
+        self.source = source
+        if not source:
+            # No external source - update() must be called manually
+            return
+        elif source in self._ACTOR_PROPERTIES:
+            self._update_value = self._update_property(source)
+        elif source != 'clock':
+            raise TypeError("invalid source: {}".format(source))
+        self.direct_updates_only = False
+        if autostart:
+            self.start()
+
+    def update(self, dv=1):
+        last_value = self.value
+        self._update_value(dv)
+        if self.alt_images:
+            if self.value > last_value:
+                self._images = self.alt_images
+            elif self.value < last_value:
+                self._images = self.main_images
+        index = int(self.value // self.freq) % self.count
+        self.actor.image = self._images[index]
+        if self.limit \
+                and self.value / (self.count * self.freq - dv) >= self.limit:
+            self._stop(finished=True)
+
+    def start(self):
+        if not self.source:
+            raise ValueError("start() not supported without a source")
+        if not self.finished:
+            each_tick(self.update)
+            self.running = True
+
+    def stop(self):
+        if not self.source:
+            raise ValueError("stop() not supported without a source")
+        self._stop(finished=False)
+
+    def next(self):
+        self.update(self.freq)
+
+    def prev(self):
+        self.update(-self.freq)
+
+    def _update_direct(self, dv):
+        self.value += dv
+
+    def _update_property(self, actor_property):
+        _, prop_name = actor_property.split('_', 1)
+        def update_func(dv):
+            self.value = getattr(self.actor, prop_name)
+        return update_func
+
+    def _stop(self, finished):
+        if not self.finished:
+            unschedule(self.update)
+            self.running = False
+        if finished and self.on_finished:
+            self.on_finished()
+            self.finished = True
+
 
 def animate(object, tween='linear', duration=1, on_finished=None, **targets):
     return Animation(object, tween, duration, on_finished=on_finished,
                      **targets)
+
+def _images(actor, images, alt_images=None, every=1.0, source=None,
+        autostart=True, limit=None, on_finished=None):
+    return ImageAnimation(actor, images, alt_images, every, source,
+            autostart, limit, on_finished)
+animate.images = _images
