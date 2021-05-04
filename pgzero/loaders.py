@@ -248,6 +248,9 @@ def getfont(
     and so on.
 
     """
+    if fontname is not None and sysfontname is not None:
+        raise ValueError("Can't set both fontname and sysfontname")
+    
     fontname = fontname or ptext.DEFAULT_FONT_NAME
     fontsize = fontsize or ptext.DEFAULT_FONT_SIZE
 
@@ -262,8 +265,9 @@ def getfont(
 
     if key in ptext._font_cache:
         return ptext._font_cache[key]
-
-    if fontname is None:
+    if sysfontname is not None:
+        font = pygame.font.SysFont(sysfontname, fontsize)
+    elif fontname is None:
         font = ptext._font_cache.get(key)
         if font:
             return font

@@ -480,7 +480,7 @@ def drawbox(text, rect, fontname=None, sysfontname=None, lineheight=None, anchor
     y = rect.y + vanchor * rect.height
     fontsize = _fitsize(text, fontname, sysfontname, bold, italic, underline,
                         rect.width, rect.height, lineheight, strip)
-    return draw(text, (x, y), fontname=fontname, fontsize=fontsize, lineheight=lineheight,
+    return draw(text, (x, y), fontname=fontname, sysfontname=sysfontname, fontsize=fontsize, lineheight=lineheight,
                 width=rect.width, strip=strip, anchor=anchor, **kwargs)
 
 
