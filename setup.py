@@ -8,9 +8,9 @@ with io.open(path, encoding='utf8') as f:
     LONG_DESCRIPTION = f.read()
 
 install_requires = [
-    "pygame>=1.9.2, <2.0 ; python_version<'3.8'",
-    "pygame==2.0.0.dev6 ; python_version>='3.8'",
+    "pygame==2.*",
     'numpy',
+    'pyfxr',
 ]
 
 extras_require = {
