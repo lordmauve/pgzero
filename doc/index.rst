@@ -41,7 +41,6 @@ User Guide
     :maxdepth: 2
 
     installation
-    repl
     ide-mode
     examples
     resources

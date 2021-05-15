@@ -1,7 +1,6 @@
 import sys
 import operator
 import time
-import asyncio
 
 import pygame
 import pgzero.clock
@@ -47,7 +46,6 @@ class PGZeroGame:
         self.height = None
         self.title = None
         self.icon = None
-        self.running = False
         self.keyboard = pgzero.keyboard.keyboard
         self.handlers = {}
 
@@ -220,23 +218,12 @@ class PGZeroGame:
 
     def run(self):
         """Invoke the main loop, and then clean up."""
-        loop = asyncio.SelectorEventLoop()
         try:
-            loop.run_until_complete(self.run_as_coroutine())
-        finally:
-            loop.close()
-
-    @asyncio.coroutine
-    def run_as_coroutine(self):
-        self.running = True
-        try:
-            yield from self.mainloop()
+            self.mainloop()
         finally:
             pygame.display.quit()
             pygame.mixer.quit()
-            self.running = False
 
-    @asyncio.coroutine
     def mainloop(self):
         """Run the main loop of Pygame Zero."""
         clock = pygame.time.Clock()
@@ -250,8 +237,6 @@ class PGZeroGame:
 
         self.need_redraw = True
         while True:
-            # TODO: Use asyncio.sleep() for frame delay if accurate enough
-            yield from asyncio.sleep(0)
             dt = clock.tick(60) / 1000.0
 
             for event in pygame.event.get():

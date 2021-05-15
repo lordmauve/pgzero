@@ -13,10 +13,6 @@ install_requires = [
     'pyfxr',
 ]
 
-extras_require = {
-    'repl': ["ptpython==0.41"],
-}
-
 setup(
     name='pgzero',
     version=pgzero.__version__,
@@ -34,17 +30,12 @@ setup(
         ]
     },
     install_requires=install_requires,
-    extras_require=extras_require,
     python_requires='>=3.4',
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Education',
         'License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)',
         'Programming Language :: Python :: 3 :: Only',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
         'Topic :: Education',
         'Topic :: Games/Entertainment',
     ],
