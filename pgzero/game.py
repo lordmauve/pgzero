@@ -9,6 +9,7 @@ import pgzero.clock
 import pgzero.keyboard
 import pgzero.screen
 import pgzero.loaders
+import pgzero.screen
 
 from . import constants
 
@@ -69,11 +70,10 @@ class PGZeroGame:
         h = getattr(mod, 'HEIGHT', 600)
         if w != self.width or h != self.height:
             self.screen = pygame.display.set_mode((w, h), DISPLAY_FLAGS)
-            if hasattr(self.mod, 'screen'):
-                self.mod.screen.surface = self.screen
-            else:
-                screen = pgzero.screen.Screen(self.screen)
-                self.mod.screen = builtins.screen = screen
+            pgzero.screen.screen_instance._set_surface(self.screen)
+
+            # Set the global screen that actors blit to
+            screen = self.screen
             self.width = w
             self.height = h
 

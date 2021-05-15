@@ -94,8 +94,7 @@ class SurfacePainter:
 
 class Screen:
     """Interface to the screen."""
-
-    def __init__(self, surface):
+    def _set_surface(self, surface):
         self.surface = surface
         self.width, self.height = surface.get_size()
 
@@ -148,3 +147,6 @@ class Screen:
 
     def __repr__(self):
         return "<Screen width={} height={}>".format(self.width, self.height)
+
+
+screen_instance = Screen()
