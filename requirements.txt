@@ -1,2 +1,3 @@
 numpy
 pygame
+pyfxr>=0.3.0

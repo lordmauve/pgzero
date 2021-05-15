@@ -9,3 +9,10 @@ doc/_build
 .DS_Store
 examples_dev
 .tox
+.ackrc
+.coverage
+/.vscode/
+
+/venv*/
+/notebooks
+/test/failed-image
