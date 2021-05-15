@@ -13,6 +13,7 @@ examples_dev
 .coverage
 /.vscode/
 
+/.venv/
 /venv*/
 /notebooks
 /test/failed-image
