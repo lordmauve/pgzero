@@ -44,7 +44,7 @@ User Guide
     repl
     ide-mode
     examples
-    tutorials
+    resources
     other-libs
     changelog
 

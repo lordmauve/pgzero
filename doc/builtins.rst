@@ -254,6 +254,7 @@ stop the sound as well as query its length in seconds:
 .. class:: Sound
 
     .. method:: play()
+        :noindex:
 
         Play the sound.
 
@@ -805,8 +806,7 @@ This could be used in a Pygame Zero program like this::
         beep.play()
 
 
-.. _data_storage:
-
+.. _data-storage:
 
 Data Storage
 ------------
