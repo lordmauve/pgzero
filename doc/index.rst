@@ -42,6 +42,7 @@ User Guide
 
     installation
     ide-mode
+    resources
     other-libs
     changelog
 

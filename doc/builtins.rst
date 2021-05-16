@@ -227,6 +227,7 @@ stop the sound as well as query its length in seconds:
 .. class:: Sound
 
     .. method:: play()
+        :noindex:
 
         Play the sound.
 
