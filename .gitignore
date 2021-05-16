@@ -9,3 +9,6 @@ doc/_build
 .DS_Store
 examples_dev
 /test/failed-image/
+
+/.tox/
+/.venv/
