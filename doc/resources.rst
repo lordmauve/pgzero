@@ -31,9 +31,13 @@ Online Tutorials
 * `Coding Games with Pygame Zero and Python`_ - teaches programming in Python
   for complete beginners, moving into several complete examples.
 
+* `Game Development with Pygame Zero`_ - walks through creating several
+  small, fun games.
+
 
 .. _`Simple Game Tutorials`: https://simplegametutorials.github.io/pygamezero/
 .. _`Coding Games with Pygame Zero and Python`: https://electronstudio.github.io/pygame-zero-book/
+.. _`Game Development with Pygame Zero`: https://aposteriori.trinket.io/game-development-with-pygame-zero
 
 
 Magazines
