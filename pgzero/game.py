@@ -2,7 +2,6 @@ import sys
 import operator
 import time
 import asyncio
-import builtins
 
 import pygame
 import pgzero.clock
