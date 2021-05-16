@@ -1,6 +1,15 @@
 Pygame Zero
 ===========
 
+.. image:: https://img.shields.io/pypi/v/pgzero
+   :alt: PyPI
+
+.. image:: https://img.shields.io/pypi/dm/pgzero
+   :alt: PyPI - Downloads
+
+.. image:: https://img.shields.io/readthedocs/pygame-zero
+   :alt: Read the Docs
+
 A zero-boilerplate games programming framework for Python 3, based on Pygame.
 
 Some examples
