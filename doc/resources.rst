@@ -62,3 +62,15 @@ There are numerous Pygame Zero tutorial videos on YouTube_; here are some:
 * `How to use Pygame Zero <https://www.youtube.com/watch?v=qAbPMXH7V0k>`_ (TeCoEd)
 
 .. _YouTube: https://www.youtube.com/
+
+
+Hardware
+--------
+
+* Phidgets_ make a range of electronic devices - sensors, motors, input devices,
+  and more - that connect to your computer over USB and can be used from Python
+  programs. They have a `range of Pygame Zero projects for you to try`__ with
+  Phidgets, and they offer a discount for educators.
+
+.. _Phidgets: https://www.phidgets.com
+.. __: https://www.phidgets.com/education/learn/projects/pygame-zero-projects/
