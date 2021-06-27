@@ -6,6 +6,7 @@ import asyncio
 import pygame
 import pgzero.clock
 import pgzero.keyboard
+import pgzero.joysticks
 import pgzero.screen
 import pgzero.loaders
 import pgzero.screen
@@ -34,6 +35,19 @@ def positional_parameters(handler):
     code = handler.__code__
     return code.co_varnames[:code.co_argcount]
 
+
+def joy_axis_mapper(axis):
+    return constants.joy_axis(round(axis))
+
+
+def joy_value_mapper(value):
+    return constants.joy_value(round(value))
+
+
+def joy_button_mapper(button, context={}):
+    joy_number = getattr(context.get('event'), 'joy', 0) 
+    button_name = pgzero.joysticks.get_joy_btn_name(joy_number, button)
+    return constants.joy_button(button_name)
 
 class DEFAULTICON:
     """Sentinel indicating that we want to use the default icon."""
@@ -105,16 +119,23 @@ class PGZeroGame:
         pygame.MOUSEMOTION: 'on_mouse_move',
         pygame.KEYDOWN: 'on_key_down',
         pygame.KEYUP: 'on_key_up',
-        constants.MUSIC_END: 'on_music_end'
+        pygame.JOYBUTTONUP: 'on_joystick_up',
+        pygame.JOYBUTTONDOWN: 'on_joystick_down',
+        pygame.JOYAXISMOTION: 'on_joystick_motion',
+        constants.MUSIC_END: 'on_music_end',
     }
 
     def map_buttons(val):
         return {c for c, pressed in zip(constants.mouse, val) if pressed}
 
     EVENT_PARAM_MAPPERS = {
-        'buttons': map_buttons,
-        'button': constants.mouse,
-        'key': constants.keys
+        'buttons': ('buttons', map_buttons),
+        'button': ('button', constants.mouse),
+        'key': ('key', constants.keys),
+        'joy_button': ('button', joy_button_mapper),
+        'axis': ('axis', joy_axis_mapper),
+        'value': ('value', joy_value_mapper),
+        'joy': ('joy', constants.joysticks)
     }
 
     def load_handlers(self):
@@ -145,13 +166,18 @@ class PGZeroGame:
 
         def make_getter(mapper, getter):
             if mapper:
-                return lambda event: mapper(getter(event))
+                # can we pass context?
+                pass_context = hasattr(mapper, '__code__') and mapper.__code__.co_argcount > 1 and 'context' in mapper.__code__.co_varnames
+                if pass_context:
+                    return lambda event: mapper(getter(event), context={'event': event})
+                else:
+                    return lambda event: mapper(getter(event))
             return getter
 
         param_handlers = []
         for name in param_names:
-            getter = operator.attrgetter(name)
-            mapper = self.EVENT_PARAM_MAPPERS.get(name)
+            attribute_name, mapper = self.EVENT_PARAM_MAPPERS.get(name) or (None, None)
+            getter = operator.attrgetter(attribute_name or name)
             param_handlers.append((name, make_getter(mapper, getter)))
 
         def prep_args(event):
@@ -249,6 +275,8 @@ class PGZeroGame:
         pgzclock = pgzero.clock.clock
 
         self.need_redraw = True
+        pgzero.joysticks.initialize_joysticks()
+
         while True:
             # TODO: Use asyncio.sleep() for frame delay if accurate enough
             yield from asyncio.sleep(0)
@@ -256,10 +284,15 @@ class PGZeroGame:
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
+                    pgzero.joysticks.quit_joysticks()
                     return
-                if event.type == pygame.KEYDOWN:
+
+                if pgzero.joysticks.process_event(event):
+                    pass
+                elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_q and \
                             event.mod & (pygame.KMOD_CTRL | pygame.KMOD_META):
+                        pgzero.joysticks.quit_joysticks()
                         sys.exit(0)
                     self.keyboard._press(event.key)
                 elif event.type == pygame.KEYUP:

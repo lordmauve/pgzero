@@ -1,0 +1,30 @@
+{
+    "snes": {
+        "button_x": 0,
+        "button_y": 3,
+        "button_a": 1,
+        "button_b": 2,
+        "button_select": 8,
+        "button_start": 9,
+        "button_right": 5,
+        "button_left": 4,
+        "axis": {
+            "horizontal": 0,
+            "vertical": 1
+        }
+    },
+    "Microsoft X-Box 360 pad": {
+        "button_x": 3,
+        "button_y": 2,
+        "button_a": 1,
+        "button_b": 0,
+        "button_select": 6,
+        "button_start": 7,
+        "button_right": 5,
+        "button_left": 4,
+        "axis": {
+            "horizontal": 0,
+            "vertical": 1
+        }
+    }
+}
