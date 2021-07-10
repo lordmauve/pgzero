@@ -17,16 +17,15 @@ screen = None  # This global surface is what actors draw to
 DISPLAY_FLAGS = 0
 
 
-def exit():
-    """Wait for up to a second for all sounds to play out
-    and then exit
+def exit(exit_status=0):
+    """Cleanly exits pgzero and pygame.
+
+    Args:
+        exit_status (int): Exit status. The default value of 0 indicates
+            a successful termination.
+
     """
-    t0 = time.time()
-    while pygame.mixer.get_busy():
-        time.sleep(0.1)
-        if time.time() - t0 > 1.0:
-            break
-    sys.exit()
+    sys.exit(exit_status)
 
 
 def positional_parameters(handler):
@@ -218,6 +217,55 @@ class PGZeroGame:
                 )
             return draw
 
+    def _call_users_on_enter_func(self):
+        # Calls the user's on_enter function if defined.
+        try:
+            on_enter = self.mod.on_enter
+        except AttributeError:
+            # No func defined, so nothing to do.
+            return
+
+        if 0 != on_enter.__code__.co_argcount:
+            # Put exception string on its own line for a cleaner traceback.
+            raise TypeError(
+                    'on_enter() must not take any arguments'
+            )
+
+        on_enter()
+
+    def _call_users_on_exit_func(self, exit_status):
+        # Calls the user's on_exit function if defined.
+        # Supports calling functions with zero or one argument (exit_status).
+        try:
+            on_exit = self.mod.on_exit
+        except AttributeError:
+            # No func defined, so nothing to do.
+            return
+
+        if 0 == on_exit.__code__.co_argcount:
+            on_exit()
+        elif 1 == on_exit.__code__.co_argcount:
+            on_exit(exit_status)
+        else:
+            # Put exception string on its own line for a cleaner traceback.
+            raise TypeError(
+                    'on_exit() can only take up to one argument'
+            )
+
+    def _on_exit(self, exit_status):
+        # Exit clean up done here.
+        # User's on_exit func is called right after exiting the game loop.
+        self._call_users_on_exit_func(exit_status)
+
+        # Wait (up to a second) for all sounds to play out.
+        t0 = time.time()
+        while pygame.mixer.get_busy():
+            time.sleep(0.1)
+            if time.time() - t0 > 1.0:
+                break
+
+        pygame.quit()  # Uninitialize any initialized pygame modules.
+
     def run(self):
         """Invoke the main loop, and then clean up."""
         loop = asyncio.SelectorEventLoop()
@@ -229,12 +277,19 @@ class PGZeroGame:
     @asyncio.coroutine
     def run_as_coroutine(self):
         self.running = True
+        exit_status = 0
+
         try:
             yield from self.mainloop()
+        except SystemExit as e:
+            exit_status = e.code
         finally:
-            pygame.display.quit()
-            pygame.mixer.quit()
+            self._on_exit(exit_status)
             self.running = False
+
+        # This needs to be outside the finally clause to allow all other
+        # exceptions to be passed up.
+        sys.exit(exit_status)
 
     @asyncio.coroutine
     def mainloop(self):
@@ -247,8 +302,11 @@ class PGZeroGame:
         self.load_handlers()
 
         pgzclock = pgzero.clock.clock
-
         self.need_redraw = True
+
+        # User's on_enter func is called right before entering the game loop.
+        self._call_users_on_enter_func()
+
         while True:
             # TODO: Use asyncio.sleep() for frame delay if accurate enough
             yield from asyncio.sleep(0)
@@ -258,9 +316,9 @@ class PGZeroGame:
                 if event.type == pygame.QUIT:
                     return
                 if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_q and \
-                            event.mod & (pygame.KMOD_CTRL | pygame.KMOD_META):
-                        sys.exit(0)
+                    if (event.key == pygame.K_q and
+                            event.mod & (pygame.KMOD_CTRL | pygame.KMOD_META)):
+                        return
                     self.keyboard._press(event.key)
                 elif event.type == pygame.KEYUP:
                     self.keyboard._release(event.key)
