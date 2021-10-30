@@ -235,10 +235,14 @@ class PGZeroGame:
 
         pgzclock = pgzero.clock.clock
 
+        from time import perf_counter_ns
         self.need_redraw = True
+
+        ftimes = []
         while True:
             dt = clock.tick(60) / 1000.0
 
+            start_time = perf_counter_ns()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     return
@@ -259,5 +263,12 @@ class PGZeroGame:
             screen_change = self.reinit_screen()
             if screen_change or update or pgzclock.fired or self.need_redraw:
                 draw()
+                frame_time = perf_counter_ns() - start_time
+                ftimes.append(frame_time)
+                if len(ftimes) >= 60:
+                    mean_fps = 1_000_000_000 * len(ftimes) / sum(ftimes)
+                    print(f"mean fps: {mean_fps:0.1f}")
+                    print(f"worst fps: {1e9 / max(ftimes):0.1f}")
+                    ftimes.clear()
                 pygame.display.flip()
                 self.need_redraw = False
