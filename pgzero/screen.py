@@ -139,7 +139,7 @@ class Screen:
         """
         if isinstance(image, str):
             image = loaders.images.load(image)
-        self.surface.blit(image, pos)
+        self.surface.blit(image, pos, None, pygame.BLEND_ALPHA_SDL2)
 
     @property
     def draw(self):
