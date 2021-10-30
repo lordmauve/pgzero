@@ -8,6 +8,7 @@ import warnings
 import sys
 import os
 import pygame
+from contextlib import contextmanager
 pygame.mixer.pre_init(frequency=22050, size=-16, channels=2)
 pygame.init()
 
@@ -121,9 +122,11 @@ def load_and_run(path, repl=False):
     sys._pgzrun = True
 
     prepare_mod(mod)
-    exec(code, mod.__dict__)
+    with temp_window():
+        exec(code, mod.__dict__)
 
     pygame.display.init()
+    PGZeroGame.show_default_icon()
     try:
         run_mod(mod, repl=repl)
     finally:
@@ -131,6 +134,40 @@ def load_and_run(path, repl=False):
         pygame.display.quit()
         clock.clock.clear()
         del sys.modules[name]
+
+
+@contextmanager
+def temp_window():
+    """Create a temporary hidden window for the duration of the context.
+
+    Several Pygame surface operations access the state of the screen as a
+    global:
+
+    * Surface.convert_alpha() without arguments converts a surface for fast
+      blitting to the display.
+    * Surface() without flags creates a surface identical to the display
+      format.
+
+    There's no good API to expose what the display format is until we create
+    a window, so we create a temporary window, which let us use these
+    functions. The expectation is that when we create a real window this will
+    have the same display format and blits etc will still be fast.
+
+    After the initial load we dispose of this window and start again. Resizing
+    the initial window has a problem: it doesn't recenter the window on the
+    screen.
+
+    """
+    # An icon needs to exist before the window is created.
+    PGZeroGame.show_default_icon()
+    pygame.display.set_mode(
+        (100, 100),
+        flags=(DISPLAY_FLAGS & ~pygame.SHOWN) | pygame.HIDDEN,
+    )
+    try:
+        yield
+    finally:
+        pygame.display.quit()
 
 
 def prepare_mod(mod):
@@ -149,10 +186,6 @@ def prepare_mod(mod):
     """
     storage.storage._set_filename_from_path(mod.__file__)
     loaders.set_root(mod.__file__)
-
-    # An icon needs to exist before the window is created.
-    PGZeroGame.show_default_icon()
-    pygame.display.set_mode((100, 100), DISPLAY_FLAGS)
 
     # Copy pgzero builtins into system builtins
     from . import builtins as pgzero_builtins

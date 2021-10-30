@@ -14,7 +14,7 @@ from . import constants
 
 
 screen = None  # This global surface is what actors draw to
-DISPLAY_FLAGS = 0
+DISPLAY_FLAGS = pygame.SHOWN
 
 
 def exit():
