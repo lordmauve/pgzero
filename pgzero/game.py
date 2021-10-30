@@ -1,6 +1,8 @@
 import sys
 import operator
 import time
+import types
+from time import perf_counter
 
 import pygame
 import pgzero.clock
@@ -39,13 +41,27 @@ class DEFAULTICON:
 
 
 class PGZeroGame:
-    def __init__(self, mod):
+    """The core game loop for Pygame Zero.
+
+    Dispatch events, call update functions, draw. Repeat.
+    """
+
+    def __init__(
+        self,
+        mod: types.ModuleType,
+        fps: bool = False
+    ):
+        """Construct a game loop given the pgzero module mod.
+
+        If fps is True, show a FPS count at the bottom left of the window.
+        """
         self.mod = mod
         self.screen = None
         self.width = None
         self.height = None
         self.title = None
         self.icon = None
+        self.fps = fps
         self.keyboard = pgzero.keyboard.keyboard
         self.handlers = {}
 
@@ -66,7 +82,11 @@ class PGZeroGame:
         w = getattr(mod, 'WIDTH', 800)
         h = getattr(mod, 'HEIGHT', 600)
         if w != self.width or h != self.height:
-            self.screen = pygame.display.set_mode((w, h), DISPLAY_FLAGS)
+            self.screen = pygame.display.set_mode(
+                (w, h),
+                DISPLAY_FLAGS,
+                vsync=1
+            )
             pgzero.screen.screen_instance._set_surface(self.screen)
 
             # Set the global screen that actors blit to
@@ -170,12 +190,6 @@ class PGZeroGame:
 
         return new_handler
 
-    def dispatch_event(self, event):
-        handler = self.handlers.get(event.type)
-        if handler:
-            self.need_redraw = True
-            handler(event)
-
     def get_update_func(self):
         """Get a one-argument update function.
 
@@ -224,51 +238,116 @@ class PGZeroGame:
             pygame.display.quit()
             pygame.mixer.quit()
 
+    def handle_events(self, dt, update) -> bool:
+        """Handle all events for the current frame.
+
+        Return True if an event was handled.
+        """
+        updated = False
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                sys.exit(0)
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_q and \
+                        event.mod & (pygame.KMOD_CTRL | pygame.KMOD_META):
+                    sys.exit(0)
+                self.keyboard._press(event.key)
+            elif event.type == pygame.KEYUP:
+                self.keyboard._release(event.key)
+            handler = self.handlers.get(event.type)
+            if handler:
+                handler(event)
+                updated = True
+
+        clock = pgzero.clock.clock
+        clock.tick(dt)
+        updated |= clock.fired
+
+        if update:
+            update(dt)
+            updated = True
+
+        updated |= self.reinit_screen()
+        return updated
+
     def mainloop(self):
         """Run the main loop of Pygame Zero."""
-        clock = pygame.time.Clock()
         self.reinit_screen()
 
         update = self.get_update_func()
         draw = self.get_draw_func()
         self.load_handlers()
 
-        pgzclock = pgzero.clock.clock
+        logic_timer = Timer('logic', print=self.fps)
+        draw_timer = Timer('draw', print=self.fps)
+        for i, dt in enumerate(frames(60)):
+            with logic_timer:
+                updated = self.handle_events(dt, update)
 
-        from time import perf_counter_ns
-        self.need_redraw = True
+            if updated:
+                with draw_timer:
+                    draw()
 
-        ftimes = []
-        while True:
-            dt = clock.tick(60) / 1000.0
-
-            start_time = perf_counter_ns()
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    return
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_q and \
-                            event.mod & (pygame.KMOD_CTRL | pygame.KMOD_META):
-                        sys.exit(0)
-                    self.keyboard._press(event.key)
-                elif event.type == pygame.KEYUP:
-                    self.keyboard._release(event.key)
-                self.dispatch_event(event)
-
-            pgzclock.tick(dt)
-
-            if update:
-                update(dt)
-
-            screen_change = self.reinit_screen()
-            if screen_change or update or pgzclock.fired or self.need_redraw:
-                draw()
-                frame_time = perf_counter_ns() - start_time
-                ftimes.append(frame_time)
-                if len(ftimes) >= 60:
-                    mean_fps = 1_000_000_000 * len(ftimes) / sum(ftimes)
-                    print(f"mean fps: {mean_fps:0.1f}")
-                    print(f"worst fps: {1e9 / max(ftimes):0.1f}")
-                    ftimes.clear()
+                if self.fps and i % 60 == 0:
+                    fps = 1000 / (draw_timer.mean + logic_timer.mean)
+                    print(f"fps: {fps:0.1f}")
                 pygame.display.flip()
-                self.need_redraw = False
+
+
+def frames(fps=60):
+    """Iterate over frames at the given fps, yielding time delta (in s)."""
+    from time import perf_counter_ns, sleep
+    tgt = 1 / fps  # target frame time
+
+    t = perf_counter_ns()
+    dt = tgt
+    dts = []
+
+    awake_lag = 0
+    while True:
+        yield dt
+        nextt = perf_counter_ns()
+        dt = (nextt - t) / 1e9
+        if dt < tgt:
+            sleep(tgt - dt - awake_lag)
+            nextt = perf_counter_ns()
+            dt = (nextt - t) / 1e9
+        t = nextt
+        dts.append(dt)
+        if len(dts) > 60:
+            mean = sum(dts) / len(dts)
+            awake_lag = (mean - tgt) * 0.5
+            dts.clear()
+
+
+class Timer:
+    """Context manager to time the game loop."""
+
+    __slots__ = (
+        'name',
+        'times',
+        'start',
+        'mean',
+        'print',
+    )
+
+    def __init__(self, name, print=False):
+        self.name = name
+        self.times = []
+        self.mean = 0
+        self.print = print
+
+    def __enter__(self):
+        self.start = perf_counter()
+
+    def __exit__(self, *_):
+        ftimes = self.times
+        ftimes.append((perf_counter() - self.start) * 1e3)
+        if len(self.times) >= 60 or not self.mean:
+            self.mean = sum(ftimes) / len(ftimes)
+            if self.print:
+                print(
+                    f"{self.name} mean: {self.mean:0.1f}ms  "
+                    f"worst: {max(ftimes):0.1f}ms")
+            ftimes.clear()

@@ -3,7 +3,7 @@ from . import clock
 from . import loaders
 from .game import PGZeroGame, DISPLAY_FLAGS
 from types import ModuleType
-from optparse import OptionParser
+from argparse import ArgumentParser
 import warnings
 import sys
 import os
@@ -62,25 +62,32 @@ def main():
     if not _check_python_ok_for_pygame():
         _substitute_full_framework_python()
 
-    parser = OptionParser()
-    options, args = parser.parse_args()
-
-    if len(args) != 1:
-        parser.error("You must specify which module to run.")
+    parser = ArgumentParser()
+    parser.add_argument(
+        '--fps',
+        action='store_true',
+        help="Print periodic FPS measurements on the terminal."
+    )
+    parser.add_argument(
+        'program',
+        help="The Pygame Zero program to run."
+    )
+    args = parser.parse_args()
 
     if __debug__:
         warnings.simplefilter('default', DeprecationWarning)
-    path = path = args[0]
-    load_and_run(path)
+
+    load_and_run(args)
 
 
-def load_and_run(path):
+def load_and_run(args):
     """Load and run the given Python file as the main PGZero game module.
 
     Note that the 'import pgzrun' IDE mode doesn't pass through this entry
     point, as the module is already loaded.
 
     """
+    path = args.program
     with open(path, 'rb') as f:
         src = f.read()
 
@@ -103,7 +110,7 @@ def load_and_run(path):
     pygame.display.init()
     PGZeroGame.show_default_icon()
     try:
-        run_mod(mod)
+        run_mod(mod, fps=args.fps)
     finally:
         # Clean some of the state we created, useful in testing
         pygame.display.quit()
@@ -169,6 +176,6 @@ def prepare_mod(mod):
         python_builtins.__dict__.setdefault(k, v)
 
 
-def run_mod(mod):
+def run_mod(mod, **kwargs):
     """Run the module."""
-    PGZeroGame(mod).run()
+    PGZeroGame(mod, **kwargs).run()
