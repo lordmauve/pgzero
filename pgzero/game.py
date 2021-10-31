@@ -238,6 +238,33 @@ class PGZeroGame:
             pygame.display.quit()
             pygame.mixer.quit()
 
+    def inject_global_handlers(self):
+        """Inject handlers provide by the Pygame Zero system.
+
+        Some of these wrap user handlers so must be injected later.
+        """
+        self.handlers[pygame.QUIT] = lambda e: sys.exit(0)
+        self.handlers[pygame.VIDEOEXPOSE] = lambda e: None
+
+        user_key_down = self.handlers.get(pygame.KEYDOWN)
+        user_key_up = self.handlers.get(pygame.KEYUP)
+
+        def key_down(event):
+            if event.key == pygame.K_q and \
+                    event.mod & (pygame.KMOD_CTRL | pygame.KMOD_META):
+                sys.exit(0)
+            self.keyboard._press(event.key)
+            if user_key_down:
+                return user_key_down(event)
+
+        def key_up(event):
+            self.keyboard._release(event.key)
+            if user_key_up:
+                return user_key_up(event)
+
+        self.handlers[pygame.KEYDOWN] = key_down
+        self.handlers[pygame.KEYUP] = key_up
+
     def handle_events(self, dt, update) -> bool:
         """Handle all events for the current frame.
 
@@ -246,15 +273,6 @@ class PGZeroGame:
         updated = False
 
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                sys.exit(0)
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_q and \
-                        event.mod & (pygame.KMOD_CTRL | pygame.KMOD_META):
-                    sys.exit(0)
-                self.keyboard._press(event.key)
-            elif event.type == pygame.KEYUP:
-                self.keyboard._release(event.key)
             handler = self.handlers.get(event.type)
             if handler:
                 handler(event)
@@ -278,6 +296,7 @@ class PGZeroGame:
         update = self.get_update_func()
         draw = self.get_draw_func()
         self.load_handlers()
+        self.inject_global_handlers()
 
         logic_timer = Timer('logic', print=self.fps)
         draw_timer = Timer('draw', print=self.fps)
