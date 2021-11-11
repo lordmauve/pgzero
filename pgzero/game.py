@@ -308,9 +308,11 @@ class PGZeroGame:
                 with draw_timer:
                     draw()
 
-                if self.fps and i % 60 == 0:
-                    fps = 1000 / (draw_timer.mean + logic_timer.mean)
-                    print(f"fps: {fps:0.1f}")
+                if self.fps and i and i % 60 == 0:
+                    ftime_ms = draw_timer.get_mean() + logic_timer.get_mean()
+                    fps = 1000 / ftime_ms
+
+                    print(f"fps: {fps:0.1f}  time per frame: {ftime_ms:0.1f}ms")
                 pygame.display.flip()
 
 
@@ -345,28 +347,33 @@ class Timer:
 
     __slots__ = (
         'name',
-        'times',
+        'total', 'count', 'worst',
         'start',
-        'mean',
         'print',
     )
 
     def __init__(self, name, print=False):
         self.name = name
-        self.times = []
-        self.mean = 0
+        self.total = 0
+        self.count = 0
+        self.worst = 0
         self.print = print
 
     def __enter__(self):
         self.start = perf_counter()
 
     def __exit__(self, *_):
-        ftimes = self.times
-        ftimes.append((perf_counter() - self.start) * 1e3)
-        if len(self.times) >= 60 or not self.mean:
-            self.mean = sum(ftimes) / len(ftimes)
-            if self.print:
-                print(
-                    f"{self.name} mean: {self.mean:0.1f}ms  "
-                    f"worst: {max(ftimes):0.1f}ms")
-            ftimes.clear()
+        t = (perf_counter() - self.start) * 1e3
+        self.count += 1
+        self.total += t
+        if t > self.worst:
+            self.worst = t
+
+    def get_mean(self) -> float:
+        mean = self.total / self.count
+        if self.print:
+            print(
+                f"{self.name} mean: {mean:0.1f}ms  "
+                f"worst: {self.worst:0.1f}ms")
+        self.worst = self.total = self.count = 0
+        return mean
