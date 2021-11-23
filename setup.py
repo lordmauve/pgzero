@@ -8,7 +8,7 @@ with io.open(path, encoding='utf8') as f:
     LONG_DESCRIPTION = f.read()
 
 install_requires = [
-    "pygame==2.*",
+    "pygame>=2.1",
     'numpy',
     'pyfxr',
 ]
