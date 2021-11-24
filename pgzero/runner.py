@@ -77,17 +77,16 @@ def main():
     if __debug__:
         warnings.simplefilter('default', DeprecationWarning)
 
-    load_and_run(args)
+    load_and_run(args.program, fps=args.fps)
 
 
-def load_and_run(args):
+def load_and_run(path, *, fps: bool = False):
     """Load and run the given Python file as the main PGZero game module.
 
     Note that the 'import pgzrun' IDE mode doesn't pass through this entry
     point, as the module is already loaded.
 
     """
-    path = args.program
     with open(path, 'rb') as f:
         src = f.read()
 
@@ -110,7 +109,7 @@ def load_and_run(args):
     pygame.display.init()
     PGZeroGame.show_default_icon()
     try:
-        run_mod(mod, fps=args.fps)
+        run_mod(mod, fps=fps)
     finally:
         # Clean some of the state we created, useful in testing
         pygame.display.quit()
