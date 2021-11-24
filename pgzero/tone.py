@@ -107,6 +107,8 @@ def _convert_args(pitch, duration, *, waveform=Waveform.SIN, volume=0.8):
         )
     if not duration:
         raise ValueError("Note has zero duration")
+    if isinstance(pitch, str):
+        pitch = pyfxr.note_to_hertz(pitch)
     return ToneParams(pitch, duration, Waveform(waveform), volume)
 
 

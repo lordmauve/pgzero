@@ -1,12 +1,8 @@
 import re
 from unittest import TestCase
 
-import numpy
+from pgzero.tone import _convert_args
 
-from pgzero.tone import (
-    sine_array_onecycle, note_value,
-    note_to_hertz, validate_note, InvalidNote
-)
 
 TEST_NOTES = {
     'A4': dict(val=0, hertz=440, parts=('A', '', 4)),
@@ -20,31 +16,16 @@ TEST_NOTES = {
 
 
 class ToneTest(TestCase):
-    def test_sine_array(self):
-        numpy.allclose(
-            sine_array_onecycle(2205),
-            numpy.array(
-                [0, 19260, 31164, 31164, 19260, 0, -19260, -31164, -31164, -19260],
-                dtype=numpy.int16
-            )
-        )
-
-    def test_validate_note(self):
-        for note, val in TEST_NOTES.items():
-            self.assertEqual(validate_note(note), val['parts'])
-
+    def test_invalid_note(self):
         for note in ['A9', 'H4', '4A', 'a4', 'Az4']:
             errmsg = re.escape(
                 '%s is not a valid note. notes are A-F, are either normal, '
                 'flat (b) or sharp (#) and of octave 0-8' % note
             )
-            with self.assertRaisesRegex(InvalidNote, errmsg):
-                validate_note(note)
-
-    def test_note_value(self):
-        for note, val in TEST_NOTES.items():
-            self.assertEqual(note_value(*val['parts']), val['val'])
+            with self.assertRaisesRegex(Exception, errmsg):
+                _convert_args(note, 1)
 
     def test_note_to_hertz(self):
         for note, val in TEST_NOTES.items():
-            self.assertAlmostEqual(note_to_hertz(note), val['hertz'], 2)
+            params = _convert_args(note, 1.0)
+            self.assertAlmostEqual(params.hz, val['hertz'], 2)
