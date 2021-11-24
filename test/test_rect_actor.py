@@ -32,14 +32,16 @@ TEST_MODULE = "pgzero.actor"
 TEST_DISP_W, TEST_DISP_H = (500, 500)
 
 
-pygame.init()
-pygame.display.set_mode((TEST_DISP_W, TEST_DISP_H))
-
-
 class RectActorTestSingularNoIp(unittest.TestCase):
     @classmethod
-    def setUpClass(self):
+    def setUpClass(cls):
         set_root(__file__)
+        pygame.init()
+        pygame.display.set_mode((TEST_DISP_W, TEST_DISP_H))
+
+    @classmethod
+    def tearDownClass(cls):
+        pygame.display.quit()
 
     def setUp(self):
         # the Alien should be 66 x 92 px
@@ -87,6 +89,7 @@ class RectActorTestSingularNoIp(unittest.TestCase):
 
     def testCollideRectFalseSeparate(self):
         self.assertFalse(self.separate_rect.colliderect(self.actor))
+
 
 if __name__=="__main__":
     unittest.main()
