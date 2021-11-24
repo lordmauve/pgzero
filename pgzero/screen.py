@@ -73,7 +73,28 @@ class SurfacePainter:
         """Draw a rectangle."""
         if not isinstance(rect, RECT_CLASSES):
             raise TypeError("screen.draw.rect() requires a rect to draw")
-        pygame.draw.rect(self._surf, make_color(color), rect, width)
+
+        if width <= 1:
+            pygame.draw.rect(self._surf, make_color(color), rect, width)
+            return
+
+        c = make_color(color)
+
+        hw = width / 2
+        l, t, w, h = rect
+        l1, l2 = round(l - hw), round(l + hw)
+        r1, r2 = round(l + w - hw), round(l + w + hw)
+        t1, t2 = round(t - hw), round(t + hw)
+        b1, b2 = round(t + h - hw), round(t + h + hw)
+
+        def r(x1, y1, x2, y2):
+            r = pygame.Rect(x1, y1, x2 - x1, y2 - y1)
+            pygame.draw.rect(self._surf, c, r, 0)
+
+        r(l1, t1, r2, t2)  # top inclusive
+        r(l1, t2, l2, b1)  # left exclusive
+        r(r1, t2, r2, b1)  # right exclusive
+        r(l1, b1, r2, b2)  # bottom inclusive
 
     def filled_rect(self, rect, color):
         """Draw a filled rectangle."""

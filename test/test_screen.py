@@ -1,6 +1,8 @@
 import sys
 import unittest
 from pathlib import Path
+import os
+import warnings
 
 import numpy as np
 import pygame
@@ -12,12 +14,80 @@ from pgzero.loaders import set_root, images
 from pgzero.rect import Rect, ZRect
 
 
+ROOT = Path(__file__).parent
+
+
+def assert_screen_match(computed, name):
+    """Check that the image on the screen matches the reference image.
+
+    If the reference image is missing, raise an exception, unless the
+    environment variable $W2D_SAVE_REF is given; if given, save current output
+    as new reference images. These will need to be checked and committed.
+
+    """
+    ref_image = ROOT / 'expected-image' / f'{name}.png'
+
+    if not ref_image.exists():
+        if os.environ.get('PGZ_SAVE_REF'):
+            warnings.warn(
+                f"No reference image exists for {name}; saving new screenshot",
+                UserWarning
+            )
+            pygame.image.save(computed, str(ref_image))
+            return
+        else:
+            raise AssertionError(
+                f"No reference image exists for {name}; set $PGZ_SAVE_REF "
+                "to create."
+            )
+    else:
+        expected = pygame.image.load(str(ref_image))
+
+    comp_surf = pygame.surfarray.array3d(computed)
+    exp_surf = pygame.surfarray.array3d(expected)
+
+    failname = ROOT / 'failed-image' / f'{name}.png'
+
+    if np.allclose(comp_surf, exp_surf, atol=2):
+        if failname.exists():
+            failname.unlink()
+        return
+
+    failname.parent.mkdir(exist_ok=True)
+
+    w, h = computed.get_size()
+    out = pygame.Surface(
+        (w * 2 + 1, w),
+        depth=32,
+    )
+    out.blit(computed, (0, 0))
+    out.blit(expected, (w + 1, 0))
+    WHITE = (255, 255, 255)
+    FONTHEIGHT = 40
+    pygame.draw.line(
+        out,
+        WHITE,
+        (w, 0),
+        (w, h),
+    )
+    font = pygame.font.SysFont(pygame.font.get_default_font(), FONTHEIGHT)
+    y = h - FONTHEIGHT
+    out.blit(font.render("Computed", True, WHITE), (10, y))
+    lbl = font.render("Expected", True, WHITE)
+    out.blit(lbl, (w * 2 - 9 - lbl.get_width(), y))
+    pygame.image.save(out, str(failname))
+
+    raise AssertionError(
+        "Images differ; saved comparison images to {}".format(failname)
+    )
+
+
 class ScreenTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Initialise the display and set loaders to target the current dir."""
         pygame.init()
-        cls.surf = pygame.display.set_mode((200, 100))
+        cls.surf = pygame.display.set_mode((200, 200))
         set_root(__file__)
 
     @classmethod
@@ -57,42 +127,23 @@ class ScreenTest(unittest.TestCase):
     def test_blit_surf(self):
         """We can blit a surface to the screen."""
         self.screen.blit(images.alien, (0, 0))
-        self.assertImagesAlmostEqual(self.surf, images.expected_alien_blit)
+        assert_screen_match(self.surf, 'alien_blit')
 
     def test_blit_name(self):
         """screen.blit() accepts an image name instead of a Surface."""
         self.screen.blit('alien', (0, 0))
-        self.assertImagesAlmostEqual(
-            self.screen.surface,
-            images.expected_alien_blit
-        )
-
-    def test_bounds(self):
-        """test that the bounds method is present / works and that the return
-        value is minimally correct (top-left should equal 0, bottom-right
-        greater than 0)"""
-        b = self.screen.bounds()
-        self.assertEqual(b.left, 0)
-        self.assertEqual(b.top, 0)
-        self.assertGreater(b.width, 0)
-        self.assertGreater(b.height, 0)
+        assert_screen_match(self.surf, 'alien_blit')
 
     def test_fill_gradient(self):
         """We can fill the screen with a gradient."""
         self.screen.fill('black', gcolor='blue')
-        self.assertImagesAlmostEqual(
-            self.screen.surface,
-            images.expected_gradient
-        )
+        assert_screen_match(self.surf, 'gradient')
 
     def test_line(self):
         yellow = (255, 255, 0)
         """We can draw a line."""
         self.screen.draw.line(start=(0, 50), end=(100, 30), color=yellow, width=9)
-        self.assertImagesAlmostEqual(
-            self.screen.surface,
-            images.expected_line
-        )
+        assert_screen_match(self.surf, 'line')
 
     def test_line_errors(self):
         """draw.line raises errors as expected."""
@@ -106,19 +157,13 @@ class ScreenTest(unittest.TestCase):
         yellow = (255, 255, 0)
         """We can draw a circle."""
         self.screen.draw.circle(pos=(50, 50), radius=50, color=yellow, width=9)
-        self.assertImagesAlmostEqual(
-            self.screen.surface,
-            images.expected_circle
-        )
+        assert_screen_match(self.surf, 'circle')
 
     def test_filled_circle(self):
         yellow = (255, 255, 0)
         """We can draw a filled circle."""
         self.screen.draw.filled_circle(pos=(50, 50), radius=50, color=yellow)
-        self.assertImagesAlmostEqual(
-            self.screen.surface,
-            images.expected_filled_circle
-        )
+        assert_screen_match(self.surf, 'filled_circle')
 
     def test_circle_errors(self):
         """draw.circle raises errors as expected."""
@@ -133,20 +178,14 @@ class ScreenTest(unittest.TestCase):
         yellow = (255, 255, 0)
         """We can draw a polygon."""
         self.screen.draw.polygon(poly, yellow)
-        self.assertImagesAlmostEqual(
-            self.screen.surface,
-            images.expected_polygon
-        )
+        assert_screen_match(self.surf, 'polygon')
 
     def test_filled_polygon(self):
         poly = [(0, 99), (49, 0), (99, 99)]
         yellow = (255, 255, 0)
         """We can draw a filled polygon."""
         self.screen.draw.filled_polygon(poly, yellow)
-        self.assertImagesAlmostEqual(
-            self.screen.surface,
-            images.expected_filled_polygon
-        )
+        assert_screen_match(self.surf, 'filled_polygon')
 
     def test_polygon_errors(self):
         """draw.polygon raises errors as expected."""
@@ -159,20 +198,14 @@ class ScreenTest(unittest.TestCase):
     def test_rect(self):
         yellow = (255, 255, 0)
         """We can draw a rectangle."""
-        self.screen.draw.rect(rect=Rect((0, 0), (100, 100)), color=yellow, width=9)
-        self.assertImagesAlmostEqual(
-            self.screen.surface,
-            images.expected_rect
-        )
+        self.screen.draw.rect(rect=Rect((20, 20), (100, 100)), color=yellow, width=9)
+        assert_screen_match(self.surf, 'rect')
 
     def test_filled_rect(self):
         yellow = (255, 255, 0)
         """We can draw a filled rectangle."""
         self.screen.draw.filled_rect(rect=Rect((0, 0), (100, 100)), color=yellow)
-        self.assertImagesAlmostEqual(
-            self.screen.surface,
-            images.expected_filled_rect
-        )
+        assert_screen_match(self.surf, 'filled_rect')
 
     def test_rect_errors(self):
         """draw.rect raises errors as expected."""
@@ -196,16 +229,13 @@ class ScreenTest(unittest.TestCase):
             color='red',
             gcolor='blue'
         )
-        self.assertImagesAlmostEqual(
-            self.screen.surface,
-            images.expected_wrapped_gradient_text
-        )
+        assert_screen_match(self.surf, 'wrapped_gradient_text')
 
     def test_bounds(self):
         """We can get a bounding rect for the screen."""
         self.assertEqual(
             self.screen.bounds(),
-            ZRect(0, 0, 200, 100)
+            ZRect(0, 0, 200, 200)
         )
 
 
