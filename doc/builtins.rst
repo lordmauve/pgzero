@@ -491,8 +491,7 @@ attribute to some new image name::
 
 Actors have all the same attributes and methods as :ref:`Rect <rect>`,
 including methods like `.colliderect()`__ which can be used to test whether
-two actors have collided. A copy of an actor's :ref:`Rect <rect>` can be
-returned using the ``.rect`` attribute.
+two actors have collided.
 
 .. __: https://www.pygame.org/docs/ref/rect.html#pygame.Rect.colliderect
 
