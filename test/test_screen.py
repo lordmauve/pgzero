@@ -9,6 +9,7 @@ import pygame.surfarray
 
 from pgzero.screen import Screen
 from pgzero.loaders import set_root, images
+from pgzero.rect import Rect, ZRect
 
 
 class ScreenTest(unittest.TestCase):
@@ -25,7 +26,8 @@ class ScreenTest(unittest.TestCase):
         pygame.display.quit()
 
     def setUp(self):
-        self.screen = Screen(self.surf)
+        self.screen = Screen()
+        self.screen._set_surface(self.surf)
         self.screen.clear()
 
     def assertImagesAlmostEqual(self, computed, expected):
@@ -197,6 +199,13 @@ class ScreenTest(unittest.TestCase):
         self.assertImagesAlmostEqual(
             self.screen.surface,
             images.expected_wrapped_gradient_text
+        )
+
+    def test_bounds(self):
+        """We can get a bounding rect for the screen."""
+        self.assertEqual(
+            self.screen.bounds(),
+            ZRect(0, 0, 200, 100)
         )
 
 
