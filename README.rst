@@ -1,14 +1,23 @@
-Pygame Zero
-===========
+
+.. image:: https://img.shields.io/github/workflow/status/lordmauve/pgzero/Run%20tests/master
+    :target: https://github.com/lordmauve/pgzero/actions/workflows/test.yml
+    :alt: GitHub Test Status
 
 .. image:: https://img.shields.io/pypi/v/pgzero
+   :target: https://pypi.org/project/pgzero/
    :alt: PyPI
 
 .. image:: https://img.shields.io/pypi/dm/pgzero
+   :target: https://pypistats.org/packages/pgzero
    :alt: PyPI - Downloads
 
 .. image:: https://img.shields.io/readthedocs/pygame-zero
+   :target: https://pygame-zero.readthedocs.io/
    :alt: Read the Docs
+
+Pygame Zero
+===========
+
 
 A zero-boilerplate games programming framework for Python 3, based on Pygame.
 
