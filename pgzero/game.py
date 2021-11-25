@@ -2,7 +2,7 @@ import sys
 import operator
 import time
 import types
-from time import perf_counter
+from time import perf_counter, sleep
 
 import pygame
 import pgzero.clock
@@ -318,22 +318,21 @@ class PGZeroGame:
 
 def frames(fps=60):
     """Iterate over frames at the given fps, yielding time delta (in s)."""
-    from time import perf_counter_ns, sleep
     tgt = 1 / fps  # target frame time
 
-    t = perf_counter_ns()
+    t = perf_counter()
     dt = tgt
     dts = []
 
     awake_lag = 0
     while True:
         yield dt
-        nextt = perf_counter_ns()
-        dt = (nextt - t) / 1e9
+        nextt = perf_counter()
+        dt = nextt - t
         if dt < tgt:
             sleep(tgt - dt - awake_lag)
-            nextt = perf_counter_ns()
-            dt = (nextt - t) / 1e9
+            nextt = perf_counter()
+            dt = nextt - t
         t = nextt
         dts.append(dt)
         if len(dts) > 60:
