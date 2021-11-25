@@ -193,7 +193,9 @@ class SoundLoader(ResourceLoader):
     def _load(self, path):
         try:
             return pygame.mixer.Sound(path)
-        except pygame.error:
+        except pygame.error as err:
+            if not err.args[0].startswith('Unable to open file'):
+                raise
             from .soundfmt import identify
             try:
                 fmt = identify(path)

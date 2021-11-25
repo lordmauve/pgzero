@@ -20,12 +20,14 @@ jobs:
         # stricter tests for mission critical code
         flake8 --count pgzero pgzrun.py test
 
-    - name: Install xvfb
+    - name: Install xvfb and pulseaudio
       run: |
-          sudo apt-get install xvfb
+          sudo apt-get install xvfb pulseaudio
     - name: Run tests under xvfb
       run: |
-        XDG_RUNTIME_DIR="$RUNNER_TEMP" xvfb-run --auto-servernum python setup.py test
+        export XDG_RUNTIME_DIR="$RUNNER_TEMP"
+        pulseaudio -D --start
+        xvfb-run --auto-servernum python setup.py test
     - name: Cleanup xvfb pidx
       uses: bcomnes/cleanup-xvfb@v1
     - uses: actions/upload-artifact@master
