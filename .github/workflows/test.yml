@@ -1,4 +1,4 @@
-name: Python application
+name: "Run tests"
 on: [push, pull_request]
 jobs:
   build:
