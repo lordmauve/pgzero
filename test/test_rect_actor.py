@@ -53,19 +53,19 @@ class RectActorTestSingularNoIp(unittest.TestCase):
         self.enclosing_rect = Rect((0, 0), (500, 500))
 
     def test_union_separate(self):
-        self.assertEquals(
+        self.assertEqual(
             self.separate_rect.union(self.actor),
             Rect((0, 20), (166, 300))
         )
 
     def test_union_overlapping(self):
-        self.assertEquals(
+        self.assertEqual(
             self.overlapping_rect.union(self.actor),
             Rect((100, 100), (120, 142))
         )
 
     def test_union_enclosed(self):
-        self.assertEquals(
+        self.assertEqual(
             self.enclosed_rect.union(self.actor),
             Rect((100, 150), (66, 92))
         )
