@@ -15,7 +15,7 @@ class SoundFormatsTest(TestCase):
         s = sounds.load(name)
         duration = s.get_length()
 
-        assert 0.85 < duration < 1.0, \
+        assert 0.88 < duration < 0.95, \
             "Failed to correctly load sound (got length %0.1fs)" % duration
 
     def assert_errmsg(self, name, pattern):
@@ -31,43 +31,40 @@ class SoundFormatsTest(TestCase):
     def test_load_22kadpcm(self):
         self.assert_loadable('wav22kadpcm')
 
-    @expectedFailure  # See issue #22 - 8Khz files don't open correctly
     def test_load_8k16bitpcm(self):
         self.assert_loadable('wav8k16bitpcm')
 
-    @expectedFailure  # See issue #22 - 8Khz files don't open correctly
     def test_load_8k8bitpcm(self):
         self.assert_loadable('wav8k8bitpcm')
 
-    @expectedFailure  # See issue #22 - 8Khz files don't open correctly
     def test_load_8kadpcm(self):
         self.assert_loadable('wav8kadpcm')
 
-    @skip(
-        'This test crashes - reported upstream as '
-        'https://github.com/pygame/pygame/issues/406'
-    )
+    # @skip(
+    #     'This test crashes - reported upstream as '
+    #     'https://github.com/pygame/pygame/issues/406'
+    # )
     def test_load_11kgsm(self):
         self.assert_errmsg('wav22kgsm', 'WAV audio encoded as GSM')
 
-    @skip(
-        'This test crashes - reported upstream as '
-        'https://github.com/pygame/pygame/issues/406'
-    )
+    # @skip(
+    #     'This test crashes - reported upstream as '
+    #     'https://github.com/pygame/pygame/issues/406'
+    # )
     def test_load_11kulaw(self):
-        self.assert_errmsg('wav22kulaw', 'WAV audio encoded as .* µ-law')
+        self.assert_loadable('wav22kulaw')
 
-    @skip(
-        'This test crashes - reported upstream as '
-        'https://github.com/pygame/pygame/issues/406'
-    )
+    # @skip(
+    #     'This test crashes - reported upstream as '
+    #     'https://github.com/pygame/pygame/issues/406'
+    # )
     def test_load_8kmp316(self):
         self.assert_errmsg('wav8kmp316', 'WAV audio encoded as MP3')
 
-    @skip(
-        'This test crashes - reported upstream as '
-        'https://github.com/pygame/pygame/issues/406'
-    )
+    # @skip(
+    #     'This test crashes - reported upstream as '
+    #     'https://github.com/pygame/pygame/issues/406'
+    # )
     def test_load_8kmp38(self):
         self.assert_errmsg('wav8kmp38', 'WAV audio encoded as MP3')
 
