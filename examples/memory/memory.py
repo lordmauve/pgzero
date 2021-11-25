@@ -84,4 +84,3 @@ def on_mouse_down(pos, button):
 
 def next_turn():
     del STATUS[:]
-

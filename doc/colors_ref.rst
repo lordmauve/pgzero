@@ -1393,4 +1393,3 @@ Greys
        digits appended, eg. ``antiquewhite1``. Because the differences are small, and
        there are so many colours without these, these variants have been
        omitted here.
-

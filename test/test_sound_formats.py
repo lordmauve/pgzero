@@ -1,4 +1,4 @@
-from unittest import TestCase, expectedFailure, skip
+from unittest import TestCase
 import pygame
 from pgzero.loaders import sounds, set_root, UnsupportedFormat
 

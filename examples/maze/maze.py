@@ -187,5 +187,3 @@ def reset():
     """Reset by generating a new maze and moving the PC back to the start."""
     generate_maze()
     pc.topleft = pc.grid_pos = (0, 0)
-
-

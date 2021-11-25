@@ -351,4 +351,3 @@ Additionally you can access a set of constants that represent modifier keys:
     .. attribute:: NUM
     .. attribute:: CAPS
     .. attribute:: MODE
-

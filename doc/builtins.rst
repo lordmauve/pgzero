@@ -906,4 +906,3 @@ These are some of the most useful methods of ``storage``:
 .. tip::
 
     Remember to check that your game still works if the storage is empty!
-

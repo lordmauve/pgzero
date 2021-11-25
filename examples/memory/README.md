@@ -128,4 +128,3 @@ that as a graphic artist I am quite a respectable plumber.
 It's easy to adjust the timings of things, but it would be even easier
 if the values were _manifest constants_ the same as ROWS and COLS, and
 this would make the program logic easier to understand.
-

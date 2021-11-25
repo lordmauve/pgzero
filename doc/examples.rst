@@ -1,11 +1,11 @@
 Examples
 ========
 Pygame Zero has a collection of examples which you can use to learn by reading
-or modifying the code of the game. You can also play with them! These examples 
+or modifying the code of the game. You can also play with them! These examples
 aren't provided with a normal installation of Pygame Zero but they're available
 in the source code repository. To download them, follow the following steps:
 
-- Download the source code of Pygame Zero on the 
+- Download the source code of Pygame Zero on the
   `GitHub repository <https://github.com/lordmauve/pgzero>`_ by clicking in the
   big green button and choosing **Download ZIP**
 - Copy the ``examples`` folder whatever you want.
@@ -55,7 +55,7 @@ Lander
    :alt: Lander
    :height: 500
    :align: center
-   
+
 To play, run::
 
     pgzrun examples/lander/lander.py
@@ -66,7 +66,7 @@ Memory
    :alt: Memory
    :height: 500
    :align: center
-   
+
 To play, run::
 
     pgzrun examples/memory/memory.py
@@ -77,7 +77,7 @@ Mines
    :alt: Mines
    :height: 300
    :align: center
-   
+
 To play, run::
 
     pgzrun examples/mines/mines.py
@@ -88,7 +88,7 @@ Pong
    :alt: Pong
    :height: 500
    :align: center
-   
+
 To play, run::
 
     pgzrun examples/pong/pong.py
@@ -99,7 +99,7 @@ Snake
    :alt: Snake
    :height: 300
    :align: center
-   
+
 To play, run::
 
     pgzrun examples/snake/snake.py
@@ -110,7 +110,7 @@ Tetra puzzle
    :alt: Tetra Puzzle
    :height: 500
    :align: center
-   
+
 To play, run::
 
     pgzrun examples/tetra_puzzle/main.py
@@ -121,7 +121,7 @@ Tron
    :alt: Tron
    :height: 500
    :align: center
-   
+
 To play, run::
 
     pgzrun examples/tron/tron.py

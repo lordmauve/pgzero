@@ -18,4 +18,3 @@ def update(dt):
 
 def on_mouse_down(button, pos):
     print("Mouse button", button, "clicked at", pos)
-
