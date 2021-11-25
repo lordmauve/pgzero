@@ -12,19 +12,20 @@ from pgzero.rect import Rect
 
 # All methods that take another Rect, no in place modification:
 
-#pygame.Rect.union 	— 	joins two rectangles into one
-#pygame.Rect.contains 	— 	test if one rectangle is inside another
-#pygame.Rect.colliderect 	— 	test if two rectangles overlap
+# pygame.Rect.union 	— 	joins two rectangles into one
+# pygame.Rect.contains 	— 	test if one rectangle is inside another
+# pygame.Rect.colliderect 	— 	test if two rectangles overlap
 
 # All others (TODO)
 
-#pygame.Rect.union_ip 	— 	joins two rectangles into one, in place
-#pygame.Rect.unionall 	— 	the union of many rectangles
-#pygame.Rect.unionall_ip 	— 	the union of many rectangles, in place
-#pygame.Rect.collidelist 	— 	test if one rectangle in a list intersects
-#pygame.Rect.collidelistall 	— 	test if all rectangles in a list intersect
-#pygame.Rect.collidedict 	— 	test if one rectangle in a dictionary intersects
-#pygame.Rect.collidedictall 	— 	test if all rectangles in a dictionary intersect
+# pygame.Rect.union_ip 	— 	joins two rectangles into one, in place
+# pygame.Rect.unionall 	— 	the union of many rectangles
+# pygame.Rect.unionall_ip 	— 	the union of many rectangles, in place
+# pygame.Rect.collidelist 	— 	test if one rectangle in a list intersects
+# pygame.Rect.collidelistall 	— 	test if all rectangles in a list intersect
+# pygame.Rect.collidedict 	— 	test if one rectangle in a dictionary intersects
+# pygame.Rect.collidedictall 	— 	test if all rectangles in a dictionary intersect
+#
 # Note: as Actor should simply masquerade as a Rect, I'd presume that "in place"
 # methods will only modify the other rect *not* the Actor
 
@@ -64,7 +65,10 @@ class RectActorTestSingularNoIp(unittest.TestCase):
         )
 
     def testUnionEnclosed(self):
-        self.assertEquals(self.enclosed_rect.union(self.actor), Rect((100, 150), (66, 92)))
+        self.assertEquals(
+            self.enclosed_rect.union(self.actor),
+            Rect((100, 150), (66, 92))
+        )
 
     def testContainsTrue(self):
         self.assertTrue(self.enclosing_rect.contains(self.actor))
@@ -91,5 +95,5 @@ class RectActorTestSingularNoIp(unittest.TestCase):
         self.assertFalse(self.separate_rect.colliderect(self.actor))
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     unittest.main()
