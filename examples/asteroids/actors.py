@@ -1,7 +1,6 @@
 import math
 import random
 
-from pygame import transform
 from pygame.math import Vector2
 
 
@@ -53,9 +52,11 @@ class Asteroid(Actor):
         self.bounds = bounds
         self.mass = mass
         pos = (random.randint(0, bounds[0]), random.randint(0, bounds[1]))
-        self.velocity = Vector2(random.uniform(-1, 1), random.uniform(-1, 1)).normalize() * 50
-        super(Asteroid, self).__init__('asteroid%s-%s' % (random.randint(1, self.ASTEROIDS), self.mass), pos=pos,
-                                       **kwargs)
+        self.velocity = Vector2()
+        self.velocity.from_polar((50, random.uniform(0, 360)))
+
+        image = 'asteroid%s-%s' % (random.randint(1, self.ASTEROIDS), self.mass)
+        super().__init__(image, pos=pos, **kwargs)
         self.exact_pos = Vector2(pos)
 
     def move(self, dt):

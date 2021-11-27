@@ -250,7 +250,5 @@ def draw():
         )
 
 
-
-
 place_apple()
 start()

@@ -1,5 +1,4 @@
 from enum import Enum
-import json
 import operator
 
 from pygame.math import Vector2
@@ -91,7 +90,8 @@ def update(dt):
         if not game.player.frozen:
             game.player.move(dt, (WIDTH, HEIGHT))
 
-        if game.lives and not game.player.invulnerable and game.player.collidelist(game.asteroids) > -1:
+        if game.lives and not game.player.invulnerable \
+                and game.player.collidelist(game.asteroids) > -1:
             sounds.player_explosion.play()
             game.lives -= 1
             game.player.destroy((WIDTH / 2, HEIGHT / 2))
@@ -109,8 +109,17 @@ def update(dt):
         max_leaders = {}
         for initial, score in leader_board:
             max_leaders[initial] = max(score, max_leaders.get(initial, 0))
-        game.leader_board['max_leaders'] = sorted(max_leaders.items(), key=operator.itemgetter(1), reverse=True)[:15]
-        game.leader_board['leader_board'] = sorted(leader_board, key=operator.itemgetter(1), reverse=True)[:15]
+
+        game.leader_board['max_leaders'] = sorted(
+            max_leaders.items(),
+            key=operator.itemgetter(1),
+            reverse=True
+        )[:15]
+        game.leader_board['leader_board'] = sorted(
+            leader_board,
+            key=operator.itemgetter(1),
+            reverse=True
+        )[:15]
 
 
 def respawn():
@@ -188,7 +197,11 @@ def draw():
     screen.clear()
     screen.blit(stars, (0, 0))
     if game.stage is GameStage.start:
-        screen.draw.text('Press SPACE to start', center=(WIDTH / 2, HEIGHT / 2), color='white')
+        screen.draw.text(
+            'Press SPACE to start',
+            center=(WIDTH / 2, HEIGHT / 2),
+            color='white'
+        )
     elif game.stage is GameStage.game:
         if game.player.show:
             game.player.draw()
@@ -196,7 +209,11 @@ def draw():
             life_icons[i].draw()
         screen.draw.text(str(round(game.score)), midtop=(WIDTH / 2, 10))
     elif game.stage is GameStage.level_complete:
-        screen.draw.text('LEVEL %s COMPLETE!' % game.level, midbottom=(WIDTH / 2, HEIGHT / 2), fontsize=60)
+        screen.draw.text(
+            f'LEVEL {game.level} COMPLETE!',
+            midbottom=(WIDTH / 2, HEIGHT / 2),
+            fontsize=60
+        )
         screen.draw.text(str(round(game.score)), midtop=(WIDTH / 2, 10))
         screen.draw.text('Next level in 3.. 2.. 1..', midtop=(WIDTH / 2, HEIGHT / 2))
     elif game.stage is GameStage.game_over:
@@ -211,11 +228,17 @@ def draw():
             top += 40
             max_top = top
             for initial, score in game.leader_board['leader_board']:
-                screen.draw.text('%s %s' % (initial, round(score)), midtop=((WIDTH / 2) - 60, top))
+                screen.draw.text(
+                    f'{initial} {round(score)}',
+                    midtop=((WIDTH / 2) - 60, top)
+                )
                 top += 24
 
             for initial, score in game.leader_board['max_leaders']:
-                screen.draw.text('%s %s' % (initial, round(score)), midtop=((WIDTH / 2) + 60, max_top))
+                screen.draw.text(
+                    f'{initial} {round(score)}',
+                    midtop=((WIDTH / 2) + 60, max_top)
+                )
                 max_top += 24
 
         screen.draw.text('Press SPACE to restart', midtop=(WIDTH / 2, top + 40))
