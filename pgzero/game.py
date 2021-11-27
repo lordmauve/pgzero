@@ -325,23 +325,16 @@ def frames(fps=60):
 
     t = perf_counter()
     dt = tgt
-    dts = []
 
-    awake_lag = 0
     while True:
         yield dt
         nextt = perf_counter()
         dt = nextt - t
         if dt < tgt:
-            sleep(tgt - dt - awake_lag)
+            sleep(tgt - dt)
             nextt = perf_counter()
             dt = nextt - t
         t = nextt
-        dts.append(dt)
-        if len(dts) > 60:
-            mean = sum(dts) / len(dts)
-            awake_lag = (mean - tgt) * 0.5
-            dts.clear()
 
 
 class Timer:
