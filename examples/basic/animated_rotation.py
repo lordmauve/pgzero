@@ -112,7 +112,7 @@ def next_ship_target():
 
 def move_ship():
     """Move the ship to the target."""
-    anim = animate(
+    animate(
         ship,
         tween='accel_decel',
         pos=ship.target,

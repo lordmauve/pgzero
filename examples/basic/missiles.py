@@ -1,6 +1,5 @@
 import random
 from collections import deque
-from itertools import tee
 from math import sin, floor
 WIDTH = 800
 HEIGHT = 400
@@ -79,9 +78,9 @@ class Perlin:
     def _get(self, p):
         n = int(floor(p / WIND_SCALE))
         frac = (p - n * WIND_SCALE) / WIND_SCALE
-        l = self._rnd(n)
-        r = self._rnd(n + 1)
-        return r * frac + (1.0 - frac) * l
+        left = self._rnd(n)
+        right = self._rnd(n + 1)
+        return frac * right + (1.0 - frac) * left
 
     def get(self, p):
         x, y = p

@@ -75,4 +75,4 @@ def explode_random():
     explode(x, y)
 
 
-clock.schedule_interval(explode_random, 1.0) # Schedule explosions every 1s
+clock.schedule_interval(explode_random, 1.0)  # Schedule explosions every 1s
