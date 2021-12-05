@@ -93,7 +93,8 @@ def draw():
         "all-time clunks: %d" % totalscore,
         "clunks per second: %d" % clunkers,
     ])
-    screen.draw.text(hudtext,
+    screen.draw.text(
+        hudtext,
         right=sx - 10,
         top=120,
         fontname="roboto_condensed",
