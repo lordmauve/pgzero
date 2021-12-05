@@ -180,11 +180,12 @@ class Game():
 
         target_y = max(40, min(target_y, HEIGHT - 80))
 
-        distance = abs(self.left_paddle.y - target_y)
-        duration = min(1.0, distance / 600.0)
-
-        animate(self.left_paddle, y=target_y, duration=.50,
-            on_finished=self.computer_stop_acting)
+        animate(
+            self.left_paddle,
+            y=target_y,
+            duration=.50,
+            on_finished=self.computer_stop_acting
+        )
 
     def computer_move_randomly(self):
         # move the paddle randomly during one second before launching the ball
@@ -198,8 +199,12 @@ class Game():
         else:
             on_finished = self.computer_launch
 
-        animate(self.left_paddle, y=target_y, duration=duration,
-            on_finished=on_finished)
+        animate(
+            self.left_paddle,
+            y=target_y,
+            duration=duration,
+            on_finished=on_finished
+        )
 
     def computer_act(self):
         if self.in_progress:
@@ -284,7 +289,6 @@ def update():
 
     if game.in_progress:
         game.proceed()
-
 
 
 def on_key_down(key):
