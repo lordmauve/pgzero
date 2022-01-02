@@ -65,7 +65,7 @@ class PGZeroGame:
         self.keyboard = pgzero.keyboard.keyboard
         self.handlers = {}
 
-    def reinit_screen(self):
+    def reinit_screen(self) -> bool:
         """Reinitialise the window.
 
         Return True if the dimensions of the screen changed.
@@ -93,6 +93,9 @@ class PGZeroGame:
             screen = self.screen
             self.width = w
             self.height = h
+
+            # Dimensions changed, request a redraw
+            changed = True
 
         title = getattr(self.mod, 'TITLE', 'Pygame Zero Game')
         if title != self.title:
