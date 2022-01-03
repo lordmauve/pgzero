@@ -1,4 +1,5 @@
-#to run this game type the command pgzrun mines.py into the terminal whilst in this directory
+# to run this game type the command pgzrun mines.py into the terminal
+# whilst in this directory
 
 ###########
 # Imports #
@@ -6,11 +7,11 @@
 from random import randint
 from math import floor
 
-#imports the top tiles
+# imports the top tiles
 cover = Actor('cover')
-flag  = Actor('flag')
+flag = Actor('flag')
 
-#creates a dictionary that stores all the possible bottom tile types
+# creates a dictionary that stores all the possible bottom tile types
 tiles = {0: Actor('blank'),
          1: Actor('one'),
          2: Actor('two'),
@@ -20,14 +21,14 @@ tiles = {0: Actor('blank'),
          6: Actor('six'),
          7: Actor('seven'),
          8: Actor('eight'),
-         'M': Actor('mine'),}
+         'M': Actor('mine'), }
 
 ##############
 # Game Setup #
 ##############
 
-wide  = 10
-tall  = 10
+wide = 10
+tall = 10
 mines = 10
 
 
@@ -44,28 +45,31 @@ def setup_empty_grid(wide, tall, filler):
         grid.append(row)
     return grid
 
+
 def populate_grid(grid, mines, wide, tall):
     for mine in range(mines):
-        x, y = randint(0, wide - 1), randint(0,tall - 1)
+        x, y = randint(0, wide - 1), randint(0, tall - 1)
         while grid[y][x] == 'M':
-            x, y = randint(0, wide - 1), randint(0,tall - 1)
+            x, y = randint(0, wide - 1), randint(0, tall - 1)
         grid[y][x] = 'M'
     return grid
+
 
 def count_mines(grid):
     for y in range(len(grid)):
         for x in range(len(grid[0])):
             if grid[y][x] != 'M':
-                neighbors = [(x - 1, y - 1), (x    , y - 1), (x + 1, y - 1),
-                             (x - 1, y    ),                 (x + 1, y    ),
-                             (x - 1, y + 1), (x    , y + 1), (x + 1, y + 1)]
+                neighbors = [(x - 1, y - 1), (x, y - 1), (x + 1, y - 1),
+                             (x - 1, y),                 (x + 1, y),
+                             (x - 1, y + 1), (x, y + 1), (x + 1, y + 1)]
                 for nx, ny in neighbors:
                     try:
                         if ny >= 0 and nx >= 0 and grid[ny][nx] == 'M':
                             grid[y][x] += 1
-                    except:
+                    except IndexError:
                         pass
     return grid
+
 
 def draw():
     xpos, ypos = -15, -15
@@ -104,15 +108,15 @@ def on_mouse_down(pos, button):
         elif top_grid[mousepos[1]][mousepos[0]] == 'F':
             top_grid[mousepos[1]][mousepos[0]] = 1
 
+
 def edge_detection(gridpos, grid):
     zeros = [gridpos]
-    past_zeros = []
     for zero in zeros:
         top_grid[zero[1]][zero[0]] = 0
         x, y = zero
-        neighbors = [(x - 1, y - 1), (x    , y - 1), (x + 1, y - 1),
-                     (x - 1, y    ),                 (x + 1, y    ),
-                     (x - 1, y + 1), (x    , y + 1), (x + 1, y + 1)]
+        neighbors = [(x - 1, y - 1), (x, y - 1), (x + 1, y - 1),
+                     (x - 1, y),                 (x + 1, y),
+                     (x - 1, y + 1), (x, y + 1), (x + 1, y + 1)]
         for nx, ny in neighbors:
             try:
                 if ny >= 0 and nx >= 0:
@@ -125,7 +129,7 @@ def edge_detection(gridpos, grid):
                         if top_grid[ny][nx] != 'F':
                             top_grid[ny][nx] = 0
 
-            except:
+            except IndexError:
                 pass
     return top_grid
 
@@ -133,11 +137,12 @@ def edge_detection(gridpos, grid):
 # Screen Setup #
 ################
 
-#creates two variables that define the width and height of the screen
-WIDTH = ((wide * 30) + 1) #adapts the screen size to fit the number of tiles chosen
-HEIGHT = ((tall * 30) + 1) #adapts the screen size to fit the number of tiles chosen
 
-top_grid  = setup_empty_grid(wide, tall, 1)
+# creates two variables that define the width and height of the screen
+WIDTH = ((wide * 30) + 1)  # adapts the screen size to fit the number of tiles chosen
+HEIGHT = ((tall * 30) + 1)  # adapts the screen size to fit the number of tiles chosen
+
+top_grid = setup_empty_grid(wide, tall, 1)
 base_grid = setup_empty_grid(wide, tall, 0)
 base_grid = populate_grid(base_grid, mines, wide, tall)
 base_grid = count_mines(base_grid)
