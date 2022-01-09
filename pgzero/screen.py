@@ -114,10 +114,10 @@ class SurfacePainter:
 
 def blit_gradient(start, stop, dest_surface):
     """Blit a gradient into a destination surface.
-    
+
     The function does not return anything as the gradient is written
     in-place in the destination surface.
-    
+
     Args:
       start: The starting (top) color as a tuple (red, green, blue).
       stop: The stopping (bottom) color as a tuple (red, green, blue).
