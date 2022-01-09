@@ -1,4 +1,3 @@
-import numpy as np
 import pygame
 import pygame.draw
 
@@ -113,6 +112,29 @@ class SurfacePainter:
         ptext.drawbox(*args, surf=self._surf, **kwargs)
 
 
+def blit_gradient(start, stop, dest_surface):
+    """Blit a gradient into a destination surface.
+    
+    The function does not return anything as the gradient is written
+    in-place in the destination surface.
+    
+    Args:
+      start: The starting (top) color as a tuple (red, green, blue).
+      stop: The stopping (bottom) color as a tuple (red, green, blue).
+      dest_surface: A pygame.Surface to write the gradient into.
+    Returns:
+      None."""
+    surface_compact = pygame.Surface((2, 2))
+    pixelarray = pygame.PixelArray(surface_compact)
+    pixelarray[0][0] = start
+    pixelarray[0][1] = stop
+    pixelarray[1][0] = start
+    pixelarray[1][1] = stop
+    pygame.transform.smoothscale(surface_compact,
+                                 pygame.PixelArray(dest_surface).shape,
+                                 dest_surface=dest_surface)
+
+
 class Screen:
     """Interface to the screen."""
     def _set_surface(self, surface):
@@ -132,13 +154,7 @@ class Screen:
         if gcolor:
             start = make_color(color)
             stop = make_color(gcolor)
-            pixs = pygame.surfarray.pixels3d(self.surface)
-            h = self.height
-
-            gradient = np.dstack(
-                [np.linspace(a, b, h) for a, b in zip(start, stop)][:3]
-            )
-            pixs[...] = gradient
+            blit_gradient(start, stop, self.surface)
         else:
             self.surface.fill(make_color(color))
 
