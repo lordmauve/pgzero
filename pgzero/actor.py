@@ -273,9 +273,10 @@ class Actor:
 
     @angle.setter
     def angle(self, angle):
-        self._angle = angle
-        self._transform()
-        self._update_transform(_set_angle)
+        if self._angle!=angle:
+            self._angle = angle
+            self._transform()
+            self._update_transform(_set_angle)
         
     @property
     def scale(self):
@@ -283,9 +284,10 @@ class Actor:
 
     @scale.setter
     def scale(self, scale):
-        self._scale = scale
-        self._transform()
-        self._update_transform(_set_scale)
+        if self._scale!=scale:
+            self._scale = scale
+            self._transform()
+            self._update_transform(_set_scale)
     
     @property
     def flip_x(self):
@@ -293,8 +295,9 @@ class Actor:
 
     @flip_x.setter
     def flip_x(self, flip_x):
-        self._flip_x = flip_x
-        self._update_transform(_set_flip)
+        if self._flip_x!=flip_x:
+            self._flip_x = flip_x
+            self._update_transform(_set_flip)
 
     @property
     def flip_y(self):
@@ -302,8 +305,9 @@ class Actor:
     
     @flip_y.setter
     def flip_y(self, flip_y):
-        self._flip_y = flip_y
-        self._update_transform(_set_flip)
+        if self.flip_y!=flip_y:
+            self._flip_y = flip_y
+            self._update_transform(_set_flip)
             
     @property
     def opacity(self):
