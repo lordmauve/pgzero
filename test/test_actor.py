@@ -110,6 +110,27 @@ class ActorTest(unittest.TestCase):
             a.angle += 1.0
         self.assertEqual(a.pos, (100.0, 100.0))
 
+    def test_no_scaling(self):
+        a = Actor('alien', pos=(100.0, 100.0))
+        originial_size = (a.width, a.height)
+
+        a.scale = 1
+        self.assertEqual((a.width, a.height) + a.pos, originial_size + a.pos)
+
+    def test_scale_down(self):
+        a = Actor('alien', pos=(100.0, 100.0))
+        scale = 0.25
+        exp_size = (int(a.width*scale), int(a.height*scale))
+        a.scale = scale
+        self.assertEqual((a.width, a.height) + a.pos, exp_size + (100.0, 100.0))
+
+    def test_scale_up(self):
+        a = Actor('alien', pos=(100.0, 100.0))
+        scale = 2.5
+        exp_size = (int(a.width*scale), int(a.height*scale))
+        a.scale = scale
+        self.assertEqual((a.width, a.height) + a.pos, exp_size + (100.0, 100.0))
+
     def test_opacity_default(self):
         """Ensure opacity is initially set to its default value."""
         a = Actor('alien')
