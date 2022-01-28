@@ -48,7 +48,7 @@ ANCHOR_CENTER = None
 MAX_ALPHA = 255  # Based on pygame's max alpha.
 
 
-def transform_anchor(ax, ay, w, h, angle):
+def transform_anchor(ax, ay, w, h, angle, scale=1.0):
     """Transform anchor based upon a rotation of a surface of size w x h."""
     theta = -radians(angle)
 
@@ -68,8 +68,8 @@ def transform_anchor(ax, ay, w, h, angle):
     ray = cax * sintheta + cay * costheta
 
     return (
-        tw * 0.5 + rax,
-        th * 0.5 + ray
+        (tw * 0.5 + rax)*scale,
+        (th * 0.5 + ray)*scale
     )
 
 
@@ -78,6 +78,12 @@ def _set_angle(actor, current_surface):
         # No changes required for default angle.
         return current_surface
     return pygame.transform.rotate(current_surface, actor._angle)
+
+def _set_scale(actor, current_surface):
+    if actor._scale == 1.0:
+        # No changes required for default scale.
+        return current_surface
+    return pygame.transform.scale(current_surface, (int(current_surface.get_width() * actor._scale), int(current_surface.get_height() * actor._scale)))
 
 
 def _set_opacity(actor, current_surface):
@@ -104,8 +110,9 @@ class Actor:
         a for a in dir(rect.ZRect) if not a.startswith("_")
     ]
 
-    function_order = [_set_opacity, _set_angle]
+    function_order = [_set_opacity, _set_scale, _set_angle]
     _anchor = _anchor_value = (0, 0)
+    _scale = 1.0
     _angle = 0.0
     _opacity = 1.0
 
@@ -238,7 +245,20 @@ class Actor:
         if self._angle == 0.0:
             self._anchor = self._untransformed_anchor
         else:
-            self._anchor = transform_anchor(ax, ay, ow, oh, self._angle)
+            self._anchor = transform_anchor(ax, ay, ow, oh, self._angle, self._scale)
+
+    def _transform(self):
+        w, h = self._orig_surf.get_size()
+
+        ra = radians(self._angle)
+        sin_a = sin(ra)
+        cos_a = cos(ra)
+        self.height = (abs(w * sin_a) + abs(h * cos_a))*self._scale
+        self.width = (abs(w * cos_a) + abs(h * sin_a))*self._scale
+        ax, ay = self._untransformed_anchor
+        p = self.pos
+        self._anchor = transform_anchor(ax, ay, w, h, self._angle, self._scale)
+        self.pos = p
 
     @property
     def angle(self):
@@ -247,19 +267,19 @@ class Actor:
     @angle.setter
     def angle(self, angle):
         self._angle = angle
-        w, h = self._orig_surf.get_size()
-
-        ra = radians(angle)
-        sin_a = sin(ra)
-        cos_a = cos(ra)
-        self.height = abs(w * sin_a) + abs(h * cos_a)
-        self.width = abs(w * cos_a) + abs(h * sin_a)
-        ax, ay = self._untransformed_anchor
-        p = self.pos
-        self._anchor = transform_anchor(ax, ay, w, h, angle)
-        self.pos = p
+        self._transform()
         self._update_transform(_set_angle)
+        
+    @property
+    def scale(self):
+        return self._scale
 
+    @scale.setter
+    def scale(self, scale):
+        self._scale = scale
+        self._transform()
+        self._update_transform(_set_scale)
+    
     @property
     def opacity(self):
         """Get/set the current opacity value.
