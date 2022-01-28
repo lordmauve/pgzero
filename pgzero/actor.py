@@ -85,6 +85,11 @@ def _set_scale(actor, current_surface):
         return current_surface
     return pygame.transform.scale(current_surface, (int(current_surface.get_width() * actor._scale), int(current_surface.get_height() * actor._scale)))
 
+def _set_flip(actor, current_surface):
+    if actor._flip_x==False and actor._flip_y==False:
+        # No changes required for default flip.
+        return current_surface
+    return pygame.transform.flip(current_surface, actor._flip_x, actor._flip_y)
 
 def _set_opacity(actor, current_surface):
     alpha = int(actor.opacity * MAX_ALPHA + 0.5)  # +0.5 for rounding up.
@@ -110,9 +115,11 @@ class Actor:
         a for a in dir(rect.ZRect) if not a.startswith("_")
     ]
 
-    function_order = [_set_opacity, _set_scale, _set_angle]
+    function_order = [_set_opacity, _set_scale, _set_flip, _set_angle]
     _anchor = _anchor_value = (0, 0)
     _scale = 1.0
+    _flip_x = False
+    _flip_y = False    
     _angle = 0.0
     _opacity = 1.0
 
@@ -280,6 +287,24 @@ class Actor:
         self._transform()
         self._update_transform(_set_scale)
     
+    @property
+    def flip_x(self):
+        return self._flip_x
+
+    @flip_x.setter
+    def flip_x(self, flip_x):
+        self._flip_x = flip_x
+        self._update_transform(_set_flip)
+
+    @property
+    def flip_y(self):
+        return self._flip_y
+    
+    @flip_y.setter
+    def flip_y(self, flip_y):
+        self._flip_y = flip_y
+        self._update_transform(_set_flip)
+            
     @property
     def opacity(self):
         """Get/set the current opacity value.
