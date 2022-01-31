@@ -1,3 +1,4 @@
+from __future__ import annotations
 import pygame
 from math import radians, sin, cos, atan2, degrees, sqrt
 
@@ -6,6 +7,9 @@ from . import loaders
 from . import rect
 from . import spellcheck
 
+from typing import Sequence, Tuple, Union
+from pygame import Vector2
+_Coordinate = Union[Tuple[float, float], Sequence[float], Vector2]
 
 ANCHORS = {
     'x': {
@@ -361,5 +365,20 @@ class Actor:
         dy = ty - myy
         return sqrt(dx * dx + dy * dy)
 
+    def move_towards(self, direction:Union[int, float, Actor, _Coordinate], distance, stop_on_target=True):
+        """move actor position of a certain distance in pixels in a certain direction
+           this direction can be an angle in degrees or an Actor or a point coordinate"""
+        if isinstance(direction, (int,float)):
+            angle = radians(direction)
+        else:
+            angle = radians(self.angle_to(direction))
+            if stop_on_target:
+                target_distance = self.distance_to(direction)
+                if (target_distance < distance) and distance>0:
+                    distance = target_distance
+        dx = distance * cos(angle)
+        dy = -distance * sin(angle)
+        self.pos = (self.x+dx, self.y+dy)
+        
     def unload_image(self):
         loaders.images.unload(self._image_name)
