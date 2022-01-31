@@ -84,8 +84,8 @@ def _set_scale(actor, current_surface):
     if actor._scale == 1.0:
         # No changes required for default scale.
         return current_surface
-    new_width = int(current_surface.get_width() * actor._scale)
-    new_height = int(current_surface.get_height() * actor._scale)
+    new_width = current_surface.get_width() * actor._scale
+    new_height = current_surface.get_height() * actor._scale
     return pygame.transform.scale(current_surface, (new_width, new_height))
 
 
@@ -265,8 +265,8 @@ class Actor:
         ra = radians(self._angle)
         sin_a = sin(ra)
         cos_a = cos(ra)
-        self.height = int((abs(w * sin_a) + abs(h * cos_a))*self._scale)
-        self.width = int((abs(w * cos_a) + abs(h * sin_a))*self._scale)
+        self.height = (abs(w * sin_a) + abs(h * cos_a))*self._scale
+        self.width = (abs(w * cos_a) + abs(h * sin_a))*self._scale
         ax, ay = self._untransformed_anchor
         p = self.pos
         self._anchor = transform_anchor(ax, ay, w, h, self._angle, self._scale)
