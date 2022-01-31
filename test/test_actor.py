@@ -120,14 +120,14 @@ class ActorTest(unittest.TestCase):
     def test_scale_down(self):
         a = Actor('alien', pos=(100.0, 100.0))
         scale = 0.25
-        exp_size = (int(a.width*scale), int(a.height*scale))
+        exp_size = (a.width*scale, a.height*scale)
         a.scale = scale
         self.assertEqual((a.width, a.height) + a.pos, exp_size + (100.0, 100.0))
 
     def test_scale_up(self):
         a = Actor('alien', pos=(100.0, 100.0))
         scale = 2.5
-        exp_size = (int(a.width*scale), int(a.height*scale))
+        exp_size = (a.width*scale, a.height*scale)
         a.scale = scale
         self.assertEqual((a.width, a.height) + a.pos, exp_size + (100.0, 100.0))
 
