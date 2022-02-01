@@ -1,3 +1,4 @@
+from typing import Union
 import pygame
 from math import radians, sin, cos, atan2, degrees, sqrt
 
@@ -5,6 +6,7 @@ from . import game
 from . import loaders
 from . import rect
 from . import spellcheck
+from .rect import ZRect
 
 
 ANCHORS = {
@@ -108,28 +110,41 @@ class Actor:
     _anchor = _anchor_value = (0, 0)
     _angle = 0.0
     _opacity = 1.0
+    _image_name = None
+    _subrect = None
+
+    def _surface_cachekey(self):
+        if self.subrect is None:
+            hashv = 0
+        else:
+            hashv = hash((self.subrect.x, self.subrect.y,
+                          self.subrect.width, self.subrect.height))
+        return self._image_name + '.' + str(hashv)
 
     def _build_transformed_surf(self):
-        cache_len = len(self._surface_cache)
+        key = self._surface_cachekey()
+        surface_cache = self._surface_cache[key][1]
+        cache_len = len(surface_cache)
         if cache_len == 0:
-            last = self._orig_surf
+            last = self._surface_cache[key][0]
         else:
-            last = self._surface_cache[-1]
+            last = surface_cache[-1]
         for f in self.function_order[cache_len:]:
             new_surf = f(self, last)
-            self._surface_cache.append(new_surf)
+            surface_cache.append(new_surf)
             last = new_surf
-        return self._surface_cache[-1]
+        return surface_cache[-1]
 
     def __init__(self, image, pos=POS_TOPLEFT, anchor=ANCHOR_CENTER, **kwargs):
         self._handle_unexpected_kwargs(kwargs)
 
-        self._surface_cache = []
+        self._surface_cache = {}
         self.__dict__["_rect"] = rect.ZRect((0, 0), (0, 0))
         # Initialise it at (0, 0) for size (0, 0).
         # We'll move it to the right place and resize it later
 
         self.image = image
+        self.subrect = kwargs.pop('subrect', None)
         self._init_position(pos, anchor, **kwargs)
 
     def __getattr__(self, attr):
@@ -214,7 +229,8 @@ class Actor:
     def _update_transform(self, function):
         if function in self.function_order:
             i = self.function_order.index(function)
-            del self._surface_cache[i:]
+            for k in self._surface_cache.keys():
+                del self._surface_cache[k][1][i:]
         else:
             raise IndexError(
                 "function {!r} does not have a registered order."
@@ -324,14 +340,51 @@ class Actor:
 
     @image.setter
     def image(self, image):
-        self._image_name = image
-        self._orig_surf = loaders.images.load(image)
-        self._surface_cache.clear()  # Clear out old image's cache.
-        self._update_pos()
+        if self._image_name != image:
+            self._image_name = image
+            self._orig_surf = loaders.images.load(image)
+            key = self._surface_cachekey()
+            if key not in self._surface_cache.keys():
+                self._surface_cache[key] = [None] * 2
+                self._surface_cache[key][0] = self._orig_surf
+                self._surface_cache[key][1] = []  # Clear out old image's cache.
+            self._update_pos()
+
+    @property
+    def subrect(self):
+        return self._subrect
+
+    @subrect.setter
+    def subrect(self, subrect: Union[pygame.Rect, ZRect]):
+        subr = subrect
+        if subrect is not None:
+            if not isinstance(self.subrect, ZRect):
+                subr = pygame.Rect(subrect)
+        if subr != self._subrect:
+            self._subrect = subr
+            subrect_tuple = None
+            if self._subrect is not None:
+                subrect_tuple = (subr.x, subr.y, subr.w, subr.h)
+            self._orig_surf = loaders.images.load(self.image, subrect=subrect_tuple)
+            # if self._subrect is None:
+            #     self._orig_surf = loaders.images.load(self.image)
+            # else:
+            #     self._orig_surf = loaders.images.load(self.image)\
+            #         .subsurface(self._subrect)
+            # self._surface_cache.clear()  # Clear out old image's cache.
+            key = self._surface_cachekey()
+            if key not in self._surface_cache.keys():
+                self._surface_cache[key] = [None] * 2
+                self._surface_cache[key][0] = self._orig_surf
+                self._surface_cache[key][1] = []  # Clear out old image's cache.
+            self._update_pos()
 
     def _update_pos(self):
         p = self.pos
-        self.width, self.height = self._orig_surf.get_size()
+        if self.subrect is None:
+            self.width, self.height = self._orig_surf.get_size()
+        else:
+            self.width, self.height = self.subrect.width, self.subrect.height
         self._calc_anchor()
         self.pos = p
 

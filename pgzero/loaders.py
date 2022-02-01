@@ -175,8 +175,12 @@ class ImageLoader(ResourceLoader):
     EXTNS = ['png', 'gif', 'jpg', 'jpeg', 'bmp']
     TYPE = 'image'
 
-    def _load(self, path):
-        return pygame.image.load(path).convert_alpha()
+    def _load(self, path, *args, **kwargs):
+        subrect = kwargs.pop('subrect', None)
+        if subrect is None:
+            return pygame.image.load(path).convert_alpha()
+        else:
+            return pygame.image.load(path).convert_alpha().subsurface(subrect)
 
     def __repr__(self):
         return "<Images images={}>".format(self.__dir__())

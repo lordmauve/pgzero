@@ -146,3 +146,9 @@ class ActorTest(unittest.TestCase):
         a = Actor("alien")
         for attribute in dir(a):
             a.__getattr__(attribute)
+
+    def test_subrect(self):
+        """Ensure opacity is initially set to its default value."""
+        a = Actor('alien')
+        a.subrect = (10, 12, 30, 43)
+        self.assertEqual((a.width, a.height), (30, 43))
