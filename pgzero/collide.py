@@ -16,63 +16,27 @@ def distance_to_squared(from_x, from_y, to_x, to_y):
 class Collide():
     @staticmethod
     def line_line(l1x1, l1y1, l1x2, l1y2, l2x1, l2y1, l2x2, l2y2):
-        l1x2_l1x1 = l1x2 - l1x1
-        l1y2_l1y1 = l1y2 - l1y1
-
-        determinant = (l2y2 - l2y1) * l1x2_l1x1 - (l2x2 - l2x1) * l1y2_l1y1
-
-        # Simplify: Parallel lines are never considered to be intersecting
-        if determinant == 0:
-            return False
-
-        uA = ((l2x2 - l2x1) * (l1y1 - l2y1) - (l2y2 - l2y1) * (l1x1 - l2x1)) \
-            / determinant
-        if uA < 0 or uA > 1:
-            return False
-
-        uB = (l1x2_l1x1 * (l1y1 - l2y1) - l1y2_l1y1 * (l1x1 - l2x1)) \
-            / determinant
-        if uB < 0 or uB > 1:
-            return False
-
-        return True
+        pt = Collide.line_line_XY(l1x1, l1y1, l1x2, l1y2, l2x1, l2y1, l2x2, l2y2)
+        return all(pt)
 
     @staticmethod
-    def line_lines(l1x1, l1y1, l1x2, l1y2, l2):
-        l1x2_l1x1 = l1x2 - l1x1
-        l1y2_l1y1 = l1y2 - l1y1
-
-        i = 0
-        for li in l2:
-            determinant = (li[3] - li[1]) * l1x2_l1x1 - (li[2] - li[0]) * l1y2_l1y1
-
-            # Simplify: Parallel lines are never considered to be intersecting
-            if determinant == 0:
-                i += 1
-                continue
-
-            uA = ((li[2] - li[0]) * (l1y1 - li[1]) - (li[3] - li[1]) * (l1x1 - li[0]))\
-                / determinant
-            uB = (l1x2_l1x1 * (l1y1 - li[1]) - l1y2_l1y1 * (l1x1 - li[0])) / determinant
-            if 0 <= uA <= 1 and 0 <= uB <= 1:
+    def line_lines(l1x1, l1y1, l1x2, l1y2, lines):
+        for i, line in enumerate(lines):
+            l2x1, l2y1, l2x2, l2y2 = line
+            if Collide.line_line(l1x1, l1y1, l1x2, l1y2, l2x1, l2y1, l2x2, l2y2):
                 return i
-
-            i += 1
-
         return -1
 
     @staticmethod
     def line_line_XY(l1x1, l1y1, l1x2, l1y2, l2x1, l2y1, l2x2, l2y2):
-        determinant = (l2y2 - l2y1) * (l1x2 - l1x1) - (l2x2 - l2x1) * (l1y2 - l1y1)
+        determinant = (l2y2-l2y1)*(l1x2-l1x1) - (l2x2-l2x1)*(l1y2-l1y1)
 
         # Simplify: Parallel lines are never considered to be intersecting
         if determinant == 0:
             return (None, None)
 
-        uA = ((l2x2 - l2x1) * (l1y1 - l2y1) - (l2y2 - l2y1) * (l1x1 - l2x1))\
-            / determinant
-        uB = ((l1x2 - l1x1) * (l1y1 - l2y1) - (l1y2 - l1y1) * (l1x1 - l2x1))\
-            / determinant
+        uA = ((l2x2-l2x1)*(l1y1-l2y1) - (l2y2-l2y1)*(l1x1-l2x1)) / determinant
+        uB = ((l1x2-l1x1)*(l1y1-l2y1) - (l1y2-l1y1)*(l1x1-l2x1)) / determinant
 
         if 0 <= uA <= 1 and 0 <= uB <= 1:
             ix = l1x1 + uA * (l1x2 - l1x1)
@@ -244,10 +208,7 @@ class Collide():
         return None
 
     @staticmethod
-    def line_rect(x1, y1, x2, y2, rx, ry, w, h):
-        if Collide.rect_points(rx, ry, w, h, [(x1, y1), (x2, y2)]) != -1:
-            return True
-
+    def _rect_lines(rx, ry, w, h):
         half_w = w / 2
         half_h = h / 2
         rect_lines = [
@@ -256,6 +217,14 @@ class Collide():
             [rx + half_w, ry + half_h, rx - half_w, ry + half_h],
             [rx + half_w, ry + half_h, rx + half_w, ry - half_h],
         ]
+        return rect_lines
+
+    @staticmethod
+    def line_rect(x1, y1, x2, y2, rx, ry, w, h):
+        if Collide.rect_points(rx, ry, w, h, [(x1, y1), (x2, y2)]) != -1:
+            return True
+
+        rect_lines = Collide._rect_lines(rx, ry, w, h)
         if Collide.line_lines(x1, y1, x2, y2, rect_lines) != -1:
             return True
 
@@ -266,17 +235,11 @@ class Collide():
         if Collide.rect_point(rx, ry, w, h, x1, y1):
             return (x1, y1)
 
-        half_w = w / 2
-        half_h = h / 2
-        rect_lines = [
-            [rx - half_w, ry - half_h, rx - half_w, ry + half_h],
-            [rx - half_w, ry - half_h, rx + half_w, ry - half_h],
-            [rx + half_w, ry + half_h, rx - half_w, ry + half_h],
-            [rx + half_w, ry + half_h, rx + half_w, ry - half_h],
-        ]
+        rect_lines = Collide._rect_lines(rx, ry, w, h)
+
         XYs = []
-        for li in rect_lines:
-            ix, iy = Collide.line_line_XY(x1, y1, x2, y2, li[0], li[1], li[2], li[3])
+        for l in rect_lines:
+            ix, iy = Collide.line_line_XY(x1, y1, x2, y2, l[0], l[1], l[2], l[3])
             if ix is not None:
                 XYs.append((ix, iy))
 
@@ -323,8 +286,7 @@ class Collide():
         rx = tx * costheta - ty * sintheta
         ry = ty * costheta + tx * sintheta
 
-        if rx > -half_width and rx < half_width and ry > -half_height\
-           and ry < half_height:
+        if rx > -half_width and rx < half_width and ry > -half_height and ry < half_height:
             return (x1, y1)
 
         wc = half_width * costheta
@@ -345,8 +307,8 @@ class Collide():
         ]
 
         XYs = []
-        for li in obb_lines:
-            ix, iy = Collide.line_line_XY(x1, y1, x2, y2, li[0], li[1], li[2], li[3])
+        for l in obb_lines:
+            ix, iy = Collide.line_line_XY(x1, y1, x2, y2, l[0], l[1], l[2], l[3])
             if ix is not None:
                 XYs.append((ix, iy))
 
@@ -383,7 +345,7 @@ class Collide():
     @staticmethod
     def circle_point(x1, y1, radius, x2, y2):
         rSquare = radius ** 2
-        dSquare = (x2 - x1) ** 2 + (y2 - y1) ** 2
+        dSquare = (x2 - x1)**2 + (y2 - y1)**2
 
         if dSquare < rSquare:
             return True
@@ -395,14 +357,14 @@ class Collide():
         rSquare = radius ** 2
 
         i = 0
-        for point in points:
+        for i, point in enumerate(points):
             try:
                 px = point[0]
                 py = point[1]
             except KeyError:
                 px = point.x
                 py = point.y
-            dSquare = (px - x) ** 2 + (py - y) ** 2
+            dSquare = (px - x)**2 + (py - y)**2
 
             if dSquare < rSquare:
                 return i
@@ -417,7 +379,7 @@ class Collide():
     @staticmethod
     def circle_circle(x1, y1, r1, x2, y2, r2):
         rSquare = (r1 + r2) ** 2
-        dSquare = (x2 - x1) ** 2 + (y2 - y1) ** 2
+        dSquare = (x2 - x1)**2 + (y2 - y1)**2
 
         if dSquare < rSquare:
             return True
@@ -458,10 +420,10 @@ class Collide():
         half_h = h / 2
 
         if (
-            px < x - half_w or
-            px > x + half_w or
-            py < y - half_h or
-            py > y + half_h
+            px < x - half_w
+            or px > x + half_w
+            or py < y - half_h
+            or py > y + half_h
         ):
             return False
 
@@ -476,8 +438,7 @@ class Collide():
         min_y = y - half_h
         max_y = y + half_h
 
-        i = 0
-        for point in points:
+        for i, point in enumerate(points):
             try:
                 px = point[0]
                 py = point[1]
@@ -491,7 +452,6 @@ class Collide():
                 and py <= max_y
             ):
                 return i
-            i += 1
 
         return -1
 
@@ -520,408 +480,169 @@ class Collide():
 
         return True
 
-    @staticmethod
-    def obb_point(x, y, w, h, angle, px, py):
-        half_width = w / 2
-        half_height = h / 2
-        b_radius_sq = half_width ** 2 + half_height ** 2
-        tx = px - x
-        ty = py - y
+    class Obb:
+        def __init__(self, x, y, w, h, angle):
+            self.x = x
+            self.y = y
+            self.angle = angle
+            self.width = w
+            self.height = h
+            self.half_w = w / 2
+            self.half_h = h / 2
+            self.b_radius_sq = self.half_w ** 2 + self.half_h ** 2
+            r_angle = math.radians(angle)
+            self.costheta = math.cos(r_angle)
+            self.sintheta = math.sin(r_angle)
+            self._lines = None
+            self._points = None
 
-        if tx ** 2 + ty ** 2 > b_radius_sq:
+        def transform_point(self, px, py):
+            tx = px - self.x
+            ty = py - self.y
+            rx = tx * self.costheta - ty * self.sintheta
+            ry = ty * self.costheta + tx * self.sintheta
+            return (rx, ry)
+
+        def contains(self, px, py):
+            rx, ry = self.transform_point(px, py)
+            tx = px - self.x
+            ty = py - self.y
+
+            if tx ** 2 + ty ** 2 > self.b_radius_sq:
+                return False
+            return (rx > -self.half_w and rx < self.half_w
+                    and ry > -self.half_h and ry < self.half_h)
+
+        def collideline(self, lx1, ly1, lx2, ly2):
+            if self.contains(lx1, ly1) or self.contains(lx2, ly2):
+                return True
+
+            if Collide.line_lines(lx1, ly1, lx2, ly2, self.lines()) != -1:
+                return True
+
             return False
 
-        r_angle = math.radians(angle)
-        costheta = math.cos(r_angle)
-        sintheta = math.sin(r_angle)
+        def collidecircle(self, cx, cy, radius):
+            return Collide.circle_rect(*self.transform_point(cx, cy), radius,
+                                       0, 0, self.width, self.height)
 
-        rx = tx * costheta - ty * sintheta
-        ry = ty * costheta + tx * sintheta
+        def colliderect(self, rx, ry, rw, rh):
+            tx = rx - self.x
+            ty = ry - self.y
 
-        if rx > -half_width and rx < half_width\
-           and ry > -half_height and ry < half_height:
-            return True
+            if tx ** 2 + ty ** 2 > (self.half_h + self.half_w + rw + rh) ** 2:
+                return False
 
-        return False
+            if self.contains(rx, ry):
+                return True
+
+            if Collide.rect_point(rx, ry, rw, rh, self.x, self.y):
+                return True
+
+            if Collide.rect_points(rx, ry, rw, rh, self.points()) != -1:
+                return True
+
+            h_rw = rw / 2
+            h_rh = rh / 2
+            rect_points = [
+                [rx - h_rw, ry - h_rh], [rx + h_rw, ry - h_rh],
+                [rx + h_rw, ry + h_rh], [rx - h_rw, ry + h_rh]
+            ]
+            for point in rect_points:
+                if self.contains(*point):
+                    return True
+
+        def collideobb(self, x, y, w, h, angle):
+            tx, ty = self.transform_point(x, y)
+            return Collide.Obb(tx, ty, w, h, angle - self.angle).colliderect(0, 0, self.width, self.height)
+
+        def points(self):
+            if self._points is not None:
+                return self._points
+
+            wc = self.half_w * self.costheta
+            hs = self.half_h * self.sintheta
+            hc = self.half_h * self.costheta
+            ws = self.half_w * self.sintheta
+            self._points = [
+                [self.x + wc + hs, self.y + hc - ws],
+                [self.x - wc + hs, self.y + hc + ws],
+                [self.x - wc - hs, self.y - hc + ws],
+                [self.x + wc - hs, self.y - hc - ws],
+            ]
+            return self._points
+
+        def lines(self):
+            if self._lines is not None:
+                return self._lines
+
+            p = self.get_points()
+            self._lines = [
+                [p[0][0], p[0][1], p[1][0], p[1][1]],
+                [p[1][0], p[1][1], p[2][0], p[2][1]],
+                [p[3][0], p[3][1], p[3][0], p[3][1]],
+                [p[3][0], p[3][1], p[0][0], p[0][1]]
+            ]
+            return self._lines
+
+    @staticmethod
+    def obb_point(x, y, w, h, angle, px, py):
+        obb = Collide.Obb(x, y, w, h, angle)
+        return obb.contains(px, py)
 
     @staticmethod
     def obb_points(x, y, w, h, angle, points):
-        half_width = w / 2
-        half_height = h / 2
-        r_angle = math.radians(angle)
-        costheta = math.cos(r_angle)
-        sintheta = math.sin(r_angle)
-
-        i = 0
-        for point in points:
+        obb = Collide.Obb(x, y, w, h, angle)
+        for i, point in enumerate(points):
             try:
-                px = point[0]
-                py = point[1]
+                px, py = point[0], point[1]
             except KeyError:
-                px = point.x
-                py = point.y
-
-            tx = px - x
-            ty = py - y
-            rx = tx * costheta - ty * sintheta
-            ry = ty * costheta + tx * sintheta
-
-            if (rx > -half_width and rx < half_width and
-                    ry > -half_height and ry < half_height):
+                px, py = point.x, point.y
+            if obb.contains(px, py):
                 return i
-            i += 1
 
         return -1
 
     @staticmethod
     def obb_line(x, y, w, h, angle, lx1, ly1, lx2, ly2):
-        half_width = w / 2
-        half_height = h / 2
-        r_angle = math.radians(angle)
-        costheta = math.cos(r_angle)
-        sintheta = math.sin(r_angle)
-
-        tx = lx1 - x
-        ty = ly1 - y
-        rx = tx * costheta - ty * sintheta
-        ry = ty * costheta + tx * sintheta
-
-        if (rx > -half_width and rx < half_width and
-           ry > -half_height and ry < half_height):
-            return True
-
-        tx = lx2 - x
-        ty = ly2 - y
-        rx = tx * costheta - ty * sintheta
-        ry = ty * costheta + tx * sintheta
-
-        if (rx > -half_width and rx < half_width and
-                ry > -half_height and ry < half_height):
-            return True
-
-        wc = half_width * costheta
-        hs = half_height * sintheta
-        hc = half_height * costheta
-        ws = half_width * sintheta
-        p = [
-            [x + wc + hs, y + hc - ws],
-            [x - wc + hs, y + hc + ws],
-            [x + wc - hs, y - hc - ws],
-            [x - wc - hs, y - hc + ws],
-        ]
-        obb_lines = [
-            [p[0][0], p[0][1], p[1][0], p[1][1]],
-            [p[1][0], p[1][1], p[3][0], p[3][1]],
-            [p[3][0], p[3][1], p[2][0], p[2][1]],
-            [p[2][0], p[2][1], p[0][0], p[0][1]]
-        ]
-
-        if Collide.line_lines(lx1, ly1, lx2, ly2, obb_lines) != -1:
-            return True
-
-        return False
+        obb = Collide.Obb(x, y, w, h, angle)
+        return obb.collideline(lx1, ly1, lx2, ly2)
 
     @staticmethod
     def obb_lines(x, y, w, h, angle, lines):
-        half_width = w / 2
-        half_height = h / 2
-        r_angle = math.radians(angle)
-        costheta = math.cos(r_angle)
-        sintheta = math.sin(r_angle)
-
-        wc = half_width * costheta
-        hs = half_height * sintheta
-        hc = half_height * costheta
-        ws = half_width * sintheta
-        p = [
-            [x + wc + hs, y + hc - ws],
-            [x - wc + hs, y + hc + ws],
-            [x + wc - hs, y - hc - ws],
-            [x - wc - hs, y - hc + ws],
-        ]
-        obb_lines = [
-            [p[0][0], p[0][1], p[1][0], p[1][1]],
-            [p[1][0], p[1][1], p[3][0], p[3][1]],
-            [p[3][0], p[3][1], p[2][0], p[2][1]],
-            [p[2][0], p[2][1], p[0][0], p[0][1]]
-        ]
-
-        i = 0
-        for li in lines:
-            tx = li[0] - x
-            ty = li[1] - y
-            rx = tx * costheta - ty * sintheta
-            ry = ty * costheta + tx * sintheta
-
-            if (rx > -half_width and rx < half_width and
-                    ry > -half_height and ry < half_height):
+        obb = Collide.Obb(x, y, w, h, angle)
+        for i, line in enumerate(lines):
+            if obb.collideline(*line):
                 return i
-
-            tx = li[2] - x
-            ty = li[3] - y
-            rx = tx * costheta - ty * sintheta
-            ry = ty * costheta + tx * sintheta
-
-            if (rx > -half_width and rx < half_width and
-                    ry > -half_height and ry < half_height):
-                return i
-
-            if Collide.line_lines(li[0], li[1], li[2], li[3], obb_lines) != -1:
-                return i
-
-            i += 1
-
         return -1
 
     @staticmethod
     def obb_circle(x, y, w, h, angle, cx, cy, radius):
-        half_width = w / 2
-        half_height = h / 2
-        tx = cx - x
-        ty = cy - y
-
-        if tx ** 2 + ty ** 2 > (half_height + half_width + radius) ** 2:
-            return False
-
-        r_angle = math.radians(angle)
-        costheta = math.cos(r_angle)
-        sintheta = math.sin(r_angle)
-
-        rx = tx * costheta - ty * sintheta
-        ry = ty * costheta + tx * sintheta
-
-        if (rx < -half_width - radius
-                or rx > half_width + radius
-                or ry < -half_height - radius
-                or ry > half_height + radius):
-            return False
-
-        if ((rx <= half_width and rx >= -half_width) or
-                (ry <= half_height and ry >= -half_height)):
-            return True
-
-        dx = abs(rx) - half_width
-        dy = abs(ry) - half_height
-        dist_squared = dx ** 2 + dy ** 2
-        if dist_squared > radius ** 2:
-            return False
-
-        return True
+        obb = Collide.Obb(x, y, w, h, angle)
+        return obb.collidecircle(cx, cy, radius)
 
     @staticmethod
     def obb_circles(x, y, w, h, angle, circles):
-        half_width = w / 2
-        half_height = h / 2
-        r_angle = math.radians(angle)
-        costheta = math.cos(r_angle)
-        sintheta = math.sin(r_angle)
-
-        i = 0
-        for circle in circles:
-            tx = circle[0] - x
-            ty = circle[1] - y
-
-            rx = tx * costheta - ty * sintheta
-            ry = ty * costheta + tx * sintheta
-
-            if (rx < -half_width - circle[2]
-                    or rx > half_width + circle[2]
-                    or ry < -half_height - circle[2]
-                    or ry > half_height + circle[2]):
-                i += 1
-                continue
-
-            if ((rx <= half_width and rx >= -half_width) or
-                    (ry <= half_height and ry >= -half_height)):
+        obb = Collide.Obb(x, y, w, h, angle)
+        for i, circle in enumerate(circles):
+            if obb.collidecircle(*circle):
                 return i
-
-            dx = abs(rx) - half_width
-            dy = abs(ry) - half_height
-            dist_squared = dx ** 2 + dy ** 2
-            if dist_squared > circle[2] ** 2:
-                i += 1
-                continue
-
-            return i
-
         return -1
 
     @staticmethod
     def obb_rect(x, y, w, h, angle, rx, ry, rw, rh):
-        half_width = w / 2
-        half_height = h / 2
-        tx = rx - x
-        ty = ry - y
-
-        if tx ** 2 + ty ** 2 > (half_height + half_width + rw + rh) ** 2:
-            return False
-
-        r_angle = math.radians(angle)
-        costheta = math.cos(r_angle)
-        sintheta = math.sin(r_angle)
-
-        tx2 = tx * costheta - ty * sintheta
-        ty2 = ty * costheta + tx * sintheta
-
-        if (tx2 > -half_width and tx2 < half_width and
-                ty2 > -half_height and ty2 < half_height):
-            return True
-
-        wc = half_width * costheta
-        hs = half_height * sintheta
-        hc = half_height * costheta
-        ws = half_width * sintheta
-        p = [
-            [wc + hs, hc - ws],
-            [-wc + hs, hc + ws],
-            [wc - hs, -hc - ws],
-            [-wc - hs, -hc + ws],
-        ]
-        obb_lines = [
-            [p[0][0], p[0][1], p[1][0], p[1][1]],
-            [p[1][0], p[1][1], p[3][0], p[3][1]],
-            [p[3][0], p[3][1], p[2][0], p[2][1]],
-            [p[2][0], p[2][1], p[0][0], p[0][1]]
-        ]
-        h_rw = rw / 2
-        h_rh = rh / 2
-        rect_lines = [
-            [tx - h_rw, ty - h_rh, tx - h_rw, ty + h_rh],
-            [tx + h_rw, ty - h_rh, tx + h_rw, ty + h_rh],
-            [tx - h_rw, ty - h_rh, tx + h_rw, ty - h_rh],
-            [tx - h_rw, ty + h_rh, tx + h_rw, ty + h_rh]
-        ]
-
-        for obb_p in p:
-            if (obb_p[0] > tx - h_rw and obb_p[0] < tx + h_rw and
-                    obb_p[1] > ty - h_rh and obb_p[1] < ty + h_rh):
-                return True
-
-        for obb_line in obb_lines:
-            l1x1 = obb_line[0]
-            l1y1 = obb_line[1]
-            l1x2 = obb_line[2]
-            l1y2 = obb_line[3]
-            l1x2_l1x1 = l1x2 - l1x1
-            l1y2_l1y1 = l1y2 - l1y1
-
-            for rect_line in rect_lines:
-                l2x1 = rect_line[0]
-                l2y1 = rect_line[1]
-                l2x2 = rect_line[2]
-                l2y2 = rect_line[3]
-
-                determinant = (l2y2 - l2y1) * l1x2_l1x1 - (l2x2 - l2x1) * l1y2_l1y1
-
-                # Simplify: Parallel lines are never considered to be intersecting
-                if determinant == 0:
-                    continue
-
-                uA = ((l2x2 - l2x1) * (l1y1 - l2y1) - (l2y2 - l2y1) * (l1x1 - l2x1)) \
-                    / determinant
-                if uA < 0 or uA > 1:
-                    continue
-
-                uB = (l1x2_l1x1 * (l1y1 - l2y1) - l1y2_l1y1 * (l1x1 - l2x1))\
-                    / determinant
-                if uB < 0 or uB > 1:
-                    continue
-
-                return True
-
-        return False
+        obb = Collide.Obb(x, y, w, h, angle)
+        return obb.colliderect(rx, ry, rw, rh)
 
     @staticmethod
     def obb_rects(x, y, w, h, angle, rects):
-        half_width = w / 2
-        half_height = h / 2
-        r_angle = math.radians(angle)
-        costheta = math.cos(r_angle)
-        sintheta = math.sin(r_angle)
-
-        i = 0
-        for rect in rects:
-            rx = rect[0]
-            ry = rect[1]
-            rw = rect[2]
-            rh = rect[3]
-
-            tx = rx - x
-            ty = ry - y
-
-            if tx ** 2 + ty ** 2 > (half_height + half_width + rw + rh) ** 2:
-                i += 1
-                continue
-
-            tx2 = tx * costheta - ty * sintheta
-            ty2 = ty * costheta + tx * sintheta
-
-            if (tx2 > -half_width and tx2 < half_width and
-                    ty2 > -half_height and ty2 < half_height):
+        obb = Collide.Obb(x, y, w, h, angle)
+        for i, circle in enumerate(rects):
+            if obb.colliderect(*rects):
                 return i
-
-            wc = half_width * costheta
-            hs = half_height * sintheta
-            hc = half_height * costheta
-            ws = half_width * sintheta
-            p = [
-                [wc + hs, hc - ws],
-                [-wc + hs, hc + ws],
-                [wc - hs, -hc - ws],
-                [-wc - hs, -hc + ws],
-            ]
-            obb_lines = [
-                [p[0][0], p[0][1], p[1][0], p[1][1]],
-                [p[1][0], p[1][1], p[3][0], p[3][1]],
-                [p[3][0], p[3][1], p[2][0], p[2][1]],
-                [p[2][0], p[2][1], p[0][0], p[0][1]]
-            ]
-            h_rw = rw / 2
-            h_rh = rh / 2
-            rect_lines = [
-                [tx - h_rw, ty - h_rh, tx - h_rw, ty + h_rh],
-                [tx + h_rw, ty - h_rh, tx + h_rw, ty + h_rh],
-                [tx - h_rw, ty - h_rh, tx + h_rw, ty - h_rh],
-                [tx - h_rw, ty + h_rh, tx + h_rw, ty + h_rh]
-            ]
-
-            for obb_p in p:
-                if (obb_p[0] > tx - h_rw and obb_p[0] < tx + h_rw and
-                        obb_p[1] > ty - h_rh and obb_p[1] < ty + h_rh):
-                    return i
-
-            for obb_line in obb_lines:
-                l1x1 = obb_line[0]
-                l1y1 = obb_line[1]
-                l1x2 = obb_line[2]
-                l1y2 = obb_line[3]
-                l1x2_l1x1 = l1x2 - l1x1
-                l1y2_l1y1 = l1y2 - l1y1
-
-                for rect_line in rect_lines:
-                    l2x1 = rect_line[0]
-                    l2y1 = rect_line[1]
-                    l2x2 = rect_line[2]
-                    l2y2 = rect_line[3]
-
-                    determinant = (l2y2 - l2y1) * l1x2_l1x1 - (l2x2 - l2x1) * l1y2_l1y1
-
-                    # Simplify: Parallel lines are never considered to be intersecting
-                    if determinant == 0:
-                        continue
-
-                    uA = ((l2x2 - l2x1) * (l1y1 - l2y1) - (l2y2 - l2y1)
-                          * (l1x1 - l2x1)) / determinant
-                    if uA < 0 or uA > 1:
-                        continue
-
-                    uB = (l1x2_l1x1 * (l1y1 - l2y1) - l1y2_l1y1 * (l1x1 - l2x1))\
-                        / determinant
-                    if uB < 0 or uB > 1:
-                        continue
-
-                    return i
-
-            i += 1
-
         return -1
+
+    @staticmethod
+    def obb_obb(x, y, w, h, angle, x2, y2, w2, h2, angle2):
+        obb = Collide.Obb(x, y, w, h, angle)
+        return obb.collideobb(x2, y2, w2, h2, angle2)
