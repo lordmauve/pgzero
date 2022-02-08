@@ -255,7 +255,8 @@ class Actor:
         ay = calculate_anchor(ay, 'y', oh)
         self._untransformed_anchor = ax, ay
         if self._angle == 0.0:
-            self._anchor = self._untransformed_anchor
+            anchor = self._untransformed_anchor
+            self._anchor = (anchor[0] * self._scale, anchor[1] * self._scale)
         else:
             self._anchor = transform_anchor(ax, ay, ow, oh, self._angle, self._scale)
 
