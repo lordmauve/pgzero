@@ -134,6 +134,7 @@ class Actor:
         self._mask: pygame.mask.Mask = None
         self._drawed_surf: pygame.Surface = None
         self._surface_cache: List[pygame.Surface] = []
+        self._radius: float = None
         self.__dict__["_rect"] = rect.ZRect((0, 0), (0, 0))
         # Initialise it at (0, 0) for size (0, 0).
         # We'll move it to the right place and resize it later
