@@ -1,3 +1,4 @@
+from __future__ import annotations
 import pygame
 from math import radians, sin, cos, atan2, degrees, sqrt
 
@@ -8,19 +9,10 @@ from . import spellcheck
 from .rect import ZRect
 from .collide import Collide
 
-from typing import Sequence, Tuple, Union, List
+from typing import Sequence, Union, List
 from pygame import Vector2
+from ._common import _Coordinate, _CanBeRect, _CanBeObb
 
-_Coordinate = Union[Tuple[float, float], Sequence[float], Vector2]
-_CanBeRect = Union[
-    ZRect,
-    pygame.Rect,
-    Tuple[int, int, int, int],
-    List[int],
-    Tuple[_Coordinate, _Coordinate],
-    List[_Coordinate],
-]
-_CanBeObb = Tuple[_CanBeRect, float]
 
 ANCHORS = {
     'x': {
@@ -123,8 +115,6 @@ class Actor:
     _anchor = _anchor_value = (0, 0)
     _angle = 0.0
     _opacity = 1.0
-    _mask = None
-    _drawed_surf = None
 
     def _build_transformed_surf(self):
         cache_len = len(self._surface_cache)
@@ -141,7 +131,9 @@ class Actor:
     def __init__(self, image, pos=POS_TOPLEFT, anchor=ANCHOR_CENTER, **kwargs):
         self._handle_unexpected_kwargs(kwargs)
 
-        self._surface_cache = []
+        self._mask: pygame.mask.Mask = None
+        self._drawed_surf: pygame.Surface = None
+        self._surface_cache: List[pygame.Surface] = []
         self.__dict__["_rect"] = rect.ZRect((0, 0), (0, 0))
         # Initialise it at (0, 0) for size (0, 0).
         # We'll move it to the right place and resize it later
@@ -384,10 +376,8 @@ class Actor:
     def unload_image(self):
         loaders.images.unload(self._image_name)
 
-    def collidepoint_pixel(self, x, y=0):
-        if isinstance(x, tuple):
-            y = x[1]
-            x = x[0]
+    def mask_collidepoint(self, pt: _Coordinate):
+        x, y = pt
         if self._mask is None:
             self._mask = pygame.mask.from_surface(self._build_transformed_surf())
 
@@ -402,7 +392,7 @@ class Actor:
 
         return self._mask.get_at((xoffset, yoffset))
 
-    def collide_pixel(self, actor):
+    def mask_collide(self, actor):
         for a in [self, actor]:
             if a._mask is None:
                 a._mask = pygame.mask.from_surface(a._build_transformed_surf())
@@ -412,16 +402,16 @@ class Actor:
 
         return self._mask.overlap(actor._mask, (xoffset, yoffset))
 
-    def collidelist_pixel(self, actors):
+    def mask_collidelist(self, actors):
         for i in range(len(actors)):
-            if self.collide_pixel(actors[i]):
+            if self.mask_collide(actors[i]):
                 return i
         return -1
 
-    def collidelistall_pixel(self, actors):
+    def mask_collidelistall(self, actors):
         collided = []
         for i in range(len(actors)):
-            if self.collide_pixel(actors[i]):
+            if self.mask_collide(actors[i]):
                 collided.append(i)
         return collided
 
