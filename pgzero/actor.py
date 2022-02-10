@@ -366,12 +366,6 @@ class Actor:
             if self._subrect is not None:
                 subrect_tuple = (subr.x, subr.y, subr.w, subr.h)
             self._orig_surf = loaders.images.load(self.image, subrect=subrect_tuple)
-            # if self._subrect is None:
-            #     self._orig_surf = loaders.images.load(self.image)
-            # else:
-            #     self._orig_surf = loaders.images.load(self.image)\
-            #         .subsurface(self._subrect)
-            # self._surface_cache.clear()  # Clear out old image's cache.
             key = self._surface_cachekey()
             if key not in self._surface_cache.keys():
                 self._surface_cache[key] = [None] * 2
