@@ -1,4 +1,3 @@
-from typing import Union
 import pygame
 from math import radians, sin, cos, atan2, degrees, sqrt
 
@@ -7,7 +6,7 @@ from . import loaders
 from . import rect
 from . import spellcheck
 from .rect import ZRect
-
+from ._common import _CanBeRect
 
 ANCHORS = {
     'x': {
@@ -101,7 +100,7 @@ def _set_opacity(actor, current_surface):
 
 
 class Actor:
-    EXPECTED_INIT_KWARGS = SYMBOLIC_POSITIONS
+    EXPECTED_INIT_KWARGS = SYMBOLIC_POSITIONS | set(("subrect",))
     DELEGATED_ATTRIBUTES = [
         a for a in dir(rect.ZRect) if not a.startswith("_")
     ]
@@ -110,8 +109,6 @@ class Actor:
     _anchor = _anchor_value = (0, 0)
     _angle = 0.0
     _opacity = 1.0
-    _image_name = None
-    _subrect = None
 
     def _surface_cachekey(self):
         if self.subrect is None:
@@ -142,9 +139,10 @@ class Actor:
         self.__dict__["_rect"] = rect.ZRect((0, 0), (0, 0))
         # Initialise it at (0, 0) for size (0, 0).
         # We'll move it to the right place and resize it later
-
+        self._subrect = None
+        self._image_name: str = None
         self.image = image
-        self.subrect = kwargs.pop('subrect', None)
+        self.subrect = kwargs.get('subrect', None)
         self._init_position(pos, anchor, **kwargs)
 
     def __getattr__(self, attr):
@@ -355,7 +353,7 @@ class Actor:
         return self._subrect
 
     @subrect.setter
-    def subrect(self, subrect: Union[pygame.Rect, ZRect]):
+    def subrect(self, subrect: _CanBeRect):
         subr = subrect
         if subrect is not None:
             if not isinstance(self.subrect, ZRect):
