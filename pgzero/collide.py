@@ -238,8 +238,9 @@ class Collide():
         rect_lines = Collide._rect_lines(rx, ry, w, h)
 
         XYs = []
-        for l in rect_lines:
-            ix, iy = Collide.line_line_XY(x1, y1, x2, y2, l[0], l[1], l[2], l[3])
+        for line in rect_lines:
+            ix, iy = Collide.line_line_XY(x1, y1, x2, y2,
+                                          line[0], line[1], line[2], line[3])
             if ix is not None:
                 XYs.append((ix, iy))
 
@@ -286,7 +287,8 @@ class Collide():
         rx = tx * costheta - ty * sintheta
         ry = ty * costheta + tx * sintheta
 
-        if rx > -half_width and rx < half_width and ry > -half_height and ry < half_height:
+        if (rx > -half_width and rx < half_width and
+            ry > -half_height and ry < half_height):
             return (x1, y1)
 
         wc = half_width * costheta
@@ -307,8 +309,8 @@ class Collide():
         ]
 
         XYs = []
-        for l in obb_lines:
-            ix, iy = Collide.line_line_XY(x1, y1, x2, y2, l[0], l[1], l[2], l[3])
+        for li in obb_lines:
+            ix, iy = Collide.line_line_XY(x1, y1, x2, y2, li[0], li[1], li[2], li[3])
             if ix is not None:
                 XYs.append((ix, iy))
 
@@ -554,7 +556,8 @@ class Collide():
 
         def collideobb(self, x, y, w, h, angle):
             tx, ty = self.transform_point(x, y)
-            return Collide.Obb(tx, ty, w, h, angle - self.angle).colliderect(0, 0, self.width, self.height)
+            return Collide.Obb(tx, ty, w, h, angle - self.angle)\
+                .colliderect(0, 0, self.width, self.height)
 
         def points(self):
             if self._points is not None:
