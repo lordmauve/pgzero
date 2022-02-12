@@ -2,7 +2,7 @@ import pygame
 from pgzero.actor import Actor
 from pgzero import loaders
 import time
-from typing import List, Sequence, Callable
+from typing import List, Sequence, Callable, Tuple
 from ._common import _CanBeRect
 from .rect import ZRect
 from .clock import each_tick, unschedule
@@ -94,7 +94,7 @@ class FrameAnimation(FrameBasicAnimation):
         self._finished = False
         super().__init__(actor, frames)
 
-    def animate(self, dt=-1) -> (int, int):
+    def animate(self, dt=-1) -> Tuple[int, int]:
         # calculate elapsed time
         if dt == -1:
             now = time.time()
@@ -142,7 +142,7 @@ class FrameAnimation(FrameBasicAnimation):
 
     def play_during(self, duration: int, on_finished: Callable = None):
         self.play(duration=duration, on_finished=on_finished)
-        
+
     def play_infinite(self):
         self.play()
 
