@@ -288,7 +288,7 @@ class Collide():
         ry = ty * costheta + tx * sintheta
 
         if (rx > -half_width and rx < half_width and
-            ry > -half_height and ry < half_height):
+                ry > -half_height and ry < half_height):
             return (x1, y1)
 
         wc = half_width * costheta
