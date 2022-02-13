@@ -208,34 +208,34 @@ class Collide():
         return None
 
     @staticmethod
-    def _rect_lines(rx, ry, w, h):
+    def _rect_lines(rcx, rcy, w, h):
         half_w = w / 2
         half_h = h / 2
         rect_lines = [
-            [rx - half_w, ry - half_h, rx - half_w, ry + half_h],
-            [rx - half_w, ry - half_h, rx + half_w, ry - half_h],
-            [rx + half_w, ry + half_h, rx - half_w, ry + half_h],
-            [rx + half_w, ry + half_h, rx + half_w, ry - half_h],
+            [rcx - half_w, rcy - half_h, rcx - half_w, rcy + half_h],
+            [rcx - half_w, rcy - half_h, rcx + half_w, rcy - half_h],
+            [rcx + half_w, rcy + half_h, rcx - half_w, rcy + half_h],
+            [rcx + half_w, rcy + half_h, rcx + half_w, rcy - half_h],
         ]
         return rect_lines
 
     @staticmethod
-    def line_rect(x1, y1, x2, y2, rx, ry, w, h):
-        if Collide.rect_points(rx, ry, w, h, [(x1, y1), (x2, y2)]) != -1:
+    def line_rect(x1, y1, x2, y2, rcx, rcy, w, h):
+        if Collide.rect_points(rcx, rcy, w, h, [(x1, y1), (x2, y2)]) != -1:
             return True
 
-        rect_lines = Collide._rect_lines(rx, ry, w, h)
+        rect_lines = Collide._rect_lines(rcx, rcy, w, h)
         if Collide.line_lines(x1, y1, x2, y2, rect_lines) != -1:
             return True
 
         return False
 
     @staticmethod
-    def line_rect_XY(x1, y1, x2, y2, rx, ry, w, h):
-        if Collide.rect_point(rx, ry, w, h, x1, y1):
+    def line_rect_XY(x1, y1, x2, y2, rcx, rcy, w, h):
+        if Collide.rect_point(rcx, rcy, w, h, x1, y1):
             return (x1, y1)
 
-        rect_lines = Collide._rect_lines(rx, ry, w, h)
+        rect_lines = Collide._rect_lines(rcx, rcy, w, h)
 
         XYs = []
         for line in rect_lines:
@@ -261,15 +261,15 @@ class Collide():
         return (ix, iy)
 
     @staticmethod
-    def line_rect_dist(x1, y1, x2, y2, rx, ry, w, h):
-        ix, iy = Collide.line_rect_XY(x1, y1, x2, y2, rx, ry, w, h)
+    def line_rect_dist(x1, y1, x2, y2, rcx, rcy, w, h):
+        ix, iy = Collide.line_rect_XY(x1, y1, x2, y2, rcx, rcy, w, h)
         if ix is not None:
             return distance_to(x1, y1, ix, iy)
         return None
 
     @staticmethod
-    def line_rect_dist_squared(x1, y1, x2, y2, rx, ry, w, h):
-        ix, iy = Collide.line_rect_XY(x1, y1, x2, y2, rx, ry, w, h)
+    def line_rect_dist_squared(x1, y1, x2, y2, rcx, rcy, w, h):
+        ix, iy = Collide.line_rect_XY(x1, y1, x2, y2, rcx, rcy, w, h)
         if ix is not None:
             return distance_to_squared(x1, y1, ix, iy)
         return None
@@ -389,11 +389,11 @@ class Collide():
         return False
 
     @staticmethod
-    def circle_rect(cx, cy, cr, rx, ry, rw, rh):
+    def circle_rect(cx, cy, cr, rcx, rcy, rw, rh):
         h_w = rw / 2
         h_h = rh / 2
-        rect_l = rx - h_w
-        rect_t = ry - h_h
+        rect_l = rcx - h_w
+        rect_t = rcy - h_h
 
         if cx < rect_l:
             dx2 = (cx - rect_l) ** 2
@@ -462,8 +462,8 @@ class Collide():
         return Collide.line_rect(lx1, ly1, lx2, ly2, x, y, w, h)
 
     @staticmethod
-    def rect_circle(rx, ry, rw, rh, cx, cy, cr):
-        return Collide.circle_rect(cx, cy, cr, rx, ry, rw, rh)
+    def rect_circle(rcx, rcy, rw, rh, cx, cy, cr):
+        return Collide.circle_rect(cx, cy, cr, rcx, rcy, rw, rh)
 
     @staticmethod
     def rect_rect(x1, y1, w1, h1, x2, y2, w2, h2):
@@ -528,27 +528,27 @@ class Collide():
             return Collide.circle_rect(*self.transform_point(cx, cy), radius,
                                        0, 0, self.width, self.height)
 
-        def colliderect(self, rx, ry, rw, rh):
-            tx = rx - self.x
-            ty = ry - self.y
+        def colliderect(self, rcx, rcy, rw, rh):
+            tx = rcx - self.x
+            ty = rcy - self.y
 
             if tx ** 2 + ty ** 2 > (self.half_h + self.half_w + rw + rh) ** 2:
                 return False
 
-            if self.contains(rx, ry):
+            if self.contains(rcx, rcy):
                 return True
 
-            if Collide.rect_point(rx, ry, rw, rh, self.x, self.y):
+            if Collide.rect_point(rcx, rcy, rw, rh, self.x, self.y):
                 return True
 
-            if Collide.rect_points(rx, ry, rw, rh, self.points()) != -1:
+            if Collide.rect_points(rcx, rcy, rw, rh, self.points()) != -1:
                 return True
 
             h_rw = rw / 2
             h_rh = rh / 2
             rect_points = [
-                [rx - h_rw, ry - h_rh], [rx + h_rw, ry - h_rh],
-                [rx + h_rw, ry + h_rh], [rx - h_rw, ry + h_rh]
+                [rcx - h_rw, rcy - h_rh], [rcx + h_rw, rcy - h_rh],
+                [rcx + h_rw, rcy + h_rh], [rcx - h_rw, rcy + h_rh]
             ]
             for point in rect_points:
                 if self.contains(*point):
@@ -633,9 +633,9 @@ class Collide():
         return -1
 
     @staticmethod
-    def obb_rect(x, y, w, h, angle, rx, ry, rw, rh):
+    def obb_rect(x, y, w, h, angle, rcx, rcy, rw, rh):
         obb = Collide.Obb(x, y, w, h, angle)
-        return obb.colliderect(rx, ry, rw, rh)
+        return obb.colliderect(rcx, rcy, rw, rh)
 
     @staticmethod
     def obb_rects(x, y, w, h, angle, rects):
