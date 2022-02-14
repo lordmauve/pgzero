@@ -77,11 +77,11 @@ class Collide():
         dot = (((cx - x1) * dx) + ((cy - y1) * dy)) / l_sq
 
         ix = x1 + dot * dx
-        if (ix < x1) == (ix < x2):
+        if (dx!=0) and (ix < x1) == (ix < x2):
             return False
 
         iy = y1 + dot * dy
-        if (iy < y1) == (iy < y2):
+        if (dy!=0) and (iy < y1) == (iy < y2):
             return False
 
         dist_sq = (ix - cx) ** 2 + (iy - cy) ** 2
@@ -339,7 +339,7 @@ class Collide():
 
     @staticmethod
     def line_obb_dist_squared(x1, y1, x2, y2, ox, oy, w, h, angle):
-        ix, iy = Collide.obb_line_XY(x1, y1, x2, y2, ox, oy, w, h, angle)
+        ix, iy = Collide.line_obb_XY(x1, y1, x2, y2, ox, oy, w, h, angle)
         if ix is not None:
             return distance_to_squared(x1, y1, ix, iy)
         return None
