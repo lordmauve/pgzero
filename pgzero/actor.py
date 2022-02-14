@@ -496,6 +496,6 @@ class Actor:
         else:
             rect2 = ZRect(target[0])
             angle2 = target[1]
-            obb2 = rect.centerx, rect2.centery, rect2.width, rect2.height, angle2
+            obb2 = rect2.centerx, rect2.centery, rect2.width, rect2.height, angle2
 
         return Collide.obb_obb(*self._obb(), *obb2)
