@@ -77,11 +77,11 @@ class Collide():
         dot = (((cx - x1) * dx) + ((cy - y1) * dy)) / l_sq
 
         ix = x1 + dot * dx
-        if (dx!=0) and (ix < x1) == (ix < x2):
+        if (dx != 0) and (ix < x1) == (ix < x2):
             return False
 
         iy = y1 + dot * dy
-        if (dy!=0) and (iy < y1) == (iy < y2):
+        if (dy != 0) and (iy < y1) == (iy < y2):
             return False
 
         dist_sq = (ix - cx) ** 2 + (iy - cy) ** 2
@@ -252,7 +252,7 @@ class Collide():
 
         ix, iy = XYs.pop(0)
         shortest_dist = distance_to_squared(ix, iy, x1, y1)
-        for x,y in XYs:
+        for x, y in XYs:
             dist = distance_to_squared(x, y, x1, y1)
             if dist < shortest_dist:
                 ix = x
@@ -280,7 +280,7 @@ class Collide():
         obb = Collide.Obb(ox, oy, w, h, angle)
         if obb.contains(x1, y1):
             return x1, y1
-        
+
         obb_lines = obb.lines()
         XYs = []
         for li in obb_lines:
