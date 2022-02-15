@@ -250,12 +250,13 @@ class Collide():
         elif length == 1:
             return XYs[0]
 
-        ix, iy = XYs[0]
-        shortest_dist = (ix - x1) ** 2 + (iy - y1) ** 2
-        for XY in XYs:
-            dist = (XY[0] - x1) ** 2 + (XY[1] - y1) ** 2
+        ix, iy = XYs.pop(0)
+        shortest_dist = distance_to_squared(ix, iy, x1, y1)
+        for x,y in XYs:
+            dist = distance_to_squared(x, y, x1, y1)
             if dist < shortest_dist:
-                ix, iy = XY
+                ix = x
+                iy = y
                 shortest_dist = dist
 
         return (ix, iy)
@@ -276,38 +277,11 @@ class Collide():
 
     @staticmethod
     def line_obb_XY(x1, y1, x2, y2, ox, oy, w, h, angle):
-        half_width = w / 2
-        half_height = h / 2
-        r_angle = math.radians(angle)
-        costheta = math.cos(r_angle)
-        sintheta = math.sin(r_angle)
-
-        tx = x1 - ox
-        ty = y1 - oy
-        rx = tx * costheta - ty * sintheta
-        ry = ty * costheta + tx * sintheta
-
-        if (rx > -half_width and rx < half_width and
-                ry > -half_height and ry < half_height):
-            return (x1, y1)
-
-        wc = half_width * costheta
-        hs = half_height * sintheta
-        hc = half_height * costheta
-        ws = half_width * sintheta
-        p = [
-            [ox + wc + hs, oy + hc - ws],
-            [ox - wc + hs, oy + hc + ws],
-            [ox + wc - hs, oy - hc - ws],
-            [ox - wc - hs, oy - hc + ws],
-        ]
-        obb_lines = [
-            [p[0][0], p[0][1], p[1][0], p[1][1]],
-            [p[1][0], p[1][1], p[3][0], p[3][1]],
-            [p[3][0], p[3][1], p[2][0], p[2][1]],
-            [p[2][0], p[2][1], p[0][0], p[0][1]]
-        ]
-
+        obb = Collide.Obb(ox, oy, w, h, angle)
+        if obb.contains(x1, y1):
+            return x1, y1
+        
+        obb_lines = obb.lines()
         XYs = []
         for li in obb_lines:
             ix, iy = Collide.line_line_XY(x1, y1, x2, y2, li[0], li[1], li[2], li[3])
@@ -320,12 +294,13 @@ class Collide():
         elif length == 1:
             return XYs[0]
 
-        ix, iy = XYs[0]
-        shortest_dist = (ix - x1) ** 2 + (iy - y1) ** 2
-        for XY in XYs:
-            dist = (XY[0] - x1) ** 2 + (XY[1] - y1) ** 2
+        ix, iy = XYs.pop(0)
+        shortest_dist = distance_to_squared(ix, iy, x1, y1)
+        for x, y in XYs:
+            dist = distance_to_squared(x, y, x1, y1)
             if dist < shortest_dist:
-                ix, iy = XY
+                ix = x
+                iy = y
                 shortest_dist = dist
 
         return (ix, iy)
@@ -579,11 +554,11 @@ class Collide():
             if self._lines is not None:
                 return self._lines
 
-            p = self.get_points()
+            p = self.points()
             self._lines = [
                 [p[0][0], p[0][1], p[1][0], p[1][1]],
                 [p[1][0], p[1][1], p[2][0], p[2][1]],
-                [p[3][0], p[3][1], p[3][0], p[3][1]],
+                [p[2][0], p[2][1], p[3][0], p[3][1]],
                 [p[3][0], p[3][1], p[0][0], p[0][1]]
             ]
             return self._lines
