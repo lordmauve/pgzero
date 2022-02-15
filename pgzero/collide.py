@@ -61,14 +61,7 @@ class Collide():
 
     @staticmethod
     def line_circle(x1, y1, x2, y2, cx, cy, radius):
-        r_sq = radius ** 2
-
-        dist_sq = (x1 - cx) ** 2 + (y1 - cy) ** 2
-        if dist_sq <= r_sq:
-            return True
-
-        dist_sq = (x2 - cx) ** 2 + (y2 - cy) ** 2
-        if dist_sq <= r_sq:
+        if Collide.circle_points(cx, cy, radius, ((x1, y1), (x2, y2))) != -1:
             return True
 
         dx = x2 - x1
@@ -76,16 +69,12 @@ class Collide():
         l_sq = dx ** 2 + dy ** 2
         dot = (((cx - x1) * dx) + ((cy - y1) * dy)) / l_sq
 
+        if dot >= 1 or dot <= 0:
+            return False
         ix = x1 + dot * dx
-        if (dx != 0) and (ix < x1) == (ix < x2):
-            return False
-
         iy = y1 + dot * dy
-        if (dy != 0) and (iy < y1) == (iy < y2):
-            return False
 
-        dist_sq = (ix - cx) ** 2 + (iy - cy) ** 2
-        if dist_sq <= r_sq:
+        if Collide.circle_point(cx, cy, radius, ix, iy):
             return True
 
         return False
@@ -324,7 +313,7 @@ class Collide():
         rSquare = radius ** 2
         dSquare = (x2 - x1)**2 + (y2 - y1)**2
 
-        if dSquare < rSquare:
+        if dSquare <= rSquare:
             return True
 
         return False
@@ -343,7 +332,7 @@ class Collide():
                 py = point.y
             dSquare = (px - x)**2 + (py - y)**2
 
-            if dSquare < rSquare:
+            if dSquare <= rSquare:
                 return i
             i += 1
 
@@ -358,7 +347,7 @@ class Collide():
         rSquare = (r1 + r2) ** 2
         dSquare = (x2 - x1)**2 + (y2 - y1)**2
 
-        if dSquare < rSquare:
+        if dSquare <= rSquare:
             return True
 
         return False
