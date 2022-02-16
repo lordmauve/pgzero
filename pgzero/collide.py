@@ -4,13 +4,13 @@ import math
 def distance_to(from_x, from_y, to_x, to_y):
     dx = to_x - from_x
     dy = to_y - from_y
-    return math.sqrt(dx**2 + dy**2)
+    return math.sqrt(dx*dx + dy*dy)
 
 
 def distance_to_squared(from_x, from_y, to_x, to_y):
     dx = to_x - from_x
     dy = to_y - from_y
-    return dx**2 + dy**2
+    return dx*dx + dy*dy
 
 
 class Collide():
@@ -61,12 +61,19 @@ class Collide():
 
     @staticmethod
     def line_circle(x1, y1, x2, y2, cx, cy, radius):
-        if Collide.circle_points(cx, cy, radius, ((x1, y1), (x2, y2))) != -1:
+        radius_sq = radius * radius
+
+        dist_sq = distance_to_squared(cx, cy, x1, y1)
+        if dist_sq <= radius_sq:
+            return True
+
+        dist_sq = distance_to_squared(cx, cy, x2, y2)
+        if dist_sq <= radius_sq:
             return True
 
         dx = x2 - x1
         dy = y2 - y1
-        l_sq = dx ** 2 + dy ** 2
+        l_sq = dx * dx + dy * dy
         dot = (((cx - x1) * dx) + ((cy - y1) * dy)) / l_sq
 
         if dot >= 1 or dot <= 0:
@@ -74,112 +81,33 @@ class Collide():
         ix = x1 + dot * dx
         iy = y1 + dot * dy
 
-        if Collide.circle_point(cx, cy, radius, ix, iy):
+        dist_sq = distance_to_squared(cx, cy, ix, iy)
+        if dist_sq <= radius_sq:
             return True
 
         return False
 
     @staticmethod
     def line_circle_XY(x1, y1, x2, y2, cx, cy, radius):
-        if Collide.circle_point(cx, cy, radius, x1, y1):
-            return (x1, y1)
+        radius_sq = radius * radius
+        dist_sq = distance_to_squared(cx, cy, x1, y1)
+        if dist_sq <= radius_sq:
+            return x1, y1
 
-        x1 -= cx
-        y1 -= cy
-        x2 -= cx
-        y2 -= cy
-
-        if x2 < x1:
-            x_min, x_max = x2, x1
-        else:
-            x_min, x_max = x1, x2
-
-        if y2 < y1:
-            y_min, y_max = y2, y1
-        else:
-            y_min, y_max = y1, y2
-
-        # Coefficients of circle
-        c_r2 = radius ** 2
-
-        # Simplify if dx == 0: Vertical line
         dx = x2 - x1
-        if dx == 0:
-            d = c_r2 - x1**2
-            if d < 0:
-                return (None, None)
-            elif d == 0:
-                i = 0
-            else:
-                i = math.sqrt(d)
+        dy = y2 - y1
+        l_sq = dx * dx + dy * dy
 
-            iy = None
-            if y_min <= i <= y_max:
-                iy = i
+        dot = (((cx - x1) * dx) + ((cy - y1) * dy)) / l_sq
 
-            if y_min <= -i <= y_max:
-                if iy is None or abs(i - y1) > abs(-i - y1):
-                    iy = -i
+        ix = x1 + dot * dx
+        iy = y1 + dot * dy
 
-            if iy:
-                return (x1 + cx, iy + cy)
-            return (None, None)
-
-        # Gradient of line
-        l_m = (y2 - y1) / dx
-
-        # Simplify if l_m == 0: Horizontal line
-        if l_m == 0:
-            d = c_r2 - y1**2
-            if d < 0:
-                return (None, None)
-            elif d == 0:
-                i = 0
-            else:
-                i = math.sqrt(d)
-            ix = None
-            if x_min <= i <= x_max:
-                ix = i
-
-            if x_min <= -i <= x_max:
-                if ix is None or abs(i - x1) > abs(-i - x1):
-                    ix = -i
-
-            if ix:
-                return (ix + cx, y1 + cy)
-            return (None, None)
-
-        # y intercept
-        l_c = y1 - l_m * x1
-
-        # Coefficients of quadratic
-        a = 1 + l_m**2
-        b = 2 * l_c * l_m
-        c = l_c**2 - c_r2
-
-        # Calculate discriminant and solve quadratic
-        discriminant = b**2 - 4 * a * c
-        if discriminant < 0:
-            return (None, None)
-
-        if discriminant == 0:
-            d_root = 0
-        else:
-            d_root = math.sqrt(discriminant)
-
-        ix = None
-        i1 = (-b + d_root) / (2 * a)
-        if x_min <= i1 <= x_max:
-            ix = i1
-
-        i2 = (-b - d_root) / (2 * a)
-        if x_min <= i2 <= x_max:
-            if ix is None or abs(i1 - x1) > abs(i2 - x1):
-                ix = i2
-
-        if ix:
-            return (ix + cx, l_m * ix + l_c + cy)
-
+        dist_sq = distance_to_squared(cx, cy, ix, iy)
+        if dist_sq <= radius_sq:
+            d_to_i_norm = math.sqrt(radius_sq - dist_sq) / math.sqrt(l_sq)
+            if 0 < dot-d_to_i_norm < 1:
+                return (ix - dx*d_to_i_norm, iy - dy*d_to_i_norm)
         return (None, None)
 
     @staticmethod
@@ -310,8 +238,8 @@ class Collide():
 
     @staticmethod
     def circle_point(x1, y1, radius, x2, y2):
-        rSquare = radius ** 2
-        dSquare = (x2 - x1)**2 + (y2 - y1)**2
+        rSquare = radius * radius
+        dSquare = (x2 - x1)*(x2 - x1) + (y2 - y1)*(y2 - y1)
 
         if dSquare <= rSquare:
             return True
@@ -320,7 +248,7 @@ class Collide():
 
     @staticmethod
     def circle_points(x, y, radius, points):
-        rSquare = radius ** 2
+        rSquare = radius * radius
 
         i = 0
         for i, point in enumerate(points):
@@ -330,7 +258,7 @@ class Collide():
             except KeyError:
                 px = point.x
                 py = point.y
-            dSquare = (px - x)**2 + (py - y)**2
+            dSquare = (px - x)*(px - x) + (py - y)*(py - y)
 
             if dSquare <= rSquare:
                 return i
@@ -344,8 +272,8 @@ class Collide():
 
     @staticmethod
     def circle_circle(x1, y1, r1, x2, y2, r2):
-        rSquare = (r1 + r2) ** 2
-        dSquare = (x2 - x1)**2 + (y2 - y1)**2
+        rSquare = (r1 + r2) * (r1 + r2)
+        dSquare = (x2 - x1)*(x2 - x1) + (y2 - y1)*(y2 - y1)
 
         if dSquare <= rSquare:
             return True
@@ -360,22 +288,22 @@ class Collide():
         rect_t = rcy - h_h
 
         if cx < rect_l:
-            dx2 = (cx - rect_l) ** 2
+            dx2 = (cx - rect_l)*(cx - rect_l)
         elif cx > (rect_l + rw):
-            dx2 = (cx - rect_l - rw) ** 2
+            dx2 = (cx - rect_l - rw)*(cx - rect_l - rw)
         else:
             dx2 = 0
 
         if cy < rect_t:
-            dy2 = (cy - rect_t) ** 2
+            dy2 = (cy - rect_t) * (cy - rect_t)
         elif cy > (rect_t + rh):
-            dy2 = (cy - rect_t - rh) ** 2
+            dy2 = (cy - rect_t - rh) * (cy - rect_t - rh)
         else:
             dy2 = 0
 
         dist2 = dx2 + dy2
 
-        if dist2 < (cr ** 2):
+        if dist2 < (cr * cr):
             return True
 
         return False
@@ -455,7 +383,7 @@ class Collide():
             self.height = h
             self.half_w = w / 2
             self.half_h = h / 2
-            self.b_radius_sq = self.half_w ** 2 + self.half_h ** 2
+            self.b_radius_sq = self.half_w*self.half_w + self.half_h*self.half_h
             r_angle = math.radians(angle)
             self.costheta = math.cos(r_angle)
             self.sintheta = math.sin(r_angle)
@@ -474,7 +402,7 @@ class Collide():
             tx = px - self.x
             ty = py - self.y
 
-            if tx ** 2 + ty ** 2 > self.b_radius_sq:
+            if tx*tx + ty*ty > self.b_radius_sq:
                 return False
             return (rx > -self.half_w and rx < self.half_w
                     and ry > -self.half_h and ry < self.half_h)
@@ -496,7 +424,8 @@ class Collide():
             tx = rcx - self.x
             ty = rcy - self.y
 
-            if tx ** 2 + ty ** 2 > (self.half_h + self.half_w + rw + rh) ** 2:
+            dist_max = (self.half_h + self.half_w + rw + rh)
+            if tx*tx + ty*ty > dist_max*dist_max:
                 return False
 
             if self.contains(rcx, rcy):
