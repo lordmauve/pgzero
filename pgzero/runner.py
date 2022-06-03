@@ -168,6 +168,9 @@ def prepare_mod(mod):
     storage.storage._set_filename_from_path(mod.__file__)
     loaders.set_root(mod.__file__)
 
+    # The display mode must be set for IDE mode
+    pygame.display.set_mode((100, 100), DISPLAY_FLAGS)
+
     # Copy pgzero builtins into system builtins
     from . import builtins as pgzero_builtins
     import builtins as python_builtins
