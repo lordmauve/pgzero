@@ -7,7 +7,7 @@ similar to a remarkable extent.
 
 The `Pygame Zero version`__ can be found in Pygame Zero repository.
 
-.. __: https://github.com/lordmauve/pgzero/blob/master/examples/flappybird/flappybird.py
+.. __: https://github.com/lordmauve/pgzero/blob/stable/examples/flappybird/flappybird.py
 
 You can also download the `Scratch 1.4 version`__ and `Scratch 3 version`__ from the repository.
 
