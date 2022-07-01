@@ -1,3 +1,4 @@
+from __future__ import annotations
 import pygame
 from math import radians, sin, cos, atan2, degrees, sqrt
 
@@ -5,6 +6,12 @@ from . import game
 from . import loaders
 from . import rect
 from . import spellcheck
+from .rect import ZRect
+from .collide import Collide
+
+from typing import Sequence, Union, List
+from pygame import Vector2
+from ._common import _Coordinate, _CanBeRect, _CanBeObb
 
 
 ANCHORS = {
@@ -124,7 +131,10 @@ class Actor:
     def __init__(self, image, pos=POS_TOPLEFT, anchor=ANCHOR_CENTER, **kwargs):
         self._handle_unexpected_kwargs(kwargs)
 
-        self._surface_cache = []
+        self._mask: pygame.mask.Mask = None
+        self._drawed_surf: pygame.Surface = None
+        self._surface_cache: List[pygame.Surface] = []
+        self._radius: float = None
         self.__dict__["_rect"] = rect.ZRect((0, 0), (0, 0))
         # Initialise it at (0, 0) for size (0, 0).
         # We'll move it to the right place and resize it later
@@ -337,6 +347,9 @@ class Actor:
 
     def draw(self):
         s = self._build_transformed_surf()
+        if s != self._drawed_surf:
+            self._drawed_surf = s
+            self._mask = None
         game.screen.blit(s, self.topleft)
 
     def angle_to(self, target):
@@ -363,3 +376,126 @@ class Actor:
 
     def unload_image(self):
         loaders.images.unload(self._image_name)
+
+    def mask_collidepoint(self, pt: _Coordinate):
+        x, y = pt
+        if self._mask is None:
+            self._mask = pygame.mask.from_surface(self._build_transformed_surf())
+
+        xoffset = int(x - self.left)
+        yoffset = int(y - self.top)
+        if xoffset < 0 or yoffset < 0:
+            return 0
+
+        width, height = self._mask.get_size()
+        if xoffset > width or yoffset > height:
+            return 0
+
+        return self._mask.get_at((xoffset, yoffset))
+
+    def mask_collide(self, actor):
+        for a in [self, actor]:
+            if a._mask is None:
+                a._mask = pygame.mask.from_surface(a._build_transformed_surf())
+
+        xoffset = int(actor.left - self.left)
+        yoffset = int(actor.top - self.top)
+
+        return self._mask.overlap(actor._mask, (xoffset, yoffset))
+
+    def mask_collidelist(self, actors):
+        for i in range(len(actors)):
+            if self.mask_collide(actors[i]):
+                return i
+        return -1
+
+    def mask_collidelistall(self, actors):
+        collided = []
+        for i in range(len(actors)):
+            if self.mask_collide(actors[i]):
+                collided.append(i)
+        return collided
+
+    @property
+    def radius(self) -> float:
+        if self._radius is not None:
+            return self._radius
+        else:
+            return max(self._orig_surf.get_size()) * .5 * self._scale
+
+    @radius.setter
+    def radius(self, radius: float):
+        self._radius = radius
+
+    def circle_collidepoints(self, points: Sequence[_Coordinate],
+                             radius: float = None) -> int:
+        r = self._radius if radius is None else radius
+        return Collide.circle_points(self.centerx, self.centery, r, points)
+
+    def circle_collidepoint(self, pt: _Coordinate, radius: float = None) -> bool:
+        r = self.radius if radius is None else radius
+        return Collide.circle_point(self.centerx, self.centery, r, pt[0], pt[1])
+
+    def circle_collidecircle(self, target: Union[Actor, _Coordinate],
+                             radius: float = None, target_radius: float = None) -> bool:
+        if isinstance(target, Actor):
+            x, y = (target.centerx, target.centery)
+            r2 = target.radius if target_radius is None else target_radius
+        else:
+            x, y = target
+            r2 = target_radius
+
+        r = self.radius if radius is None else radius
+
+        return Collide.circle_circle(self.centerx, self.centery, r,
+                                     x, y, r2)
+
+    def circle_colliderect(self, target: Union[Actor, _CanBeRect],
+                           radius: float = None) -> bool:
+        rect = ZRect(target)
+        r = self.radius if radius is None else radius
+        return Collide.circle_rect(self.centerx, self.centery, r,
+                                   rect.centerx, rect.centery, rect.width, rect.height)
+
+    def _obb(self):
+        w, h = Vector2(self._orig_surf.get_size()) * self._scale
+        cx, cy = self.centerx, self.centery
+        return cx, cy, w, h, self.angle
+
+    def circle_collideobb(self, target: Actor, radius: float = None) -> bool:
+        cx, cy, w, h, angle = target._obb()
+        r = self.radius if radius is None else radius
+        return Collide.obb_circle(cx, cy, w, h, angle,
+                                  self.centerx, self.centery, r)
+
+    def obb_collidepoint(self, pt: _Coordinate) -> bool:
+        return Collide.obb_point(*self._obb(), pt[0], pt[1])
+
+    def obb_collidepoints(self, points) -> int:
+        return Collide.obb_points(*self._obb(), points)
+
+    def obb_colliderect(self, target: Union[Actor, _CanBeRect]):
+        rect = ZRect(target)
+        return Collide.obb_rect(*self._obb(), rect.centerx, rect.centery,
+                                rect.width, rect.height)
+
+    def obb_collidecircle(self, target: Union[Actor, _Coordinate],
+                          target_radius: float = None):
+        if isinstance(target, Actor):
+            x, y = (target.centerx, target.centery)
+            r = target.radius if target_radius is None else target_radius
+        else:
+            x, y = target
+            r = target_radius
+
+        return Collide.obb_circle(*self._obb(), x, y, r)
+
+    def obb_collideobb(self, target: Union[Actor, _CanBeObb]):
+        if isinstance(target, Actor):
+            obb2 = target._obb()
+        else:
+            rect2 = ZRect(target[0])
+            angle2 = target[1]
+            obb2 = rect2.centerx, rect2.centery, rect2.width, rect2.height, angle2
+
+        return Collide.obb_obb(*self._obb(), *obb2)
