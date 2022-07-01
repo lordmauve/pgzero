@@ -48,29 +48,80 @@ ANCHOR_CENTER = None
 MAX_ALPHA = 255  # Based on pygame's max alpha.
 
 
-def transform_anchor(ax, ay, w, h, angle):
-    """Transform anchor based upon a rotation of a surface of size w x h."""
-    theta = -radians(angle)
+class BoundingBox:
+    """Calculate bounding box and anchor transformations.
 
-    sintheta = sin(theta)
-    costheta = cos(theta)
+    An Actor stores a sprite as a pygame surface with an anchor point and a
+    stack of transformations. This class pulls the code for the purely
+    geometric transformations out of the Actor class - the idea is to
+    initialize a BoundingBox with the surface's original dimensions, set an
+    anchor point, and then call pygame.transform.* to update the surface and
+    call the corresponding methods on the bounding box to update the Actor's
+    internal geometrical details.
+    """
 
-    # Dims of the transformed rect
-    tw = abs(w * costheta) + abs(h * sintheta)
-    th = abs(w * sintheta) + abs(h * costheta)
+    def __init__(self, width, height, anchor):
+        self.width = width
+        self.height = height
+        self.anchor = anchor
 
-    # Offset of the anchor from the center
-    cax = ax - w * 0.5
-    cay = ay - h * 0.5
+    def set_angle(self, angle):
+        """Rotate the box and calculate the new height, width and anchor."""
+        theta = -radians(angle)
+        w, h = self.width, self.height
+        ax, ay = self.anchor
 
-    # Rotated offset of the anchor from the center
-    rax = cax * costheta - cay * sintheta
-    ray = cax * sintheta + cay * costheta
+        sintheta = sin(theta)
+        costheta = cos(theta)
 
-    return (
-        tw * 0.5 + rax,
-        th * 0.5 + ray
-    )
+        # Dims of the transformed rect
+        tw = abs(w * costheta) + abs(h * sintheta)
+        th = abs(w * sintheta) + abs(h * costheta)
+
+        # Offset of the anchor from the center
+        cax = ax - w * 0.5
+        cay = ay - h * 0.5
+
+        # Rotated offset of the anchor from the center
+        rax = cax * costheta - cay * sintheta
+        ray = cax * sintheta + cay * costheta
+
+        # Update the bounding box
+        self.width = tw
+        self.height = th
+        self.anchor = (
+            tw * 0.5 + rax,
+            th * 0.5 + ray
+        )
+
+    def set_dimensions(self, dimensions):
+        w, h = dimensions
+        ax, ay = self.anchor
+        xscale = (1.0 * w) / self.width
+        yscale = (1.0 * h) / self.height
+        self.width = w
+        self.height = h
+        self.anchor = (ax * xscale, ay * yscale)
+
+    def set_flip(self, xflip, yflip):
+        ax, ay = self.anchor
+        if xflip:
+            ax = self.width - ax
+        if yflip:
+            ay = self.height - ay
+        self.anchor = ax, ay
+
+
+def _set_dimensions(actor, current_surface):
+    if actor.dimensions == (actor._orig_width, actor._orig_height):
+        return current_surface
+    return pygame.transform.scale(current_surface, actor._dimensions)
+
+
+def _set_flip(actor, current_surface):
+    if not (actor._xflip or actor._yflip):
+        return current_surface
+    return pygame.transform.flip(current_surface, actor._xflip, actor._yflip)
 
 
 def _set_angle(actor, current_surface):
@@ -104,10 +155,12 @@ class Actor:
         a for a in dir(rect.ZRect) if not a.startswith("_")
     ]
 
-    function_order = [_set_opacity, _set_angle]
+    function_order = [_set_opacity, _set_dimensions, _set_flip, _set_angle]
     _anchor = _anchor_value = (0, 0)
     _angle = 0.0
     _opacity = 1.0
+    _xflip = False
+    _yflip = False
 
     def _build_transformed_surf(self):
         cache_len = len(self._surface_cache)
@@ -125,9 +178,10 @@ class Actor:
         self._handle_unexpected_kwargs(kwargs)
 
         self._surface_cache = []
-        self.__dict__["_rect"] = rect.ZRect((0, 0), (0, 0))
-        # Initialise it at (0, 0) for size (0, 0).
+
+        # Initialise rect at (0, 0) for size (0, 0).
         # We'll move it to the right place and resize it later
+        self.__dict__["_rect"] = rect.ZRect((0, 0), (0, 0))
 
         self.image = image
         self._init_position(pos, anchor, **kwargs)
@@ -227,18 +281,33 @@ class Actor:
     @anchor.setter
     def anchor(self, val):
         self._anchor_value = val
-        self._calc_anchor()
+        self._update_orig_anchor()
+        self._update_box()
 
-    def _calc_anchor(self):
+    def _update_orig_anchor(self):
         ax, ay = self._anchor_value
-        ow, oh = self._orig_surf.get_size()
-        ax = calculate_anchor(ax, 'x', ow)
-        ay = calculate_anchor(ay, 'y', oh)
-        self._untransformed_anchor = ax, ay
-        if self._angle == 0.0:
-            self._anchor = self._untransformed_anchor
-        else:
-            self._anchor = transform_anchor(ax, ay, ow, oh, self._angle)
+        ax = calculate_anchor(ax, 'x', self._orig_width)
+        ay = calculate_anchor(ay, 'y', self._orig_height)
+        self._orig_anchor = ax, ay
+
+    def _update_box(self):
+        b = BoundingBox(
+                self._orig_width,
+                self._orig_height,
+                self._orig_anchor)
+        # This order of operations must be preserved
+        b.set_dimensions(self._dimensions)
+        b.set_flip(self._xflip, self._yflip)
+        b.set_angle(self._angle)
+
+        # Copy the transformed height and width
+        self.height = b.height
+        self.width = b.width
+
+        # Now move the topleft so that the anchor stays in position
+        p = self.pos
+        self._anchor = b.anchor
+        self.pos = p
 
     @property
     def angle(self):
@@ -247,18 +316,44 @@ class Actor:
     @angle.setter
     def angle(self, angle):
         self._angle = angle
-        w, h = self._orig_surf.get_size()
-
-        ra = radians(angle)
-        sin_a = sin(ra)
-        cos_a = cos(ra)
-        self.height = abs(w * sin_a) + abs(h * cos_a)
-        self.width = abs(w * cos_a) + abs(h * sin_a)
-        ax, ay = self._untransformed_anchor
-        p = self.pos
-        self._anchor = transform_anchor(ax, ay, w, h, angle)
-        self.pos = p
+        self._update_box()
         self._update_transform(_set_angle)
+
+    @property
+    def dimensions(self):
+        return self._dimensions
+
+    @dimensions.setter
+    def dimensions(self, dimensions):
+        self._dimensions = dimensions
+        self._update_box()
+        self._update_transform(_set_dimensions)
+
+    @property
+    def xflip(self):
+        return self._xflip
+
+    @xflip.setter
+    def xflip(self, flipped):
+        self._xflip = flipped
+        self._update_box()
+        self._update_transform(_set_flip)
+
+    @property
+    def yflip(self):
+        return self._yflip
+
+    @yflip.setter
+    def yflip(self, flipped):
+        self._yflip = flipped
+        self._update_box()
+        self._update_transform(_set_flip)
+
+    def flip_x(self):
+        self.xflip = not self.xflip
+
+    def flip_y(self):
+        self.yflip = not self.yflip
 
     @property
     def opacity(self):
@@ -327,13 +422,14 @@ class Actor:
         self._image_name = image
         self._orig_surf = loaders.images.load(image)
         self._surface_cache.clear()  # Clear out old image's cache.
-        self._update_pos()
+        self._update_orig()
+        self._dimensions = self._orig_surf.get_size()
+        self._update_box()
 
-    def _update_pos(self):
-        p = self.pos
-        self.width, self.height = self._orig_surf.get_size()
-        self._calc_anchor()
-        self.pos = p
+    def _update_orig(self):
+        """Set original properties based on the image dimensions."""
+        self._orig_width, self._orig_height = self._orig_surf.get_size()
+        self._update_orig_anchor()
 
     def draw(self):
         s = self._build_transformed_surf()
