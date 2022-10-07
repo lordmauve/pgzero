@@ -17,8 +17,7 @@ bird.dead = False
 bird.score = 0
 bird.vy = 0
 
-storage.setdefault('highscore', 0)
-
+storage = dict(highscore=0)
 
 def reset_pipes():
     pipe_gap_y = random.randint(200, HEIGHT - 200)
