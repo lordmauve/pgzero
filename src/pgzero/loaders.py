@@ -273,7 +273,7 @@ def getfont(
         font = ptext._font_cache.get(key)
         if font:
             return font
-        font = pygame.font.Font(fontname, fontsize)
+        font = pygame.font.Sysfont(sysfontname, fontsize)
     else:
         font = fonts.load(fontname, fontsize)
 
