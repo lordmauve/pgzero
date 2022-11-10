@@ -2,7 +2,7 @@
 #  http://www.clutter-project.org/docs/clutter/stable/ClutterAlpha.html
 
 
-from math import sin, pow, pi
+from math import sin, cos, pow, pi
 
 from .clock import each_tick, unschedule
 from .spellcheck import suggest
@@ -74,6 +74,22 @@ def in_out_elastic(n):
         q -= 1.0
         return pow(2, -10 * q) * sin((q - s) * (2.0 * pi) / p) * .5 + 1.0
 
+
+@tweener
+def out_sine(n):
+    return sin(n * pi/2)
+
+@tweener
+def in_sine(n):
+    return 1 - cos(n * pi/2)
+
+@tweener
+def in_out_sine(n):
+    return -(cos(pi * n) - 1)/2
+
+@tweener
+def out_expo(n):
+    return 1 if n == 1 else 1 - pow(2, -10 * n)
 
 def _out_bounce_internal(t, d):
     p = t / d
