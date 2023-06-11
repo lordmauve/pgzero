@@ -25,7 +25,7 @@ def set_mouse_visible(is_visible):
     try:
         user32.ShowCursor(is_visible)
     except Exception as e:
-        if(b_visible):
+        if(is_visible):
             print("Failed to show mouse cursor:", str(e))
         else:
             print("Failed to hide mouse cursor:", str(e))
