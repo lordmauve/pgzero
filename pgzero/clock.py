@@ -36,6 +36,11 @@ def weak_method(method):
 def mkref(o):
     if isinstance(o, MethodType):
         return weak_method(o)
+    elif isinstance(o, partial):
+        if o.args or o.keywords:
+            return o
+        else:
+            return o.func
     else:
         try:
             return ref(o)
@@ -75,21 +80,7 @@ class Event:
             return cb.func if cb.args or cb.keywords else cb
         return cb.__func__ if isinstance(cb, MethodType) else cb
 
-def mkref(o):
-    if isinstance(o, MethodType):
-        return weak_method(o)
-    elif isinstance(o, partial):
-        if o.args or o.keywords:
-            return o
-        else:
-            return o.func
-    else:
-        try:
-            return ref(o)
-        except TypeError:
-            if isinstance(o, builtin_function_or_method):
-                return lambda: o
-            raise
+
 
 class Clock:
     """A clock used for event scheduling.
