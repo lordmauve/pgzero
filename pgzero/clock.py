@@ -8,6 +8,8 @@ import heapq
 from weakref import ref
 from functools import total_ordering
 from types import MethodType
+from functools import partial
+from collections import defaultdict
 
 __all__ = [
     'Clock', 'schedule', 'schedule_interval', 'unschedule'
@@ -34,6 +36,11 @@ def weak_method(method):
 def mkref(o):
     if isinstance(o, MethodType):
         return weak_method(o)
+    elif isinstance(o, partial):
+        if o.args or o.keywords:
+            return o
+        else:
+            return o.func
     else:
         try:
             return ref(o)
@@ -66,7 +73,13 @@ class Event:
 
     @property
     def callback(self):
-        return self.cb()
+        cb = self.cb()
+        if cb is None:
+            return None
+        if isinstance(cb, partial):
+            return cb.func if cb.args or cb.keywords else cb
+        return cb.__func__ if isinstance(cb, MethodType) else cb
+
 
 
 class Clock:
@@ -89,6 +102,7 @@ class Clock:
         self.fired = False
         self.events = []
         self._each_tick = []
+        self._scheduled_callbacks = defaultdict(int)
 
     def clear(self):
         """Remove all handlers from this clock."""
@@ -113,8 +127,13 @@ class Clock:
         :param delay: The delay before the call (in clock time / seconds).
 
         """
-        self.unschedule(callback)
-        self.schedule(callback, delay)
+        count = self._scheduled_callbacks[callback]
+        if count == 0:
+            self._scheduled_callbacks[callback] = 1
+            self.schedule(callback, delay)
+        else:
+            self._scheduled_callbacks[callback] = count + 1
+
 
     def schedule_interval(self, callback, delay):
         """Schedule callback to be called every `delay` seconds.

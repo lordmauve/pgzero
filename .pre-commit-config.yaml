@@ -13,3 +13,5 @@ repos:
   hooks:
     - id: flake8
       exclude: "^(doc|examples)/"
+      args:
+        - --ignore=E303
