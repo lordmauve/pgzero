@@ -77,6 +77,8 @@ Create a directory called ``images`` and save the image into it as
 ``alien.png``. Both of those must be lower case. Pygame Zero will complain
 otherwise, to alert you to a potential cross-platform compatibility pitfall.
 
+If the alien sprite is showing a WEBP file extension when you download it, use the file from `Github <https://github.com/lordmauve/pgzero/blob/master/doc/_static/alien.png>`_ instead.
+
 If you've done that, your project should look like this:
 
 .. code-block:: none
