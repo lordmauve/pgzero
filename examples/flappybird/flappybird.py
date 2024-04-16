@@ -17,6 +17,7 @@ bird.dead = False
 bird.score = 0
 bird.vy = 0
 
+storage = {}
 storage.setdefault('highscore', 0)
 
 
