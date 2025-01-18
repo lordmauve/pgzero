@@ -27,7 +27,7 @@ jobs:
       run: |
         export XDG_RUNTIME_DIR="$RUNNER_TEMP"
         pulseaudio -D --start
-        xvfb-run --auto-servernum python setup.py test
+        xvfb-run --auto-servernum pytest
     - name: Cleanup xvfb pidx
       uses: bcomnes/cleanup-xvfb@v1
     - uses: actions/upload-artifact@master
