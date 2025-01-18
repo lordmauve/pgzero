@@ -1,5 +1,5 @@
 
-.. image:: https://img.shields.io/github/workflow/status/lordmauve/pgzero/Run%20tests/master
+.. image:: https://img.shields.io/github/actions/workflow/status/lordmauve/pgzero/test.yml?branch=main
     :target: https://github.com/lordmauve/pgzero/actions/workflows/test.yml
     :alt: GitHub Test Status
 
