@@ -5,4 +5,6 @@ use 'pgzrun' to run the game file.
 
 """
 
-__version__ = '1.3.dev0'
+from ._version import __version__
+
+__all__ = ['__version__']

@@ -17,3 +17,5 @@ examples_dev
 /venv*/
 /notebooks
 /test/failed-image
+__pycache__
+src/pgzero/_version.py

@@ -1,5 +1,0 @@
-include README.txt COPYING AUTHORS
-recursive-include doc *.rst *.png *.wav
-recursive-include pgzero/data *.png
-recursive-include examples *
-prune doc/_build
