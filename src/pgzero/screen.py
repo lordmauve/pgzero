@@ -81,7 +81,7 @@ class SurfacePainter:
         c = make_color(color)
 
         hw = width / 2
-        l, t, w, h = rect
+        l, t, w, h = rect  # noqa: E741
         l1, l2 = round(l - hw), round(l + hw)
         r1, r2 = round(l + w - hw), round(l + w + hw)
         t1, t2 = round(t - hw), round(t + hw)
