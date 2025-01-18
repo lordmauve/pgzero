@@ -23,3 +23,9 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools_scm]
 write_to = "src/pgzero/_version.py"
+
+[tool.ruff]
+builtins = [
+    "Actor", "Rect", "ZRect", "animate", "clock", "exit", "images", "keyboard", "keymods",
+    "keys", "mouse", "music", "screen", "sounds", "storage", "tone"
+]
