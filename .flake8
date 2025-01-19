@@ -1,5 +1,0 @@
-[flake8]
-max-line-length = 88
-builtins =
-        Actor, Rect, ZRect, animate, clock, exit, images, keyboard, keymods,
-        keys, mouse, music, screen, sounds, storage, tone

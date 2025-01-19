@@ -1,5 +1,5 @@
 name: "Run tests"
-on: [push, pull_request]
+on: [pull_request, workflow_call]
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -13,12 +13,14 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt -r requirements-dev.txt
+    - name: Install project
+      run: pip install .
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names in the entire repo
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         # stricter tests for mission critical code
-        flake8 --count pgzero pgzrun.py test
+        flake8 --count src test
 
     - name: Install xvfb and pulseaudio
       run: |
@@ -27,7 +29,7 @@ jobs:
       run: |
         export XDG_RUNTIME_DIR="$RUNNER_TEMP"
         pulseaudio -D --start
-        xvfb-run --auto-servernum python setup.py test
+        xvfb-run --auto-servernum pytest
     - name: Cleanup xvfb pidx
       uses: bcomnes/cleanup-xvfb@v1
     - uses: actions/upload-artifact@master
