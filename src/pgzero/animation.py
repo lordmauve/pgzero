@@ -79,17 +79,21 @@ def in_out_elastic(n):
 def out_sine(n):
     return sin(n * pi/2)
 
+
 @tweener
 def in_sine(n):
     return 1 - cos(n * pi/2)
+
 
 @tweener
 def in_out_sine(n):
     return -(cos(pi * n) - 1)/2
 
+
 @tweener
 def out_expo(n):
     return 1 if n == 1 else 1 - pow(2, -10 * n)
+
 
 def _out_bounce_internal(t, d):
     p = t / d
