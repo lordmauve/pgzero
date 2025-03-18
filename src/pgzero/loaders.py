@@ -74,6 +74,93 @@ def validate_compatible_path(path):
             )
         )
 
+# New function to validate animation directory paths.
+def validate_animation_paths(path):
+    """Validate that the given directory path contains proper files for
+    an animation.
+    """
+    # First, validate the directory path itself.
+    validate_compatible_path(path)
+    
+    dirname = os.path.basename(path)
+    warned_dirname = False
+    warned_directory = False
+    warned_filenames = False
+    warned_numbering = False
+    warned_no_numbers = False
+    warned_extension = False
+
+    # Validate all animation frames (all files in the directory).
+    files = sorted(os.listdir(path))
+    # Variables to check consistency of naming across files.
+    last_anim_name = None
+    last_number = None
+    last_extension = None
+    for f in files:
+        # Ignore directories present and give a warning if so.
+        if not os.path.isfile(os.path.join(path, f)):
+            if not warned_directory:
+                print("WARNING: Directory {} found instead of file. Directories in "
+                      "animation folders are ignored.".format(f))
+                warned_directory = True
+            continue
+
+        # Split the filename into its parts and examine them individually.
+        basename, extension = f.split(".")
+        # Warn if not all files have the same file type.
+        if last_extension and last_extension != extension and not warned_extension:
+            print("WARNING: Extension of file {} does not match last extension {}. "
+                  "Having different file types in one animation is strongly "
+                  "discouraged.".format(f, last_extension))
+            warned_extension = True
+
+        if "_" in basename:
+            anim_name, text_number = basename.rsplit("_", 1)
+            # Warn if not all files have the same name before numbering.
+            if last_anim_name and last_anim_name != anim_name and not warned_filenames:
+                print("WARNING: Filename before numbering {} does not match last "
+                      "filename without numbering {}. Consider naming files "
+                      "consistently.".format(anim_name, last_anim_name))
+                warned_filenames = True
+            # Check if the filename ends in a number and warn if not.
+            try:
+                number = int(text_number)
+            except:
+                number = None
+                if not warned_no_numbers:
+                    print("WARNING: Filename {} does not end in a number. Order "
+                          "of frames could be wrong.".format(basename))
+                    warned_no_numbers = True
+            # Check if the filename matches the directory name.
+            if anim_name != dirname and not warned_dirname:
+                print("WARNING: Filename {} without numbering does not match "
+                      "directory name {}.".format(anim_name, dirname))
+                warned_dirname = True
+        
+            # Update last name and last number if there was a valid number.
+            last_anim_name = anim_name
+            if number:
+                last_number = number
+
+        # Update last extension.
+        last_extension = extension
+        # Validate like any other image file.
+        validate_compatible_path(os.path.join(path, f))
+
+    # If any specific warning was given, also give general best practis for
+    # naming animation frames.
+    if any((warned_dirname, warned_directory, warned_filenames, warned_numbering, 
+           warned_no_numbers, warned_extension)):
+        print("WARNING SUMMARY: Checking the animation directory revealed "
+              "problems that could interfere with correct ingest of animation "
+              "frames.\nThe following is suggested best practise:\n\t- Name "
+              "animation frames in animation directory DIR as follows: "
+              "DIR_NUMBER.EXTENSION.\n\t- Make sure all files are named after "
+              "the same pattern.\n\t- Make sure all files are of the same "
+              "file type.\n\t- Make sure frames are numbered correctly.\n\t- "
+              "If there are 10 or more frames, begin counting with 00 or 01 "
+              "instead of just 0 or 1.")
+
 
 class ResourceLoader:
     """Abstract resource loader.
@@ -122,21 +209,33 @@ class ResourceLoader:
             self.validate_root(name)
         p = os.path.join(self._root(), name)
 
-        if not os.path.isfile(p):
-            for ext in self.EXTNS:
-                p = os.path.join(self._root(), name + '.' + ext)
-                if os.path.exists(p):
-                    break
-            else:
-                raise KeyError(
-                    "No {type} found like '{name}'. "
-                    "Are you sure the {type} exists?".format(
-                        type=self.TYPE,
-                        name=name
+        # New if-else to separate dealing with animation loading vs. 
+        # non-animation loading.
+        if os.path.isdir(p) and self.TYPE == "animation":
+            # Validate the animation directory.
+            validate_animation_paths(p)
+            # With a given directory, the path to load does not 
+            # need to be changed here.
+        else:
+            # Handling of non-animations stays the same.
+            if not os.path.isfile(p):
+                for ext in self.EXTNS:
+                    p = os.path.join(self._root(), name + '.' + ext)
+                    if os.path.exists(p):
+                        break
+                else:
+                    raise KeyError(
+                        "No {type} found like '{name}'. "
+                        "Are you sure the {type} exists?".format(
+                            type=self.TYPE,
+                            name=name
+                        )
                     )
-                )
-
-        validate_compatible_path(p)
+            
+            # Validation of the directory has already occurred in 
+            # validate_animation_paths() so it's not necessary to
+            # call validate_compatible_path() again here.
+            validate_compatible_path(p)
         res = self._cache[key] = self._load(p, *args, **kwargs)
         return res
 
@@ -184,6 +283,28 @@ class ImageLoader(ResourceLoader):
 
 class UnsupportedFormat(Exception):
     """The resource was not in a supported format."""
+
+
+# New class to handle loading of animations
+class AnimationLoader(ResourceLoader):
+    # Extensions are the same as for ImageLoader as animations are made 
+    # up of individual images.
+    EXTNS = ['png', 'gif', 'jpg', 'jpeg', 'bmp']
+    TYPE = 'animation'
+
+    def _load(self, path):
+        # Get paths to all files in the directory
+        files = sorted([f_path for f in os.listdir(path) 
+                        if os.path.isfile(
+                        (f_path := os.path.join(path, f)))])
+        # Load all images as Pygame surfaces and return a list of frames.
+        frames = []
+        for f in files:
+            frames.append(pygame.image.load(f).convert_alpha())
+        return tuple(frames)
+
+    def __repr__(self):
+        return "<Animations animations={}>".format(self.__dir__())
 
 
 class SoundLoader(ResourceLoader):
@@ -237,6 +358,7 @@ class FontLoader(ResourceLoader):
 
 
 images = ImageLoader('images')
+animations = AnimationLoader('animations')
 sounds = SoundLoader('sounds')
 fonts = FontLoader('fonts')
 
@@ -289,3 +411,4 @@ def getfont(
 
 
 ptext.getfont = getfont
+

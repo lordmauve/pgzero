@@ -5,6 +5,8 @@ from . import game
 from . import loaders
 from . import rect
 from . import spellcheck
+from . import clock
+from .actor_animation import ActorAnimationSystem, ActorAnimation
 
 
 ANCHORS = {
@@ -108,11 +110,20 @@ class Actor:
     _anchor = _anchor_value = (0, 0)
     _angle = 0.0
     _opacity = 1.0
+    _anim = ActorAnimationSystem() # Initialize any actor with a new animation system
+    _a_image = None
 
     def _build_transformed_surf(self):
         cache_len = len(self._surface_cache)
         if cache_len == 0:
-            last = self._orig_surf
+            # If there is no cache and the actor is in an animation,
+            # the last drawn surface is the animation image.
+            if self._anim._current_animation:
+                last = self._a_image
+            # Otherwise, it's the static image.
+            else:
+                last = self._orig_surf
+        # If there is a cache, it reflects the correct image either way.
         else:
             last = self._surface_cache[-1]
         for f in self.function_order[cache_len:]:
@@ -234,6 +245,11 @@ class Actor:
         ow, oh = self._orig_surf.get_size()
         ax = calculate_anchor(ax, 'x', ow)
         ay = calculate_anchor(ay, 'y', oh)
+        # If an animation is playing, change the anchor coordinates
+        # based on animation frame offsets.
+        if self.anim.current:
+            ax += self._anim.current.offset_x
+            ay += self._anim.current.offset_y
         self._untransformed_anchor = ax, ay
         if self._angle == 0.0:
             self._anchor = self._untransformed_anchor
@@ -247,7 +263,10 @@ class Actor:
     @angle.setter
     def angle(self, angle):
         self._angle = angle
-        w, h = self._orig_surf.get_size()
+        if self._anim._current_animation:
+            w, h = self._a_image.get_size()
+        else:
+            w, h = self._orig_surf.get_size()
 
         ra = radians(angle)
         sin_a = sin(ra)
@@ -328,14 +347,42 @@ class Actor:
         self._orig_surf = loaders.images.load(image)
         self._surface_cache.clear()  # Clear out old image's cache.
         self._update_pos()
+        # Stop any running animation to show the static image instead.
+        self._anim.stop()
+
+    # The instance of animation system should be able to be returned
+    # but not be able to be set directly by the user.
+    @property
+    def anim(self):
+        return self._anim
 
     def _update_pos(self):
         p = self.pos
-        self.width, self.height = self._orig_surf.get_size()
+        if self._anim._current_animation:
+            self.width, self.height = self._a_image.get_size()
+        else: 
+            self.width, self.height = self._orig_surf.get_size()
         self._calc_anchor()
         self.pos = p
 
     def draw(self):
+        # If an animation is running and it has advanced a frame, the 
+        # actors new animation image needs to be fetched.
+        if self._anim._current_animation and self._anim._current_animation._new_frame:
+            # Index of the right frame.
+            i = self._anim._current_animation._frame_index
+            # Setting the actors animation image to the right frame.
+            self._a_image = self._anim._current_animation.frames[i]
+            # Updating the animation status that the frame has been udpated.
+            self._anim._current_animation.new_frame = False
+            # Clear the surface cache for the new image.
+            self._surface_cache.clear()
+        # Otherwise, if no animation is running but there still is an 
+        # animation image, it is deleted and the surface cache cleared
+        # so that the static image is displayed again.
+        elif not self._anim._current_animation and self._a_image:
+            self._a_image = None
+            self._surface_cache.clear()
         s = self._build_transformed_surf()
         game.screen.blit(s, self.topleft)
 
@@ -363,3 +410,4 @@ class Actor:
 
     def unload_image(self):
         loaders.images.unload(self._image_name)
+
