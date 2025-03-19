@@ -124,7 +124,15 @@ def validate_animation_paths(path):
                 warned_filenames = True
             # Check if the filename ends in a number and warn if not.
             try:
+                # If there is a number, check if the sorting of files has produced
+                # the correct order of frames.
                 number = int(text_number)
+                if last_number and number != last_number + 1 and not warned_numbering:
+                    print("WARNING: Number of current file ({}) does not follow "
+                          "number of last file ({}). Animation frames could be "
+                          "missing or with more than 10 frames, numbering could "
+                          "produce wrong file order.".format(number, last_number))
+                    warned_numbering = True
             except:
                 number = None
                 if not warned_no_numbers:
@@ -297,7 +305,7 @@ class AnimationLoader(ResourceLoader):
         files = sorted([f_path for f in os.listdir(path) 
                         if os.path.isfile(
                         (f_path := os.path.join(path, f)))])
-        # Load all images as Pygame surfaces and return a list of frames.
+        # Load all images as Pygame surfaces and return a tuple of frames.
         frames = []
         for f in files:
             frames.append(pygame.image.load(f).convert_alpha())

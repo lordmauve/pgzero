@@ -5,7 +5,6 @@ from . import game
 from . import loaders
 from . import rect
 from . import spellcheck
-from . import clock
 from .actor_animation import ActorAnimationSystem, ActorAnimation
 
 
@@ -111,7 +110,9 @@ class Actor:
     _angle = 0.0
     _opacity = 1.0
     _anim = ActorAnimationSystem() # Initialize any actor with a new animation system
-    _a_image = None
+    _a_image = None # Image variable to hold the currently displayed animation frame.
+    # This image is separate from the static image so that falling back to it is 
+    # possible if something goes wrong with the animations.
 
     def _build_transformed_surf(self):
         cache_len = len(self._surface_cache)
@@ -247,9 +248,9 @@ class Actor:
         ay = calculate_anchor(ay, 'y', oh)
         # If an animation is playing, change the anchor coordinates
         # based on animation frame offsets.
-        if self.anim.current:
-            ax += self._anim.current.offset_x
-            ay += self._anim.current.offset_y
+        if self._anim._current_animation:
+            ax += self._anim._current_animation.offset_x
+            ay += self._anim._current_animation.offset_y
         self._untransformed_anchor = ax, ay
         if self._angle == 0.0:
             self._anchor = self._untransformed_anchor
@@ -349,6 +350,7 @@ class Actor:
         self._update_pos()
         # Stop any running animation to show the static image instead.
         self._anim.stop()
+        self._a_image = None
 
     # The instance of animation system should be able to be returned
     # but not be able to be set directly by the user.
