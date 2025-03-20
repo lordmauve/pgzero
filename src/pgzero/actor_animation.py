@@ -23,7 +23,8 @@ class ActorAnimationSystem:
         self._animation_pool = {}
         self._current_animation = None
         self._queue = []
-        self._running_queue = False
+        self._playing_queue = False
+        self._queue_index = -1
         self._base_animation = None
         self._paused = False
         self._pause_info = None
@@ -55,12 +56,11 @@ class ActorAnimationSystem:
     def base_animation(self, name):
         # Check if the former base animation is currently running.
         swap = self._current_animation == self._base_animation
-        # Since base_animation can be None, check_animation_name() cannot be
-        # used here to validate the given name.
         # If the name is in the pool, set the base animation.
         if name in self._animation_pool:
-            # Swap in the new animation.
-            if swap:
+            # Run this animation if base animation was running
+            # or no animation was running.
+            if swap or not self._current_animation:
                 self._run(name)
             # Update the base animation.
             self._base_animation = self._animation_pool[name]
@@ -68,9 +68,14 @@ class ActorAnimationSystem:
         elif name == None:
             # If the former base animation was running, stop it.
             if swap:
-                self.stop()
-            self._base_animation = None
-        # Otherwise raise the same error as check_animation_name()
+                self.stop_all()
+            # stop_all() already sets the base animation to None
+            # so this can be in an else block.
+            else:
+                self._base_animation = None
+        # Otherwise raise the same error as check_animation_name().
+        # Since base_animation can be None, check_animation_name() cannot be
+        # used here to validate the given name.
         else:
             raise ValueError("Given animation name is not part of the available "
                              "animation pool. Valid animation names are the following: {}"
@@ -82,6 +87,15 @@ class ActorAnimationSystem:
     def paused(self):
         return self._paused
 
+    @property
+    def current_type(self):
+        if self._current_animation == self._base_animation.name:
+            return "base"
+        elif self._playing_queue:
+            return "queue"
+        else:
+            return "single"
+            
     # Checks whether the given name is actually a key for the animation pool.
     # If not, an error is raised that also lists available animations.
     def check_animation_name(self, name):
@@ -116,15 +130,30 @@ class ActorAnimationSystem:
             each_duration = durations / num_frames
             durations = tuple([each_duration] * num_frames)
 
+        # The length of offsets is used either to check whether the correct
+        # number of individual offsets were given or if the single offset
+        # tuple contains the correct number of values (2).
+        num_offsets = len(offsets)
         # Basically same check for offsets but the condition checks whether the
         # first element of offsets is also a tuple, since a single offset would
         # already satisfy the condition otherwise.
-        if isinstance(offsets, list) or isinstance(offsets[0], tuple):
-            num_offsets = len(offsets)
+        if isinstance(offsets[0], tuple):
             if num_offsets != num_frames:
                 raise ValueError("Number of supplied offsets ({}) does "
                                  "not match number of animation frames ({})."
                                  .format(num_offsets, num_frames))
+            # Check each offset for correct number of values.
+            for o in offsets:
+                l = len(o)
+                if l != 2:
+                    raise ValueError("Offset tuples must have exactly two "
+                                     "integer values for x and y, not {} "
+                                     "values.".format(l))
+        # If only a single tuple was supplied, also check number of values.
+        elif num_offsets != 2:
+            raise ValueError("Offset tuples must have exactly two integer "
+                             "values for x and y, not {} values."
+                             .format(num_offsets))
         # If a single offset was supplied, give it to every frame.
         else:
             offsets = tuple([offsets] * num_frames)
@@ -146,23 +175,29 @@ class ActorAnimationSystem:
         loaders.animations.unload(name)
 
     # Playing animations
-    def _run(self, name):
+    def _run(self, name, resume = False):
+        # If an animation is currently running, unschedule its
+        # frame advancement.
+        if self._current_animation:
+            clock.unschedule(self._current_animation._next_frame)
+        # Set the new currently running animation.
+        self._current_animation = self._animation_pool[name]
+        # If an animation should not be started but resumed,
+        # get the remaining information from the pause state
+        # and call the animations function to resume playing.
+        if resume:
+            self._current_animation._resume(self._pause_info[1])
+        # Otherwise, reset the progress states of the animation
+        # in case they hadn't been already and run it.
+        else:
+            self._current_animation._frame_index = -1
+            self._current_animation._new_frame = False
+            
+            self._current_animation._next_frame()
+
         # Reset pause state.
         self._paused = False
         self._pause_info = None
-
-        # Set the currently running animation.
-        self._current_animation = self._animation_pool[name]
-        # Set the frame index of the animation to the starting
-        # point incase for some reason it was not there already.
-        # Same for resetting the new frame flag.
-        self._current_animation._frame_index = -1
-        self._current_animation._new_frame = False
-        # Run the animation.
-        self._current_animation._next_frame()
-
-    def _resume(self):
-        pass
 
     def play(self, name):
         # Check if the animation name is valid.
@@ -184,10 +219,33 @@ class ActorAnimationSystem:
 
     # Pausing animations
     def pause(self):
-        pass
+        # Calculate the remaining time the frame should be shown after
+        # unpausing.
+        started = self._current_animation._frame_started
+        paused = clock.time()
+        remaining = paused - started
+
+        # Unschedule advancing the current animation.
+        clock.unschedule(self._current_animation._next_frame)
+
+        # Record information about the animation before the pause for 
+        # unpausing and unset the current animation.
+        self._paused = True
+        self._pause_info = (self._current_animation._name, remaining, self.current_type)
+        self._playing_queue = False
+        self._current_animation = None
 
     def unpause(self):
-        pass
+        # Get the name of the animation before the pause.
+        p_name = self._pause_info[0]
+
+        # Makes sure the animation that should be unpaused is still
+        # in the animation pool.
+        self.check_animation_name(p_name)
+
+        # Running _run() with True makes it resume the animation 
+        # instead of starting it from scratch.
+        self._run(p_name, True)
 
     # Base animation
     # set_base() is a courtesy function to make working with anim easier.
@@ -245,7 +303,7 @@ class ActorAnimationSystem:
         """Function called by the running animation when it finishes."""
         # If the queue is playing and there are animations left in it,
         # play the next one.
-        if self._running_queue and self._queue:
+        if self._playing_queue and self._queue:
             self._run(self._queue.pop(0))
         # If there's no queue but a base animation, play it.
         elif self._base_animation:
@@ -262,8 +320,8 @@ class ActorAnimationSystem:
         # Reset the state of the running animation and unschedule it.
         self._current_animation._reset()
         # If we were running the queue, stop it.
-        if self._running_queue:
-            self._running_queue = False
+        if self._playing_queue:
+            self._playing_queue = False
         # If there is a base animation, return to playing it.
         if self._base_animation:
             self._run(self._base_animation.name)
@@ -274,8 +332,8 @@ class ActorAnimationSystem:
         # Reset the state of the running animation and unschedule it.
         self._current_animation._reset()
         # If we were running the queue, stop it.
-        if self._running_queue:
-            self._running_queue = False
+        if self._playing_queue:
+            self._playing_queue = False
         # TODO: Refine this. Should base be set to None or instead
         # should a way be implemented to retain base but not play it?
         self._current_animation = None
@@ -288,14 +346,16 @@ class ActorAnimationSystem:
 class ActorAnimation:
 
     def __init__(self, actor, name, frames, durations, offsets, callback):
-        self._actor = actor
-        self._name = name
-        self._frames = frames
-        self._frame_index = -1
-        self._new_frame = False
-        self._durations = durations
-        self._offsets = offsets
-        self._callback = callback
+        self._actor = actor # Actor object that holds the animation.
+        self._name = name # Name of the animation.
+        self._frames = frames # Tuple of frames of the animation.
+        self._frame_index = -1 # Index of the current frame.
+        self._new_frame = False # Indicator whether draw() of the actor
+                                # should load the current image.
+        self._frame_started = None # Time when this frame started being shown.
+        self._durations = durations # Tuple of frame durations.
+        self._offsets = offsets # Tuple of spacial offsets for frames.
+        self._callback = callback # Callback function for the animation.
 
     # Function to advance the current frame and schedule the next advancement
     def _next_frame(self):
@@ -312,15 +372,27 @@ class ActorAnimation:
                 self._callback()
         # If the animation is not done, schedule the next frame advancement.
         else:
+            # Indicates actor.draw() should get the new frame.
             self._new_frame = True
+            # Records when this frame was started to be shown.
+            self._frame_started = clock.time()
+            # Schedules the next frame advancement.
             clock.schedule(self._next_frame, self._durations[self._frame_index])
+
+    def _resume_frame(self, remaining_duration):
+        self._new_frame = True
+        self._frame_started = clock.time()
+        clock.schedule(self._next_frame, remaining_duration)
 
     # Function to reset the state of the animation and unschedule its advance-
     # ment if it was running.
-    def _reset(self):
+    def _reset(self): 
+        # Unscheduling does not error even if _next_frame was not scheduled.
         clock.unschedule(self._next_frame)
+        # Reset the tracking values for animation progress.
         self._frame_index = -1
         self._new_frame = False
+        self._frame_started = None
 
     @property
     def name(self):
@@ -352,11 +424,11 @@ class ActorAnimation:
 
     @property
     def offset_x(self):
-        return self._offset[self._frame_index][0]
+        return self._offsets[self._frame_index][0]
 
     @property
     def offset_y(self):
-        return self._offset[self._frame_index][1]
+        return self._offsets[self._frame_index][1]
 
     @property
     def callback(self):

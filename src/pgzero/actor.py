@@ -242,15 +242,35 @@ class Actor:
         self._calc_anchor()
 
     def _calc_anchor(self):
+        # Values are "left", "center", etc.
         ax, ay = self._anchor_value
-        ow, oh = self._orig_surf.get_size()
+        # If an animation is ongoing, the current
+        # frame is used.
+        if self._anim._current_animation:
+            ow, oh = self._a_image.get_size()
+        # Otherwise, the static image is used.
+        else:
+            ow, oh = self._orig_surf.get_size()
+        #ow, oh = self._orig_surf.get_size()
+        # calculate_anchor() returns the x and y coords
+        # of the anchor in relation to the topleft of
+        # the image. (e.g. if img. is 200x150 and anchor
+        # is centered, ax and ay would be 100 and 75
+        # after the operation)
         ax = calculate_anchor(ax, 'x', ow)
         ay = calculate_anchor(ay, 'y', oh)
         # If an animation is playing, change the anchor coordinates
         # based on animation frame offsets.
         if self._anim._current_animation:
-            ax += self._anim._current_animation.offset_x
-            ay += self._anim._current_animation.offset_y
+            # Add the frame offsets to the relative pos of
+            # anchor in relation to topleft.
+            ax -= self._anim._current_animation.offset_x
+            ay -= self._anim._current_animation.offset_y
+        # The untransformed anchor assumes the image isn't 
+        # rotated. If it is, the anchor position has to be
+        # recalculated because the rotated image has a different
+        # size and topleft, so the position of the anchor
+        # in relation to topleft must also change.
         self._untransformed_anchor = ax, ay
         if self._angle == 0.0:
             self._anchor = self._untransformed_anchor
@@ -360,16 +380,22 @@ class Actor:
 
     def _update_pos(self):
         p = self.pos
-        if self._anim._current_animation:
-            self.width, self.height = self._a_image.get_size()
-        else: 
-            self.width, self.height = self._orig_surf.get_size()
+        # TODO: Decide whether the actors base width should be
+        #       changed with each animation frame or not.
+        #if self._anim._current_animation:
+        #    self.width, self.height = self._a_image.get_size()
+        #else: 
+        #    self.width, self.height = self._orig_surf.get_size()
+        self.width, self.height = self._orig_surf.get_size()
         self._calc_anchor()
         self.pos = p
 
     def draw(self):
         # If an animation is running and it has advanced a frame, the 
         # actors new animation image needs to be fetched.
+        # TODO: Solve this differently? An animation could directly 
+        # change actor._a_image when it runs _next_frame, would that
+        # be better?
         if self._anim._current_animation and self._anim._current_animation._new_frame:
             # Index of the right frame.
             i = self._anim._current_animation._frame_index
@@ -379,6 +405,16 @@ class Actor:
             self._anim._current_animation.new_frame = False
             # Clear the surface cache for the new image.
             self._surface_cache.clear()
+            """
+            DEBUG PRINTS
+            print("\nPos:", self.pos)
+            print("Anchor:", self._anchor)
+            print("Topleft:", self.topleft)
+            print("Added:", self._anchor[0] + self.topleft[0], self._anchor[1] + self.topleft[1])
+            print("Width:", self.width, "Height:", self.height)
+            """
+            # Update actor position to incorporate frame offsets.
+            self._update_pos()
         # Otherwise, if no animation is running but there still is an 
         # animation image, it is deleted and the surface cache cleared
         # so that the static image is displayed again.
