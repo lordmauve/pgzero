@@ -418,7 +418,7 @@ class Actor:
         # Otherwise, if no animation is running but there still is an 
         # animation image, it is deleted and the surface cache cleared
         # so that the static image is displayed again.
-        elif not self._anim._current_animation and self._a_image:
+        elif not self._anim._current_animation and self._a_image and not self._anim.paused:
             self._a_image = None
             self._surface_cache.clear()
         s = self._build_transformed_surf()

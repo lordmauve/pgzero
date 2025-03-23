@@ -24,7 +24,7 @@ class ActorAnimationSystem:
         self._current_animation = None
         self._queue = []
         self._playing_queue = False
-        self._queue_index = -1
+        self._queue_index = None
         self._base_animation = None
         self._paused = False
         self._pause_info = None
@@ -44,6 +44,14 @@ class ActorAnimationSystem:
 
     current_animation = current
     running = current
+
+    @property
+    def queue(self):
+        return tuple(self._queue)
+
+    @property
+    def playing_queue(self):
+        return self._playing_queue
 
     @property
     def base_animation(self):
@@ -93,8 +101,10 @@ class ActorAnimationSystem:
             return "base"
         elif self._playing_queue:
             return "queue"
-        else:
+        elif self._current_animation:
             return "single"
+        else:
+            return None
             
     # Checks whether the given name is actually a key for the animation pool.
     # If not, an error is raised that also lists available animations.
@@ -186,11 +196,11 @@ class ActorAnimationSystem:
         # get the remaining information from the pause state
         # and call the animations function to resume playing.
         if resume:
-            self._current_animation._resume(self._pause_info[1])
+            self._current_animation._resume_frame(self._pause_info[1])
         # Otherwise, reset the progress states of the animation
         # in case they hadn't been already and run it.
         else:
-            self._current_animation._frame_index = -1
+            self._current_animation._frame_index = None
             self._current_animation._new_frame = False
             
             self._current_animation._next_frame()
@@ -205,20 +215,38 @@ class ActorAnimationSystem:
 
         # Only do something if this animation is not already running.
         if not self._current_animation or self._current_animation.name != name:
+            # If the queue was playing before, pause it.
+            self.pause_queue()
+            # Start the animation.
             self._run(name)
 
     def start(self, name):
         # Check if the animation name is valid.
         self.check_animation_name(name)
 
+        # Pause the queue, if it was playing.
+        self.pause_queue()
+
         # Start the given animation, even if it was already running.
         self._run(name)
 
     def play_queue(self):
-        pass
+        # If the queue is already playing, do nothing.
+        if self._playing_queue:
+            return
+        # Start playing the animation at the current position in the queue.
+        self._advance_queue()
+
+    def start_queue(self):
+        self.queue_jump(1)
+
+        self._advance_queue()
 
     # Pausing animations
     def pause(self):
+        # If we are paused, do nothing.
+        if self._paused:
+            return
         # Calculate the remaining time the frame should be shown after
         # unpausing.
         started = self._current_animation._frame_started
@@ -232,10 +260,14 @@ class ActorAnimationSystem:
         # unpausing and unset the current animation.
         self._paused = True
         self._pause_info = (self._current_animation._name, remaining, self.current_type)
+        # Unset any state indicating current animation.
         self._playing_queue = False
         self._current_animation = None
 
     def unpause(self):
+        # If we aren't paused, do nothing.
+        if not self._paused:
+            return
         # Get the name of the animation before the pause.
         p_name = self._pause_info[0]
 
@@ -246,6 +278,14 @@ class ActorAnimationSystem:
         # Running _run() with True makes it resume the animation 
         # instead of starting it from scratch.
         self._run(p_name, True)
+        # If the animation was from the queue, also set the
+        # queue boolean again.
+        if self._pause_info[2] == "queue":
+            self._playing_queue = True
+
+    def pause_queue(self):
+        # TODO: WRITE THIS...
+        pass
 
     # Base animation
     # set_base() is a courtesy function to make working with anim easier.
@@ -258,53 +298,250 @@ class ActorAnimationSystem:
         self.base_animation = None
 
     # Animation queue
+    def queue_position(self):
+        """Returns the current position in the queue. None means the
+        queue hasn't started yet, 1 is the first and so on."""
+        if self._queue_index != None:
+            return self._queue_index + 1
+        return None
+
     def enqueue(self, *names):
+        if not names:
+            raise ValueError("No animation names to enqueue supplied.")
+        # Check for valid names and add them to the queue.
         for n in names:
             self.check_animation_name(n)
             self._queue.append(n)
 
+    # TODO: Function needs a better but not too long name.
+    def _dequeue_adjust_index(self, name, local_queue_index, q_reversed = False):
+        # If the queue is not started, no checks or adjustments have to be
+        # made.
+        if not local_queue_index:
+            return False
+        elem_index = self._queue.index(name)
+        # If the currently playing queue animation should be removed,
+        # note this and reset it.
+        if self._playing_queue and local_queue_index == self._queue.index(name):
+            self._queue[local_queue_index]._reset()
+            return True
+        # If the animation to be removed lies in front of the queue index,
+        # it must be adjusted to still play the correct animation after removals.
+        elif (q_reversed and local_queue_index < elem_index) or elem_index < local_queue_index:
+            self._queue_index -= 1
+        return False
+
+    # TODO: If the animation to be dequeued is currently playing in the
+    # queue, reset it, remove it and play the animation the at the next
+    # position after all dequeuing is done.
     def dequeue(self, *elems):
         # If no arguments were supplied, error.
         if not elems:
             raise ValueError("No animation name to dequeue supplied.")
-        # If tuples were supplied, elements are dequeued either by
-        # first, last or all elements.
-        if isinstance(elems[0], tuple):
-            for name, mode in elems:
-                match mode:
-                    case "first":
-                        self._queue.remove(name)
-                    case "last":
-                        # Never in my life have I been so embarassed to
-                        # write code that doesn't have any performance
-                        # downside except for lists of length magnitudes
-                        # greater than we expect here...
-                        self._queue.reverse()
-                        self._queue.remove(name)
-                        self._queue.reverse()
-                    case "all":
-                        self._queue = [n for n in self._queue if n != name]
-                    # If an invalid mode was given, error.
-                    case _:
-                        raise ValueError("Invalid mode for removal supplied. "
-                                         "Valid modes are 'first', 'last' and "
-                                         "'all'.")
-        # If only names were supplied, default to mode 'first'.
-        else:
-            for name in elems:
-                self._queue.remove(name)
 
+        # TODO: Rework comments to include the fact that queue_index is
+        # None if there is no position in the queue and that 
+        # dequeue_adjust_index checks for this.
+        removed_playing = False
+        # Go through each supplied animation to dequeue. If
+        # they are tuples, apply the correct mode of removal,
+        # if not default to "first".
+        for e in elems:
+            # TODO: Separate this into its own function for readability.
+            if isinstance(e, tuple):
+                name, mode = e
+                # If a name is not in the queue, error descriptively.
+                if name in self._queue:
+                    match mode:
+                        case "first":
+                            # Checks if the playing animation gets removed and
+                            # adjusts the queue index in case the removed
+                            # animation is before the current one.
+                            if self._dequeue_adjust_index(name, self._queue_index):
+                                removed_playing = True
+                            # Remove the animation from the queue.
+                            self._queue.remove(name)
+                        case "last":
+                            # Reverse-remove-reverse is not efficient, but this
+                            # shouldn't really matter for lists as small as queues
+                            # are likely to be.
+                            self._queue.reverse()
+                            # Calculate the index of the playing animation in the
+                            # reversed queue.
+                            if self._queue_index != None:
+                                rev_queue_index = len(self._queue) - self._queue_index - 1
+                            else:
+                                rev_queue_index = None
+                            # Same check above, last parameter tells the function the
+                            # queue is reversed.
+                            if self._dequeue_adjust_index(name, rev_queue_index, True):
+                                removed_playing = True
+                            # Remove the animation.
+                            self._queue.remove(name)
+                            # Flip the queue back.
+                            self._queue.reverse()
+                        case "all":
+                            # Cheking for removal of current animation is simpler
+                            # because all instances of this animation are removed,
+                            # meaning the index doesn't matter.
+                            if self._queue_index and name == self._queue[self._queue_index].name:
+                                self._queue[self._queue_index]._reset()
+                                removed_playing = True
+                            # List to fill with animations to keep in the queue.
+                            keep_queue = []
+                            # Since the actual queue index could change, we need
+                            # a static one to compare against.
+                            og_queue_index = self._queue_index
+                            # Go through the queue, keeping all animations not
+                            # targeted by this removal. Wherever one is removed
+                            # that's before the queue index, adjust it down.
+                            for i, n in enumerate(self._queue):
+                                if n != name:
+                                    keep_queue.append(n)
+                                elif og_queue_index and i < og_queue_index:
+                                    self._queue_index -= 1
+                            # TODO: Should this get a copy of keep_queue instead?
+                            #       Not really I think but should make sure.
+                            # Set the queue to the version with all occurences
+                            # of current target removed.
+                            self._queue = keep_queue
+                        case _:
+                            raise ValueError("Invalid mode for removal supplied. "
+                                             "Valid modes are 'first', 'last' and "
+                                             "'all'.")
+                else:
+                    raise ValueError("Given name {} isn't part of the queue: {}"
+                                     .format(name, ",".join(self._queue)))
+            else:
+                if e in self._queue:
+                    if self._dequeue_adjust_index(name, self._queue_index):
+                        removed_playing = True
+                    self._queue.remove(e)
+                else:
+                    raise ValueError("Given name {} isn't part of the queue: {}"
+                                     .format(name, ",".join(self._queue)))
+
+            # If the playing animation was removed and the queue still has
+            # animations play the one after where the playing animation was
+            # removed.
+            if removed_playing:
+                # TODO: Does this work?!?
+                self._queue_index -= 1
+                self.play_queue()
+
+    # TODO: Better name for this function?
+    def queue_jump(self, position):
+        """Jump to a specific animation in the queue by position."""
+        index = position - 1
+        # Error descriptively in case of a bad given position.
+        if index < 0 or index >= len(self._queue):
+            raise ValueError("Position {} to jump to is not in the queue. "
+                             "Minimum position is 1 and maximum position is"
+                             " currently {}".format(position, len(self._queue)))
+
+        # If the queue is currently playing, reset the animation and
+        # play from where the new position is.
+        if self._playing_queue:
+            self._queue[self._queue_index].reset()
+
+            self._queue_index = index - 1
+            self._advance_queue()
+        # Otherwise, only set the position without starting to play.
+        # TODO: Should this be changed? Should queue_jump always play?
+        else:
+            self._queue_index = index - 1
+
+    def _check_queue_steps(self, steps = 1, forward = True):
+        """Function to check whether a given amount of steps to change
+        the queue position by is in bounds based on the direction to move."""
+        if steps < 1:
+            raise ValueError("queue_next() accepts only positive integer "
+                             "values (the number of animations to go forward "
+                             "in the queue), not {}.".format(steps))
+        elif forward and self._queue_index + steps >= len(self._queue):
+            raise IndexError("Given steps ({}) go out of bounds of the animation "
+                             "queue, maximum steps forward at this point would be {}."
+                             .format(steps, len(self._queue) - self._queue_index - 1))
+        elif self._queue_index - steps < -1:
+            raise IndexError("Given steps ({}) go out of bounds of the animation "
+                             "queue, maximum steps backward at this point would be {}."
+                             .format(steps, self._queue_index))
+
+
+    def queue_next(self, steps = 1):
+        # Catch possible bad value for steps.
+        self._check_queue_steps(steps)
+
+        # If the queue is playing, advance by the given number of
+        # animations.
+        if self._playing_queue:
+            self._queue[self._queue_index].reset()
+            # Since _advance_queue() already increments the index by
+            # one, we reduce it by one here to have more intuitive
+            # values to use with the function.
+            self._queue_index += steps - 1
+            self._advance_queue()
+        # Otherwise, simply start playing it from the correct position.
+        else:
+            if self._queue_index != None:
+                self._queue_index += steps - 1
+            else:
+                self._queue_index = steps - 1
+            self.play_queue()
+
+    def queue_previous(self, steps = 1):
+        # Catch possible bad value for steps.
+        self._check_queue_steps(steps, False)
+
+        # If the queue is playing, move back by the given number of
+        # animations.
+        if self._playing_queue:
+            self._queue[self._queue_index].reset()
+
+            self._queue_index -= steps - 1
+            self._advance_queue()
+        else:
+            print("WARNING: Queue is not playing, can't move back"
+                  " to former animations.")
+
+    # Advance the index for the queue by one and react to the
+    # resulting state.
+    def _advance_queue(self):
+        if self._queue_index != None:
+            self._queue_index += 1
+        else:
+            self._queue_index = 0
+
+        # If the queue is done, reset the index, turn off playing
+        # the queue and return to the base animation if there is
+        # one.
+        if self._queue_index >= len(self._queue):
+            self._queue_index = None
+            self._playing_queue = False
+            # TODO: Is this the best solution? Getting to the end
+            # of the queue calls _done() twice. Not a performance
+            # problem but maybe a design problem?
+            self._done(queue_finished = True)
+        else:
+            # Run the now current animation from the queue and set
+            # the boolean keeping track if the queue is playing.
+            self._run(self._queue[self._queue_index])
+            self._playing_queue = True
 
     def empty_queue(self):
+        # If the queue is playing while it should be emptied, stop
+        # playing it.
+        if self._playing_queue:
+            self.stop()
         self._queue = []
 
     # Ending animations
-    def _done(self, name):
+    def _done(self, name = "", queue_finished = False):
         """Function called by the running animation when it finishes."""
         # If the queue is playing and there are animations left in it,
         # play the next one.
-        if self._playing_queue and self._queue:
-            self._run(self._queue.pop(0))
+        if self._playing_queue:
+            self._advance_queue()
         # If there's no queue but a base animation, play it.
         elif self._base_animation:
             self._run(self._base_animation.name)
@@ -314,9 +551,11 @@ class ActorAnimationSystem:
             self._current_animation = None
 
     def stop(self):
-        # If we are running the base animation, this function does nothing.
-        if self._current_animation == self._base_animation:
+        # If no animations are running or we are running the base
+        # animation, do nothing.
+        if not self._current_animation or self._current_animation == self._base_animation:
             return
+
         # Reset the state of the running animation and unschedule it.
         self._current_animation._reset()
         # If we were running the queue, stop it.
@@ -329,6 +568,9 @@ class ActorAnimationSystem:
             self._current_animation = None
 
     def stop_all(self):
+        # If no animations are running, do nothing.
+        if not self._current_animation:
+            return
         # Reset the state of the running animation and unschedule it.
         self._current_animation._reset()
         # If we were running the queue, stop it.
@@ -349,7 +591,7 @@ class ActorAnimation:
         self._actor = actor # Actor object that holds the animation.
         self._name = name # Name of the animation.
         self._frames = frames # Tuple of frames of the animation.
-        self._frame_index = -1 # Index of the current frame.
+        self._frame_index = None # Index of the current frame.
         self._new_frame = False # Indicator whether draw() of the actor
                                 # should load the current image.
         self._frame_started = None # Time when this frame started being shown.
@@ -359,12 +601,15 @@ class ActorAnimation:
 
     # Function to advance the current frame and schedule the next advancement
     def _next_frame(self):
-        self._frame_index += 1
+        if self._frame_index != None:
+            self._frame_index += 1
+        else:
+            self._frame_index = 0
 
         # If the animation has finished, reset the frame counter and call
         # the function telling the animation manager that the animation is done.
         if self._frame_index >= len(self._frames):
-            self._frame_index = -1
+            self._frame_index = None
             # TODO: Necessary? Counterproductive? : self._new_frame = False
             self._actor._done(self._name)
             # If there was a function callback set for the animation, call it.
@@ -390,7 +635,7 @@ class ActorAnimation:
         # Unscheduling does not error even if _next_frame was not scheduled.
         clock.unschedule(self._next_frame)
         # Reset the tracking values for animation progress.
-        self._frame_index = -1
+        self._frame_index = None
         self._new_frame = False
         self._frame_started = None
 
@@ -404,7 +649,13 @@ class ActorAnimation:
 
     @property
     def frame(self):
-        return self._frames[self._frame_index]
+        # TODO: What's the best behaviour when the user asks for
+        # info about the current frame when the animation isn't
+        # running? Currently, some return None and others neutral
+        # values for their operations. Better ideas?
+        if self._frame_index:
+            return self._frames[self._frame_index]
+        return None
 
     @property
     def durations(self):
@@ -412,7 +663,9 @@ class ActorAnimation:
 
     @property
     def duration(self):
-        return self._durations[self._frame_index]
+        if self._frame_index:
+            return self._durations[self._frame_index]
+        return None
 
     @property
     def offsets(self):
@@ -420,15 +673,21 @@ class ActorAnimation:
 
     @property
     def offset(self):
-        return self.offsets[self._frame_index]
+        if self._frame_index:
+            return self.offsets[self._frame_index]
+        return (0, 0)
 
     @property
     def offset_x(self):
-        return self._offsets[self._frame_index][0]
+        if self._frame_index:
+            return self._offsets[self._frame_index][0]
+        return 0
 
     @property
     def offset_y(self):
-        return self._offsets[self._frame_index][1]
+        if self._frame_index:
+            return self._offsets[self._frame_index][1]
+        return 0
 
     @property
     def callback(self):
