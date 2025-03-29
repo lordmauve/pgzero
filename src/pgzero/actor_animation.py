@@ -11,7 +11,7 @@ class ActorAnimationSystem:
     Direct write access to the important properties is restricted and use of anim should
     occur only through functions.
 
-    TODOTODOTODO this isn't clear yet!!!
+    # TODO: this isn't clear yet!!!
     Base animation and paused could be implemented as accessible properties, but in order
     to avoid confusion, they are not. This way, the user knows that actor.anim always
     has to be used with a function.
@@ -331,87 +331,100 @@ class ActorAnimationSystem:
             self._queue_index -= 1
         return False
 
-    # TODO: If the animation to be dequeued is currently playing in the
-    # queue, reset it, remove it and play the animation the at the next
-    # position after all dequeuing is done.
+    def _dequeue_tuple(self, t):
+        name, mode = t
+        # Same kind of boolean as in the calling function.
+        removed_playing = False
+        # If a name is not in the queue, error descriptively.
+        if name in self._queue:
+            # TODO: Better to just use if - elif - else to decrease
+            # amount of indentation by one level?
+            match mode:
+                case "first":
+                    # Checks if the playing animation gets removed and
+                    # adjusts the queue index in case the removed
+                    # animation is before the current one.
+                    if self._dequeue_adjust_index(name, self._queue_index):
+                        # The function only returns True if the current
+                        # animation was removed. This way, removed_playing
+                        # is updated only once and can't be set back to
+                        # being False again.
+                        removed_playing = True
+                    # Remove the animation from the queue.
+                    self._queue.remove(name)
+                case "last":
+                    # Reverse-remove-reverse is not efficient, but this
+                    # shouldn't really matter for lists as small as queues
+                    # are likely to be.
+                    self._queue.reverse()
+                    # Calculate the index of the playing animation in the
+                    # reversed queue.
+                    if self._queue_index != None:
+                        rev_queue_index = len(self._queue) - self._queue_index - 1
+                    else:
+                        rev_queue_index = None
+                    # Same check as above, last parameter tells the function the
+                    # queue is reversed.
+                    if self._dequeue_adjust_index(name, rev_queue_index, True):
+                        removed_playing = True
+                    # Remove the animation.
+                    self._queue.remove(name)
+                    # Flip the queue back.
+                    self._queue.reverse()
+                case "all":
+                    # Checking for removal of current animation is simpler
+                    # because all instances of this animation are removed,
+                    # meaning the index doesn't matter.
+                    if self._queue_index and name == self._queue[self._queue_index].name:
+                        self._queue[self._queue_index]._reset()
+                        removed_playing = True
+                    # List to fill with animations to keep in the queue.
+                    keep_queue = []
+                    # Since the actual queue index could change, we need
+                    # a static one to compare against.
+                    og_queue_index = self._queue_index
+                    # Go through the queue, keeping all animations not
+                    # targeted by this removal. Wherever one is removed
+                    # that's before the queue index, adjust it down.
+                    for i, n in enumerate(self._queue):
+                        if n != name:
+                            keep_queue.append(n)
+                        elif og_queue_index and i < og_queue_index:
+                            self._queue_index -= 1
+                    # TODO: Should this get a copy of keep_queue instead?
+                    #       Not really I think but should make sure.
+                    # Set the queue to the version with all occurences
+                    # of current target removed.
+                    self._queue = keep_queue
+                case _:
+                    raise ValueError("Invalid mode for removal supplied. "
+                                     "Valid modes are 'first', 'last' and "
+                                     "'all'.")
+        else:
+            raise ValueError("Given name {} isn't part of the queue: {}"
+                             .format(name, ",".join(self._queue)))
+
+        # TODO: Make this better. Two helping functions both returning
+        # bools? This could be improved.
+        return removed_playing
+
     def dequeue(self, *elems):
         # If no arguments were supplied, error.
         if not elems:
             raise ValueError("No animation name to dequeue supplied.")
-
-        # TODO: Rework comments to include the fact that queue_index is
-        # None if there is no position in the queue and that 
-        # dequeue_adjust_index checks for this.
+        # Variable to keep track whether the current animation 
+        # was removed from the queue.
         removed_playing = False
-        # Go through each supplied animation to dequeue. If
-        # they are tuples, apply the correct mode of removal,
-        # if not default to "first".
+        # Iterate all elements removing the animations based on how
+        # they were given.
         for e in elems:
-            # TODO: Separate this into its own function for readability.
+            # If it's a tuple, handle based on removal mode. The function
+            # returns a boolean like _dequeue_adjust_index does to indicate
+            # whether removed_playing should be set to True.
             if isinstance(e, tuple):
-                name, mode = e
-                # If a name is not in the queue, error descriptively.
-                if name in self._queue:
-                    match mode:
-                        case "first":
-                            # Checks if the playing animation gets removed and
-                            # adjusts the queue index in case the removed
-                            # animation is before the current one.
-                            if self._dequeue_adjust_index(name, self._queue_index):
-                                removed_playing = True
-                            # Remove the animation from the queue.
-                            self._queue.remove(name)
-                        case "last":
-                            # Reverse-remove-reverse is not efficient, but this
-                            # shouldn't really matter for lists as small as queues
-                            # are likely to be.
-                            self._queue.reverse()
-                            # Calculate the index of the playing animation in the
-                            # reversed queue.
-                            if self._queue_index != None:
-                                rev_queue_index = len(self._queue) - self._queue_index - 1
-                            else:
-                                rev_queue_index = None
-                            # Same check above, last parameter tells the function the
-                            # queue is reversed.
-                            if self._dequeue_adjust_index(name, rev_queue_index, True):
-                                removed_playing = True
-                            # Remove the animation.
-                            self._queue.remove(name)
-                            # Flip the queue back.
-                            self._queue.reverse()
-                        case "all":
-                            # Cheking for removal of current animation is simpler
-                            # because all instances of this animation are removed,
-                            # meaning the index doesn't matter.
-                            if self._queue_index and name == self._queue[self._queue_index].name:
-                                self._queue[self._queue_index]._reset()
-                                removed_playing = True
-                            # List to fill with animations to keep in the queue.
-                            keep_queue = []
-                            # Since the actual queue index could change, we need
-                            # a static one to compare against.
-                            og_queue_index = self._queue_index
-                            # Go through the queue, keeping all animations not
-                            # targeted by this removal. Wherever one is removed
-                            # that's before the queue index, adjust it down.
-                            for i, n in enumerate(self._queue):
-                                if n != name:
-                                    keep_queue.append(n)
-                                elif og_queue_index and i < og_queue_index:
-                                    self._queue_index -= 1
-                            # TODO: Should this get a copy of keep_queue instead?
-                            #       Not really I think but should make sure.
-                            # Set the queue to the version with all occurences
-                            # of current target removed.
-                            self._queue = keep_queue
-                        case _:
-                            raise ValueError("Invalid mode for removal supplied. "
-                                             "Valid modes are 'first', 'last' and "
-                                             "'all'.")
-                else:
-                    raise ValueError("Given name {} isn't part of the queue: {}"
-                                     .format(name, ",".join(self._queue)))
+                if self._dequeue_tuple(e):
+                    removed_playing = True
+            # If just an animation name was given, default to mode "first".
             else:
                 if e in self._queue:
                     if self._dequeue_adjust_index(name, self._queue_index):
@@ -421,13 +434,14 @@ class ActorAnimationSystem:
                     raise ValueError("Given name {} isn't part of the queue: {}"
                                      .format(name, ",".join(self._queue)))
 
-            # If the playing animation was removed and the queue still has
-            # animations play the one after where the playing animation was
-            # removed.
-            if removed_playing:
-                # TODO: Does this work?!?
-                self._queue_index -= 1
-                self.play_queue()
+        # While removing, the index of the current animation in the queue
+        # is updated to reflect changes. If the playing animation was
+        # removed, play the one after it.
+        if removed_playing:
+            # Index is decremented because _advance_frame() in play_queue()
+            # increments it immediately.
+            self._queue_index -= 1
+            self.play_queue()
 
     # TODO: Better name for this function?
     def queue_jump(self, position):
@@ -449,6 +463,8 @@ class ActorAnimationSystem:
         # Otherwise, only set the position without starting to play.
         # TODO: Should this be changed? Should queue_jump always play?
         else:
+            # TODO: IMPORTANT! This means that until the queue is played,
+            # queue_position will report the wrong value to the user.
             self._queue_index = index - 1
 
     def _check_queue_steps(self, steps = 1, forward = True):
