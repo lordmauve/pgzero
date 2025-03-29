@@ -350,6 +350,44 @@ class Actor:
         dy = myy - ty   # y axis is inverted from mathematical y in Pygame
         return degrees(atan2(dy, dx))
 
+    def move_towards_angle(self, angle, distance):
+        """Move the actor a certain distance towards a certain
+        angle. Does not change the actors angle property.
+        All other functions for movement around angles use
+        this basic function."""
+        move_x = cos(angle) * distance
+        move_y = sin(angle) * distance
+        self.x += move_x
+        self.y += move_y
+
+    def move_towards_point(self, point, distance):
+        """Figure out the angle to the given point and then
+        move the actor towards it by the given distance."""
+        angle = self.angle_to(point)
+        self.move_towards_angle(angle, distance)
+
+    def move_forward(self, distance):
+        """Move the actor in the direction it is facing."""
+        self.move_towards_angle(self._angle, distance)
+
+    def move_backward(self, distance):
+        """Move the actor in the opposite direction of its
+        heading."""
+        angle = (self._angle + 180) % 360
+        self.move_towards_angle(angle, distance)
+
+    def move_left(self, distance):
+        """Move the actor left based on its heading. "Strafing"
+        left."""
+        angle = (self._angle + 90) % 360
+        self.move_towards_angle(angle, distance)
+
+    def move_right(self, distance):
+        """Move the actor right based on its heading. "Strafing"
+        right."""
+        angle = (self._angle - 90) % 360
+        self.move_towards_angle(angle, distance)
+
     def distance_to(self, target):
         """Return the distance from this actor's pos to target, in pixels."""
         if isinstance(target, Actor):
