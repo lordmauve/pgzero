@@ -356,17 +356,15 @@ class Actor:
         angle. Does not change the actors angle property.
         All other functions for movement around angles use
         this basic function."""
-        rad_angle = radians(angle)
+        # Modulo of angle is there to prevent invalid angles leading to
+        # incorrect movement because of wrong radian values messing up
+        # the calculation.
+        rad_angle = radians(angle % 360)
         move_x = cos(rad_angle) * distance
         move_y = -1 * sin(rad_angle) * distance
         self.x += move_x
         self.y += move_y
 
-    # TODO: For some reason, when calling move_towards_point() every update(),
-    # the actor keeps jumping back and forth in the right direction and then
-    # the opposite direction. This is normal behaviour when the actor jumps
-    # past the given position, but should not happen when the given position
-    # was not overshot by the move. Why is it happening?
     def move_towards_point(self, point, distance):
         """Figure out the angle to the given point and then
         move the actor towards it by the given distance."""
