@@ -6,7 +6,6 @@ from . import loaders
 from . import rect
 from . import spellcheck
 
-
 ANCHORS = {
     'x': {
         'left': 0.0,
@@ -246,6 +245,8 @@ class Actor:
 
     @angle.setter
     def angle(self, angle):
+        # Keeps the angle between 0 and 359 degrees
+        angle = angle % 360
         self._angle = angle
         w, h = self._orig_surf.get_size()
 
@@ -355,11 +356,17 @@ class Actor:
         angle. Does not change the actors angle property.
         All other functions for movement around angles use
         this basic function."""
-        move_x = cos(angle) * distance
-        move_y = sin(angle) * distance
+        rad_angle = radians(angle)
+        move_x = cos(rad_angle) * distance
+        move_y = -1 * sin(rad_angle) * distance
         self.x += move_x
         self.y += move_y
 
+    # TODO: For some reason, when calling move_towards_point() every update(),
+    # the actor keeps jumping back and forth in the right direction and then
+    # the opposite direction. This is normal behaviour when the actor jumps
+    # past the given position, but should not happen when the given position
+    # was not overshot by the move. Why is it happening?
     def move_towards_point(self, point, distance):
         """Figure out the angle to the given point and then
         move the actor towards it by the given distance."""
