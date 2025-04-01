@@ -40,6 +40,7 @@ def _get_platform_pgzero_path(final_dir):
         return os.path.join(appdata, 'pgzero')
     return os.path.expanduser(os.path.join('~', '.config/pgzero', final_dir))
 
+
 # Moved this function out of Storage to make it reusable for screenshot functionality.
 def _ensure_path(path):
     """Checks if the path exists and makes all necessary directories if not."""
@@ -208,6 +209,7 @@ class Storage(dict):
 
 storage = Storage()
 
+
 # This function is used to create the screenshot instance with the file name
 # given by runner.py but save it in the scope of storage.
 def _initialize_screenshots(file_path):
@@ -235,8 +237,8 @@ class Screenshots:
         _ensure_path(self._path)
 
         # Creates the filename, made up of the script name and a timestamp.
-        filename = self._project_name + datetime.now().strftime("-%y%m%d-%H%M%S") + ".jpg"
+        timestamp = datetime.now().strftime("-%y%m%d-%H%M%S")
+        filename = self._project_name + timestamp + ".jpg"
         filepath = os.path.join(self._path, filename)
         # Save the screenshot.
         pygame.image.save(surface, filepath)
-
