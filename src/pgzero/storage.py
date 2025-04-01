@@ -3,6 +3,10 @@ import os
 import platform
 from hashlib import sha1
 
+# For screenshot functionality
+from datetime import datetime
+import pygame.image
+
 
 __all__ = ['StorageCorruptionException', 'JSONEncodingException', 'Storage']
 
@@ -15,7 +19,9 @@ class JSONEncodingException(Exception):
     """The data in the storage is corrupted."""
 
 
-def _get_platform_pgzero_path():
+# The parameter allows the same function to get the path for save data and screenshots
+# on MacOS and Linux.
+def _get_platform_pgzero_path(final_dir):
     r"""Get the storage directory for pgzero save data.
 
     Under Windows, return %APPDATA%\pgzero. Under Linux/MacOS, return
@@ -30,8 +36,19 @@ def _get_platform_pgzero_path():
                 "Couldn't find the AppData directory for Pygame Zero save "
                 "data. Please set the %APPDATA% environment variable."
             )
+        # FIXME: Is the windows path intended not to have a saves/screenshots subfolder?
         return os.path.join(appdata, 'pgzero')
-    return os.path.expanduser(os.path.join('~', '.config/pgzero/saves'))
+    return os.path.expanduser(os.path.join('~', '.config/pgzero', final_dir))
+
+# Moved this function out of Storage to make it reusable for screenshot functionality.
+def _ensure_path(path):
+    """Checks if the path exists and makes all necessary directories if not."""
+    try:
+        os.makedirs(path)
+    except (IsADirectoryError, PermissionError):
+        pass
+    except FileExistsError:
+        pass
 
 
 class Storage(dict):
@@ -42,7 +59,9 @@ class Storage(dict):
     has a unique save file.
 
     """
-    STORAGE_DIR = _get_platform_pgzero_path()
+    # The function is given "saves" now to make it behave the same as before
+    # when the function always returned a path or save files.
+    STORAGE_DIR = _get_platform_pgzero_path("saves")
 
     # Keep a reference to all defined storages
     storages = []
@@ -63,12 +82,7 @@ class Storage(dict):
     @classmethod
     def _ensure_save_path(cls):
         """Ensure that the directory for all save game data exists."""
-        try:
-            os.makedirs(cls.STORAGE_DIR)
-        except (IsADirectoryError, PermissionError):
-            pass
-        except FileExistsError:
-            pass
+        _ensure_path(cls.STORAGE_DIR)
 
     def _set_filename_from_path(self, file_path):
         """Set the path to save to from the given filename.
@@ -122,6 +136,10 @@ class Storage(dict):
         """Save data to disk."""
         if not self and not self.loaded:
             return
+        # The save functionality seems to have been broken before this point,
+        # since saving manually in the game script did not make sure the save
+        # path actually existed. This fixes it.
+        Storage._ensure_save_path()
         try:
             data = json.dumps(self)
         except TypeError:
@@ -189,3 +207,36 @@ class Storage(dict):
 
 
 storage = Storage()
+
+# This function is used to create the screenshot instance with the file name
+# given by runner.py but save it in the scope of storage.
+def _initialize_screenshots(file_path):
+    # If the instance already exists, do nothing.
+    if "screenshots" in globals():
+        return
+    # Otherwise, create the instance of the Screenshots class used to
+    # take and save screenshots.
+    if not os.path.isabs(file_path):
+        file_path = os.path.abspath(file_path)
+    project_name, _ = os.path.splitext(os.path.basename(file_path))
+
+    global screenshots
+    screenshots = Screenshots(project_name)
+
+
+class Screenshots:
+    """Class to manage taking screenshots."""
+    def __init__(self, project_name):
+        self._project_name = project_name
+        self._path = _get_platform_pgzero_path("screenshots")
+
+    def take(self, surface):
+        # Ensure that the directory for screenshots exists.
+        _ensure_path(self._path)
+
+        # Creates the filename, made up of the script name and a timestamp.
+        filename = self._project_name + datetime.now().strftime("-%y%m%d-%H%M%S") + ".jpg"
+        filepath = os.path.join(self._path, filename)
+        # Save the screenshot.
+        pygame.image.save(surface, filepath)
+

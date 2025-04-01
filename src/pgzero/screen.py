@@ -4,6 +4,7 @@ import pygame.draw
 from . import ptext
 from .rect import RECT_CLASSES, ZRect
 from . import loaders
+from . import storage
 
 
 def round_pos(pos):
@@ -177,6 +178,11 @@ class Screen:
         if isinstance(image, str):
             image = loaders.images.load(image)
         self.surface.blit(image, pos, None, pygame.BLEND_ALPHA_SDL2)
+
+    def screenshot(self):
+        """Takes a screenshot of the entire game window."""
+        # The actual screenshotting is handled in storage.
+        storage.screenshots.take(self.surface)
 
     @property
     def draw(self):

@@ -217,6 +217,8 @@ def prepare_mod(mod):
 
     """
     storage.storage._set_filename_from_path(mod.__file__)
+    # Create the storage.screenshots instance.
+    storage._initialize_screenshots(mod.__file__)
     loaders.set_root(mod.__file__)
 
     # Copy pgzero builtins into system builtins
