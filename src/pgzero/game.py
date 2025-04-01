@@ -260,6 +260,13 @@ class PGZeroGame:
             if user_key_down:
                 return user_key_down(event)
 
+            # Default key for screenshots is F12.
+            if event.key == pygame.K_F12:
+                # TODO: Better way to access the screen instance?
+                # The "screen" variable in game.py is only a surface,
+                # not the instance of the screen class.
+                pgzero.screen.screen_instance.screenshot()
+
         def key_up(event):
             self.keyboard._release(event.key)
             if user_key_up:
