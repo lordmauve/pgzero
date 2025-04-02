@@ -55,6 +55,13 @@ draw images to the screen ("blit" them).
         parameter. If ``image`` is a ``str`` then the named image will be
         loaded from the ``images/`` directory.
 
+    .. method:: screenshot()
+
+        Takes a screenshot of the entire game window and saves it.
+
+        On Windows, the save location is ``%APPDATA%\pgzero``, on MacOS and 
+        Linux it is ``~/.config/pgzero/screenshots``.
+
     .. method:: draw.line(start, end, (r, g, b), width=1)
 
         Draw a line from start to end with a certain line width.
