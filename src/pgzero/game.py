@@ -9,7 +9,6 @@ import pgzero.clock
 import pgzero.keyboard
 import pgzero.screen
 import pgzero.loaders
-import pgzero.screen
 
 from . import constants
 
@@ -64,6 +63,7 @@ class PGZeroGame:
         self.fps = fps
         self.keyboard = pgzero.keyboard.keyboard
         self.handlers = {}
+        global mouse
 
     def reinit_screen(self) -> bool:
         """Reinitialise the window.
