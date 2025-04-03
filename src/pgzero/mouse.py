@@ -5,8 +5,8 @@ from . import loaders
 
 
 class Mouse:
-    """Interface to the pygame mouse. Also integrates former 
-    enum properties of mouse to retain all previous functionality 
+    """Interface to the pygame mouse. Also integrates former
+    enum properties of mouse to retain all previous functionality
     and be backwards compatible.
     """
 
@@ -17,7 +17,7 @@ class Mouse:
     @property
     def MIDDLE(self):
         return 2
-    
+
     @property
     def RIGHT(self):
         return 3
@@ -53,7 +53,7 @@ class Mouse:
         return pygame.mouse.get_pos()
 
     @pos.setter
-    def pos(self, pos, pos_y = None):
+    def pos(self, pos, pos_y=None):
         # Setting mouse visibility is a workaround to allow
         # setting the mouse position under Wayland, which
         # normally prevents user applications from doing this.
@@ -63,7 +63,7 @@ class Mouse:
         pygame.mouse.set_visible(False)
         if pos_y:
             pygame.mouse.set_pos([pos, pos_y])
-        # TODO: Nicer way to do this? Does it have to be so strict 
+        # TODO: Nicer way to do this? Does it have to be so strict
         # in checking?
         elif isinstance(pos, (tuple, list)) and len(pos) == 2 and\
                 isinstance(pos[0], int) and isinstance(pos[1], int):
@@ -167,7 +167,7 @@ class Mouse:
                 return "UNKNOWN"
         else:
             return "BITMAP"
-    
+
     @property
     def cursor_hotspot(self):
         c = pygame.mouse.get_cursor()

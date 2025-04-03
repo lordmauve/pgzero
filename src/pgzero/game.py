@@ -63,7 +63,6 @@ class PGZeroGame:
         self.fps = fps
         self.keyboard = pgzero.keyboard.keyboard
         self.handlers = {}
-        global mouse
 
     def reinit_screen(self) -> bool:
         """Reinitialise the window.
