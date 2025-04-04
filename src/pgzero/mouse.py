@@ -1,6 +1,7 @@
 import pygame
 import pygame.mouse
 from collections import deque
+from itertools import islice
 from . import loaders
 
 
@@ -9,6 +10,35 @@ class Mouse:
     enum properties of mouse to retain all previous functionality
     and be backwards compatible.
     """
+
+    def __init__(self):
+        self._pressed = [False, False, False]
+        self._pos = None
+        self._rel = (0, 0)
+        self._last_pos = (0, 0)
+        self._last_rel = (0, 0)
+        self._recent_pos = deque(maxlen=60)
+        self._recent_rel = deque(maxlen=60)
+
+    def _press(self, button):
+        self._pressed[button - 1] = True
+
+    def _release(self, button):
+        self._pressed[button - 1] = False
+
+    def _set_pos(self, pos):
+        self._pos = pos
+        self._recent_pos.appendleft(pos)
+
+    def _add_rel(self, rel):
+        self._rel = self._rel[0] + rel[0], self._rel[1] + rel[1]
+        lrx = self._last_rel[0] + rel[0]
+        lry = self._last_rel[1] + rel[1]
+        self._last_rel = lrx, lry
+        self._recent_rel.appendleft(rel)
+
+    def _null_rel(self):
+        self._rel = (0, 0)
 
     @property
     def LEFT(self):
@@ -34,23 +64,23 @@ class Mouse:
     # to understand for users.
     @property
     def pressed(self):
-        return pygame.mouse.get_pressed()
+        return tuple(self._pressed)
 
     @property
     def pressed_left(self):
-        return pygame.mouse.get_pressed()[0]
+        return self._pressed[0]
 
     @property
     def pressed_middle(self):
-        return pygame.mouse.get_pressed()[1]
+        return self._pressed[1]
 
     @property
     def pressed_right(self):
-        return pygame.mouse.get_pressed()[2]
+        return self._pressed[2]
 
     @property
     def pos(self):
-        return pygame.mouse.get_pos()
+        return self._pos
 
     @pos.setter
     def pos(self, pos, pos_y=None):
@@ -74,14 +104,58 @@ class Mouse:
                              " as individual parameters.")
         if switch_back:
             pygame.mouse.set_visible(True)
+        # Note: Setting self._pos manually here isn't necessary
+        # because set_pos() triggers a new MOUSEMOTION event.
+
+    @property
+    def last_called_pos(self):
+        p = self._last_pos
+        self._last_pos = self._pos
+        return p
+
+    @property
+    def recent_pos(self):
+        return tuple(self._recent_pos)
+
+    @property
+    def recent_pos_max(self):
+        return self._recent_pos.maxlen
+
+    @recent_pos_max.setter
+    def recent_pos_max(self, maxl):
+        c_max = self._recent_pos.maxlen
+        if maxl > c_max:
+            self._recent_pos = deque(self._recent_pos, maxlen=maxl)
+        elif maxl < c_max:
+            elems = islice(self._recent_pos, maxl)
+            self._recent_pos = deque(elems, maxlen=maxl)
 
     @property
     def rel(self):
-        return pygame.mouse.get_rel()
+        return self._rel
+
+    @property
+    def last_called_rel(self):
+        r = self._last_rel
+        self._last_rel = (0, 0)
+        return r
 
     @property
     def recent_rel(self):
-        pass
+        return tuple(self._recent_rel)
+
+    @property
+    def recent_rel_max(self):
+        return self._recent_rel.maxlen
+
+    @recent_rel_max.setter
+    def recent_rel_max(self, maxl):
+        c_max = self._recent_rel.maxlen
+        if maxl > c_max:
+            self._recent_rel = deque(self._recent_rel, maxlen=maxl)
+        elif maxl < c_max:
+            elems = islice(self._recent_rel, maxl)
+            self._recent_rel = deque(elems, maxlen=maxl)
 
     @property
     def visible(self):
@@ -112,6 +186,8 @@ class Mouse:
     # Another option would be to expose an explicit getter function
     # and then turn it into a property the old fashioned way. This
     # works, but it rather ugly and terrible practise...
+
+    # TODO: Should cursor also be incorporated into an attribute?
     @property
     def cursor(self):
         c = pygame.mouse.get_cursor()
