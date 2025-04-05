@@ -638,9 +638,14 @@ actors around their rotation easier, Pygame Zero provides built-in functions.
     Moves the actor the given distance along the given angle.
 
 
-.. method:: Actor.move_towards_point(point, distance)
+.. method:: Actor.move_towards_point(point, distance, [overshoot])
 
     Moves the actor the given distance towards the given point of X and Y.
+
+    By default, if the distance to the point is smaller than the given
+    distance, the actor will only move up to the point but not overshoot it.
+    If the optional parameter ``overshoot`` is given as True however, the
+    actor will move past the target point if the given distance is far enough.
 
 
 .. method:: Actor.move_forward(distance)
@@ -685,13 +690,13 @@ the game window::
     def update():
         # To just read the value of the global variable,
         # we don't have to do anything else.
-        ship.move_towards_point(mouse_position)
+        ship.move_towards_point(mouse_position, 5)
 
-*Note:* When using ``move_towards_point()``, if the distance overshoots the target
-and the function is called again every frame (for example in ``update()``), the
-actor will rapidly jump back and forth since the angle to the target point gets
-inverted every frame. To prevent this, check the distance to the target point
-and adjust the length of the movement if necessary.
+*Note:* When using ``move_towards_point()`` with ``overshoot=True``, if the
+function is called every frame (for example in ``update()``), the actor will
+rapidly jump back and forth since the angle to the target point gets inverted
+every frame. To prevent this, use ``move_towards_point()`` without ``overshoot``
+or make sure it is not called rapidly with ``overshoot``.
 
 
 .. _transparency:
