@@ -374,6 +374,217 @@ can use the :func:`on_music_end() hook <on_music_end>` to do something when the
 music ends - for example, to pick another track at random.
 
 
+.. _mouse:
+
+Mouse
+-----
+
+The built-in mouse object can be used to get information of various current
+states of the mouse in the game: where it is, what buttons are pressed,
+whether it is visible and many more...
+
+It can also be used to manipulate the mouse, for example changing its position
+or the displayed mouse cursor.
+
+
+.. class:: Mouse
+
+    .. attribute:: pressed
+
+        Returns a tuple of three booleans for the left, middle and right
+        mouse buttons in order. True means the button is currently pressed.
+
+    .. attribute:: pressed_left
+
+        Returns True if the left mouse button is currently pressed,
+        False else.
+
+    .. attribute:: pressed_middle
+
+        Returns True if the middle mouse button is currently pressed, 
+        False else.
+
+    .. attribute:: pressed_right
+
+        Returns True if the right mouse button is currently pressed,
+        False else.
+
+    .. attribute:: pos
+
+        Returns the current position of the mouse.
+
+        Setting this will teleport the mouse to the supplied position
+        inside the game window.
+
+    .. attribute:: last_called_pos
+
+        Returns the position of the mouse at the time this value
+        was last read.
+
+    .. attribute:: recent_pos
+
+        Returns a tuple of the n last positions the mouse had moved 
+        to starting from the most recent. Default for n is 60 and 
+        can be changed via recent_pos_max.
+
+    .. attribute:: recent_pos_max
+
+        Returns the total number of positions tracked via recent_pos.
+        
+        Increasing this value simply extends the length of the queue
+        of tracked positions. Decreasing it also cuts the queue to the
+        new maximum number of elements.
+
+    .. attribute:: rel
+
+        Returns the relative position change of the mouse over the last
+        frame.
+
+    .. attribute:: last_called_rel
+
+        Returns the relative position change of the mouse since this
+        value was last read.
+
+    .. attribute:: recent_rel
+
+        Returns a tuple of the n last position changes the mouse had,
+        starting from the most recent. Default for n is 60 and 
+        can be changed via recent_rel_max.
+
+    .. attribute:: recent_rel_max
+
+        Returns the total number of position changed tracked via
+        recent_pos.
+        
+        Increasing this value simply extends the length of the queue
+        of tracked positions. Decreasing it also cuts the queue to the
+        new maximum number of elements.
+
+    .. attribute:: visible
+
+        Returns a boolean of whether the mouse cursor is currently
+        visible.
+
+        Setting this to either a boolean or 0 or 1 makes the mouse
+        visible or invisible.
+
+    .. attribute:: focused
+
+        Returns a boolean of whether the game window is currently
+        focused.
+
+    .. attribute:: cursor
+
+        Returns a tuple with two elements: the name string of the
+        current cursor and the hotspot of the cursor if it is known.
+
+        Setting this loads a new cursor and applies it to the mouse.
+        This can be done with either one string, or one string and
+        a hotspot position tuple at the same time.
+
+        For a more detailed explanation, see below.
+
+    .. attribute:: cursor_name
+
+        Returns the current name string of the mouse cursor.
+
+    .. attribute:: cursor_hotspot
+
+        Returns the hotspot tuple of the current cursor or None
+        if the hotspot is unknown (because it is a system cursor).
+        
+
+Recent pos and rel
+''''''''''''''''''
+
+The ``mouse.recent_pos`` and ``mouse.recent_rel`` attributes allow
+you to get the last recorded positions and relative movements from
+any mouse movement event. This can be used among other things to
+make visual effects of things "following" the mouse. Here is an
+example that draws a trail of circles behind the mouse::
+
+    def draw():
+        for p in mouse.recent_pos:
+            screen.draw.circle(p, 5, "red")
+
+How many events back are recorded is controlled by ``recent_pos_max``
+and ``recent_rel_max``. It's important to note here that these
+attributes don't record the position and relative movement for each
+frame, like ``mouse.rel`` for example does, but rather the positions
+and changes for each individual mouse movement event. Since multiple
+mouse movement events can happen in a single frame, there is no fixed
+relationship between the number of frames passed and the recorded
+positions and relative changes. In general though, a higher maximum
+value means positions and changes from longer before will still be 
+recorded.
+
+Cursors
+'''''''
+
+Many games change how the mouse cursor looks. PGZero lets you control
+this by setting the ``mouse.cursor`` attribute. There are two options
+here: system cursors or custom cursors.
+
+Windows, MacOS and Linux systems all come with a variety of pre-made
+cursor shapes ready to use. To change to any of them, simply use
+``mouse.cursor = "ARROW"`` where *"ARROW"* is usually the default cursor
+on your system. To use something else, simply change the string to one
+of these options: *"ARROW", "IBEAM", "WAIT", "CROSSHAIR", "HAND"*.
+
+If you want to use a custom cursor from an image you have in the
+``images`` folder, just call ``mouse.cursor = "image_name"`` and the
+cursor will automatically be loaded from the image resource.
+
+When using a custom cursor, you might also want to tell PGZero where
+in the image the spot is, where an actual mouse click should occur.
+The default cursor of most systems has this in the top left corner of
+the cursor image but yours could have it in the center (think shooter
+crosshairs), in the top middle (a pointing hand maybe) or anywhere else.
+
+To tell PGZero where to put the actual point, you can also give a hotspot
+tuple when setting the cursor: ``mouse.cursor = "image_name", (12, 0)``.
+
+This tells the game that when you press a mouse button, the click should
+happen not at the top left corner of the cursor image, but 12 pixels to
+the right of it. This might be the top middle for a cursor with an image
+size of 24x24 pixels. The center for a 40x40 pixels cursor would be
+``(20, 20)``.
+
+This tuple is simply a position tuple like the kind we already know about.
+The only difference is that it looks for the position to put mouse clicks
+not in relation to the top left corner of the game window, but just the
+cursor image.
+
+System cursors define their own hotspot, so you don't have to worry about
+them. This also means you can't manually check the hotspot of system
+cursors with ``mouse.cursor_hotspot`` however. This will return ``None``
+when a system cursor is in use.
+
+LEFT or pressed_left
+''''''''''''''''''''
+
+While both are accessed via ``mouse``, ``mouse.LEFT`` and 
+``mouse.pressed_left`` are different things. ``mouse.LEFT`` is used
+in your custom functions that handle mouse events, e.g. 
+``if button == mouse.LEFT`` whereas ``mouse.pressed`` and its variants
+can be used outside of these, for example in the ``update()`` function to
+check whether a mouse button is pressed at that moment.
+
+Example::
+
+    def on_mouse_down(button):
+        if button == mouse.LEFT:
+            play_tune()
+
+    def update():
+        if mouse.pressed_right:
+            fireworks()
+
+
+``mouse.WHEELUP`` and ``mouse.WHEELDOWN`` have no equivalent outside of
+``on_mouse`` functions since these can't be held down.
+
+
 .. _clock:
 
 Clock
