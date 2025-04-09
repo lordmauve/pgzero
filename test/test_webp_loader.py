@@ -2,7 +2,7 @@ import unittest
 
 import pygame
 
-from pgzero.actor import calculate_anchor, Actor
+from pgzero.actor import Actor
 from pgzero.loaders import set_root
 
 
