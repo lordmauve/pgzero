@@ -44,10 +44,10 @@ class X360Btns(IntEnum):
     FD = 0
     FL = 2
     FR = 1
-    DU = 11 # The D-Pad mappings are fake, as the Xbox treats the D-Pad like
-    DD = 12 # a hat switch. It acting like normal buttons is a simulation
-    DL = 13 # by PGZero to make it easier to work with.
-    DR = 14 # This is the last fake button.
+    DU = 11  # The D-Pad mappings are fake, as the Xbox treats the D-Pad like
+    DD = 12  # a hat switch. It acting like normal buttons is a simulation
+    DL = 13  # by PGZero to make it easier to work with.
+    DR = 14  # This is the last fake button.
     LB = 4
     RB = 5
     LP = 8
@@ -66,16 +66,17 @@ class X360Axis(IntEnum):
     RY = 4
     RT = 5
 
+
 class XSeriesBtns(IntEnum):
     NUM = 20
     FU = 4
     FD = 0
     FL = 3
     FR = 1
-    DU = 16 # The D-Pad mappings are fake, as the Xbox treats the D-Pad like
-    DD = 17 # a hat switch. It acting like normal buttons is a simulation
-    DL = 18 # by PGZero to make it easier to work with.
-    DR = 19 # This is the last fake button.
+    DU = 16  # Simulated D-Pad like with the Xbox controller.
+    DD = 17
+    DL = 18
+    DR = 19
     LB = 6
     RB = 7
     LP = 13
@@ -130,7 +131,7 @@ class PS5Btns(IntEnum):
     FD = 0
     FL = 2
     FR = 1
-    DU = 13 # Simulated D-Pad like with the Xbox controller.
+    DU = 13  # Simulated D-Pad like with the Xbox controller.
     DD = 14
     DL = 15
     DR = 16
@@ -143,7 +144,7 @@ class PS5Btns(IntEnum):
     CR = 9
 
 
-class PS4Axis(IntEnum):
+class PS5Axis(IntEnum):
     NUM = 6
     LX = 0
     LY = 1
@@ -346,7 +347,7 @@ class Joystick:
         degrees = (360 - p) % 360
         return degrees
     la = left_angle
-    
+
     @property
     def left_x(self):
         """Returns a single axis value for left-right movement of
@@ -409,7 +410,7 @@ class Joystick:
         being depressed."""
         return (self._axis[self._axis_map.RT] + 1) / 2
     rt = right_trigger
-    
+
 
 class JoystickManager:
     """Interface to pygame joystick support. Holds all active joysticks
@@ -461,7 +462,7 @@ class JoystickManager:
             # If the physical controller has a HAT, moving it to the diagonal
             # can sometimes give repeated joy down events for a single button
             # instance. To prevent this, a lockout of 0.05 seconds is enforced
-            # after shifting each simulated Dpad button before it can be 
+            # after shifting each simulated Dpad button before it can be
             # accessed again.
             if not s.dr and s._DR_open:
                 pressed.append(s._btn_map.DR)
@@ -548,14 +549,15 @@ class JoystickManager:
         """Returns the currently available ids for joystick access."""
         return tuple(self._sticks.keys())
 
-    #@property
+    # @property
     def get_default(self):
         """Returns a reference to the currently earliest connected
         joystick."""
-        if self._default != None:
+        if self._default is not None:
             return self._sticks[self._default]
         else:
             return None
+
 
 joysticks_instance = JoystickManager()
 joy = joysticks_instance.get_default
