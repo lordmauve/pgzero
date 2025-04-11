@@ -139,10 +139,11 @@ class PGZeroGame:
         return {c for c, pressed in zip(constants.mouse, val) if pressed}
 
     EVENT_PARAM_MAPPERS = {
-        # TODO: Does something need to be added here?
         'buttons': map_buttons,
         'button': constants.mouse,
-        'key': constants.keys
+        'key': constants.keys,
+        'joybtn': constants.joybtn,
+        'axis': constants.axis
     }
 
     def load_handlers(self):
@@ -278,19 +279,40 @@ class PGZeroGame:
                 return user_key_up(event)
 
         def joy_down(event):
-            self.joysticks._press(event.instance_id, event.button)
+            btn = self.joysticks._press(event.instance_id, event.button)
             if user_joy_down:
+                # Translate the button int value for the specific controller
+                # used to the generic layout exposed to the user.
+                if btn:
+                    event.joybtn = constants.joybtn[btn]
+                # If the pressed button is not recognized by the mapping,
+                # the button given to the user function is marked as such.
+                else:
+                    event.joybtn = constants.joybtn.UNKNOWN
                 return user_joy_down(event)
 
         def joy_up(event):
-            self.joysticks._release(event.instance_id, event.button)
+            btn = self.joysticks._release(event.instance_id, event.button)
             if user_joy_up:
+                if btn:
+                    event.joybtn = constants.joybtn[btn]
+                else:
+                    event.joybtn = constants.joybtn.UNKNOWN
                 return user_joy_up(event)
 
         def joy_move(event):
-            self.joysticks._set_axis(event.instance_id, event.axis,
-                                     event.value)
+            axis, v = self.joysticks._set_axis(event.instance_id, event.axis,
+                                               event.value)
             if user_joy_move:
+                if axis:
+                    # Translating the axis int to the generic layout as done
+                    # above for button events.
+                    event.axis = constants.axis[axis]
+                else:
+                    event.axis = constants.axis.UNKNOWN
+                # Since _set_axis enforces the axis deadzone, event.value is
+                # updated to reflect the now current value of the axis.
+                event.value = v
                 return user_joy_move(event)
 
         def joy_hat(event):

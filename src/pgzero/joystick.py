@@ -18,10 +18,10 @@ class SwitchBtns(IntEnum):
     DD = 12
     DL = 13
     DR = 14
-    LB = 9
-    RB = 10
-    LP = 7
-    RP = 8
+    SL = 9
+    SR = 10
+    PL = 7
+    PR = 8
     CL = 4
     CM = 5
     CR = 6
@@ -48,10 +48,10 @@ class X360Btns(IntEnum):
     DD = 12  # a hat switch. It acting like normal buttons is a simulation
     DL = 13  # by PGZero to make it easier to work with.
     DR = 14  # This is the last fake button.
-    LB = 4
-    RB = 5
-    LP = 8
-    RP = 9
+    SL = 4
+    SR = 5
+    PL = 8
+    PR = 9
     CL = 6
     CM = 10
     CR = 7
@@ -77,10 +77,10 @@ class XSeriesBtns(IntEnum):
     DD = 17
     DL = 18
     DR = 19
-    LB = 6
-    RB = 7
-    LP = 13
-    RP = 14
+    SL = 6
+    SR = 7
+    PL = 13
+    PR = 14
     CL = 10
     CM = 15
     CR = 11
@@ -106,10 +106,10 @@ class PS4Btns(IntEnum):
     DD = 12
     DL = 13
     DR = 14
-    LB = 9
-    RB = 10
-    LP = 7
-    RP = 8
+    SL = 9
+    SR = 10
+    PL = 7
+    PR = 8
     CL = 4
     CM = 5
     CR = 6
@@ -135,10 +135,10 @@ class PS5Btns(IntEnum):
     DD = 14
     DL = 15
     DR = 16
-    LB = 4
-    RB = 5
-    LP = 11
-    RP = 12
+    SL = 4
+    SR = 5
+    PL = 11
+    PR = 12
     CL = 8
     CM = 10
     CR = 9
@@ -167,7 +167,6 @@ class Joystick:
     def __init__(self, stick):
         self._stick = stick
         name = self._stick.get_name()
-        print(name)
         # We use the system name of the controller to determine
         # the correct mappings to use.
         if "Series" in name:
@@ -292,25 +291,25 @@ class Joystick:
     @property
     def shoulder_left(self):
         """Returns whether the left shoulder button is pressed."""
-        return self._pressed[self._btn_map.LB]
+        return self._pressed[self._btn_map.SL]
     sl = shoulder_left
 
     @property
     def shoulder_right(self):
         """Returns whether the right shoulder button is pressed."""
-        return self._pressed[self._btn_map.RB]
+        return self._pressed[self._btn_map.SR]
     sr = shoulder_right
 
     @property
     def push_left(self):
         """Returns whether the left stick is pressed in."""
-        return self._pressed[self._btn_map.LP]
+        return self._pressed[self._btn_map.PL]
     pl = push_left
 
     @property
     def push_right(self):
         """Returns whether the right stick is pressed in."""
-        return self._pressed[self._btn_map.RP]
+        return self._pressed[self._btn_map.PR]
     pr = push_right
 
     @property
@@ -424,10 +423,21 @@ class JoystickManager:
     def _press(self, iid, button):
         s = self._sticks[iid]
         s._pressed[button] = True
+        # If a button is not recognized, None is returned.
+        try:
+            identifier = s._btn_map(button).name
+        except ValueError:
+            identifier = None
+        return identifier
 
     def _release(self, iid, button):
         s = self._sticks[iid]
         s._pressed[button] = False
+        try:
+            identifier = s._btn_map(button).name
+        except ValueError:
+            identifier = None
+        return identifier
 
     def _set_axis(self, iid, axis, value):
         """Sets the axis value of a stick or trigger. Enforces the set
@@ -446,6 +456,11 @@ class JoystickManager:
             s._axis[axis] = value
         else:
             s._axis[axis] = 0
+        try:
+            identifier = s._axis_map(axis).name
+        except ValueError:
+            identifier = None
+        return identifier, s._axis[axis]
 
     def _convert_hat(self, iid, hat, value):
         """Takes the values of a joystick HAT event and simulates
@@ -526,7 +541,6 @@ class JoystickManager:
         pygame_joystick = pygame.joystick.Joystick(device_index)
         joy = Joystick(pygame_joystick)
         if len(self._sticks) == 0:
-            print("Brep")
             self._default = joy.instance_id
         self._sticks[joy.instance_id] = joy
 
