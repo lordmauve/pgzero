@@ -181,7 +181,6 @@ class Screen:
 
     def screenshot(self):
         """Takes a screenshot of the entire game window."""
-        # The actual screenshotting is handled in storage.
         storage.screenshots.take(self.surface)
 
     @property
