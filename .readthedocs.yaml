@@ -14,17 +14,17 @@ build:
     # rust: "1.70"
     # golang: "1.20"
 
-# Build documentation in the "docs/" directory with Sphinx
+# Build documentation in the "doc/" directory with Sphinx
 sphinx:
-  configuration: docs/conf.py
+  configuration: doc/conf.py
   # You can configure Sphinx to use a different builder, for instance use the dirhtml builder for simpler URLs
   # builder: "dirhtml"
   # Fail on all warnings to avoid broken references
   # fail_on_warning: true
 
 # Optionally build your docs in additional formats such as PDF and ePub
-# formats:
-#   - pdf
+formats:
+  - pdf
 #   - epub
 
 # Optional but recommended, declare the Python requirements required
