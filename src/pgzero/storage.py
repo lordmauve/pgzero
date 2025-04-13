@@ -19,9 +19,17 @@ class JSONEncodingException(Exception):
     """The data in the storage is corrupted."""
 
 
-# The parameter allows the same function to get the path for save data and screenshots
-# on MacOS and Linux.
-def _get_platform_pgzero_path(final_dir):
+def _get_windows_environ(env):
+    try:
+        path = os.environ[env]
+    except KeyError:
+        raise KeyError("Couldn't find the {} directory for Pygame Zero data."
+                       " Please set the %{}% environment variable."
+                       .format(env, env))
+    return path
+
+
+def _get_platform_pgzero_path():
     r"""Get the storage directory for pgzero save data.
 
     Under Windows, return %APPDATA%\pgzero. Under Linux/MacOS, return
@@ -29,19 +37,23 @@ def _get_platform_pgzero_path(final_dir):
 
     """
     if platform.system() == 'Windows':
-        try:
-            appdata = os.environ['APPDATA']
-        except KeyError:
-            raise KeyError(
-                "Couldn't find the AppData directory for Pygame Zero save "
-                "data. Please set the %APPDATA% environment variable."
-            )
-        # FIXME: Is the windows path intended not to have a saves/screenshots subfolder?
+        appdata = _get_windows_environ("APPDATA")
         return os.path.join(appdata, 'pgzero')
-    return os.path.expanduser(os.path.join('~', '.config/pgzero', final_dir))
+    return os.path.expanduser(os.path.join('~', '.config/pgzero/saves'))
 
 
-# Moved this function out of Storage to make it reusable for screenshot functionality.
+def _get_platform_screenshot_path():
+    r"""Get the screenshot directory for pgzero.
+
+    Under Windows, this is %USERPROFILE%\Pictures\pgzero. Under Linux/MacOS,
+    it's ~/Pictures/pgzero."""
+    if platform.system() == "Windows":
+        home = _get_windows_environ("USERPROFILE")
+        return os.path.join(home, "Pictures", "pgzero")
+    return os.path.expanduser(os.path.join("~", "Pictures", "pgzero"))
+
+
+# Moved this function out of Storage to make it reusable.
 def _ensure_path(path):
     """Checks if the path exists and makes all necessary directories if not."""
     try:
@@ -60,9 +72,7 @@ class Storage(dict):
     has a unique save file.
 
     """
-    # The function is given "saves" now to make it behave the same as before
-    # when the function always returned a path or save files.
-    STORAGE_DIR = _get_platform_pgzero_path("saves")
+    STORAGE_DIR = _get_platform_pgzero_path()
 
     # Keep a reference to all defined storages
     storages = []
@@ -230,7 +240,7 @@ class Screenshots:
     """Class to manage taking screenshots."""
     def __init__(self, project_name):
         self._project_name = project_name
-        self._path = _get_platform_pgzero_path("screenshots")
+        self._path = _get_platform_screenshot_path()
 
     def take(self, surface):
         # Ensure that the directory for screenshots exists.
@@ -242,3 +252,5 @@ class Screenshots:
         filepath = os.path.join(self._path, filename)
         # Save the screenshot.
         pygame.image.save(surface, filepath)
+        print("Saved a screenshot named {} in the folder {}."
+              .format(filename, self._path))

@@ -256,16 +256,12 @@ class PGZeroGame:
             if event.key == pygame.K_q and \
                     event.mod & (pygame.KMOD_CTRL | pygame.KMOD_META):
                 sys.exit(0)
+            # Default key for screenshots is F12.
+            if event.key == pygame.K_F12:
+                pgzero.screen.screen_instance.screenshot()
             self.keyboard._press(event.key)
             if user_key_down:
                 return user_key_down(event)
-
-            # Default key for screenshots is F12.
-            if event.key == pygame.K_F12:
-                # TODO: Better way to access the screen instance?
-                # The "screen" variable in game.py is only a surface,
-                # not the instance of the screen class.
-                pgzero.screen.screen_instance.screenshot()
 
         def key_up(event):
             self.keyboard._release(event.key)
