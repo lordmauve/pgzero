@@ -9,7 +9,6 @@ import pgzero.clock
 import pgzero.keyboard
 import pgzero.screen
 import pgzero.loaders
-import pgzero.screen
 
 from . import constants
 
@@ -63,6 +62,7 @@ class PGZeroGame:
         self.icon = None
         self.fps = fps
         self.keyboard = pgzero.keyboard.keyboard
+        self.mouse = pgzero.mouse.mouse_instance
         self.handlers = {}
 
     def reinit_screen(self) -> bool:
@@ -251,6 +251,9 @@ class PGZeroGame:
 
         user_key_down = self.handlers.get(pygame.KEYDOWN)
         user_key_up = self.handlers.get(pygame.KEYUP)
+        user_mouse_down = self.handlers.get(pygame.MOUSEBUTTONDOWN)
+        user_mouse_up = self.handlers.get(pygame.MOUSEBUTTONUP)
+        user_mouse_move = self.handlers.get(pygame.MOUSEMOTION)
 
         def key_down(event):
             if event.key == pygame.K_q and \
@@ -265,8 +268,27 @@ class PGZeroGame:
             if user_key_up:
                 return user_key_up(event)
 
+        def mouse_down(event):
+            self.mouse._press(event.button)
+            if user_mouse_down:
+                return user_mouse_down(event)
+
+        def mouse_up(event):
+            self.mouse._release(event.button)
+            if user_mouse_up:
+                return user_mouse_up(event)
+
+        def mouse_move(event):
+            self.mouse._set_pos(event.pos)
+            self.mouse._add_rel(event.rel)
+            if user_mouse_move:
+                return user_mouse_move(event)
+
         self.handlers[pygame.KEYDOWN] = key_down
         self.handlers[pygame.KEYUP] = key_up
+        self.handlers[pygame.MOUSEBUTTONDOWN] = mouse_down
+        self.handlers[pygame.MOUSEBUTTONUP] = mouse_up
+        self.handlers[pygame.MOUSEMOTION] = mouse_move
 
     def handle_events(self, dt, update) -> bool:
         """Handle all events for the current frame.
@@ -274,6 +296,12 @@ class PGZeroGame:
         Return True if an event was handled.
         """
         updated = False
+
+        # If no mouse movement occured, the rel state of the
+        # mouse is set to (0, 0). This is necessary since it
+        # otherwise retains the rel of the last movement
+        # even if the mouse hasn't been moved.
+        self.mouse._null_rel()
 
         for event in pygame.event.get():
             handler = self.handlers.get(event.type)
