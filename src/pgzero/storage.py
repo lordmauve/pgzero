@@ -122,6 +122,10 @@ class Storage(dict):
         """Save data to disk."""
         if not self and not self.loaded:
             return
+        # The save functionality seems to have been broken before this point,
+        # since saving manually in the game script did not make sure the save
+        # path actually existed. This fixes it.
+        Storage._ensure_save_path()
         try:
             data = json.dumps(self)
         except TypeError:
