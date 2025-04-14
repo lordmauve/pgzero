@@ -4,7 +4,12 @@ import pygame.draw
 from . import ptext
 from .rect import RECT_CLASSES, ZRect
 from . import loaders
-from . import storage
+
+# Screenshot functionality
+import os
+from sys import platform
+from datetime import datetime
+import pygame.image
 
 
 def round_pos(pos):
@@ -23,6 +28,63 @@ def make_color(arg):
     if isinstance(arg, tuple):
         return arg
     return tuple(pygame.Color(arg))
+
+
+def _get_platform_screenshot_path():
+    r"""Get the screenshot directory for pgzero.
+    Under Windows, this is %USERPROFILE%\Pictures\pgzero.
+    Under Linux/MacOS, it's ~/Pictures/pgzero.
+    If the platform is unsupported, it defaults to the CWD."""
+    if platform == "win32":
+        try:
+            home = os.environ["USERPROFILE"]
+        except KeyError:
+            raise KeyError("Couldn't find the user home directory for "
+                           "screenshots. Please set the %USERPROFILE% "
+                           "environment variable.")
+        return os.path.join(home, "Pictures", "pgzero")
+    elif platform in ["linux", "linux2", "darwin"]:
+        return os.path.expanduser(os.path.join("~", "Pictures", "pgzero"))
+    else:
+        print("WARNING: Device platform {} not recognized, thus no user folder"
+              " found. Falling back to current directory to save screenshots."
+              .format(platform))
+        return os.path.join(os.getcwd(), "pgzero_screenshots")
+
+
+# This function is used to create the screenshot instance with the file name
+# given by runner.py but save it in the scope of screen.
+def _initialize_screenshots(file_path):
+    # If the instance already exists, do nothing.
+    if "screenshots" in globals():
+        return
+    # Otherwise, create the instance of the Screenshots class used to
+    # take and save screenshots.
+    if not os.path.isabs(file_path):
+        file_path = os.path.abspath(file_path)
+    project_name, _ = os.path.splitext(os.path.basename(file_path))
+
+    global screenshots
+    screenshots = Screenshots(project_name)
+
+
+class Screenshots:
+    """Class to manage taking screenshots."""
+    def __init__(self, project_name):
+        self._project_name = project_name
+        self._path = _get_platform_screenshot_path()
+
+    def take(self, surface):
+        # Ensure that the directory for screenshots exists.
+        os.makedirs(self._path, exist_ok=True)
+
+        # Creates the filename, made up of the script name and a timestamp.
+        timestamp = datetime.now().strftime("-%Y-%m-%d_%H:%M:%S")
+        filename = self._project_name + timestamp + ".png"
+        filepath = os.path.join(self._path, filename)
+        # Save the screenshot.
+        pygame.image.save(surface, filepath)
+        return filepath
 
 
 class SurfacePainter:
@@ -181,7 +243,7 @@ class Screen:
 
     def screenshot(self):
         """Takes a screenshot of the entire game window."""
-        storage.screenshots.take(self.surface)
+        return screenshots.take(self.surface)
 
     @property
     def draw(self):

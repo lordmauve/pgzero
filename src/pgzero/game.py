@@ -13,6 +13,10 @@ import pgzero.screen
 
 from . import constants
 
+# Traceback for screenshot errors.
+from traceback import format_exc
+import os.path
+
 
 screen = None  # This global surface is what actors draw to
 DISPLAY_FLAGS = pygame.SHOWN
@@ -258,7 +262,14 @@ class PGZeroGame:
                 sys.exit(0)
             # Default key for screenshots is F12.
             if event.key == pygame.K_F12:
-                pgzero.screen.screen_instance.screenshot()
+                try:
+                    path = pgzero.screen.screen_instance.screenshot()
+                    folder, name = os.path.split(path)
+                    print("Saved a screenshot named {} in the folder {}.\n"
+                          "Full path: {}".format(name, folder, path))
+                except Exception:
+                    print("ERROR while trying to take a screenshot with F12.")
+                    print(format_exc())
             self.keyboard._press(event.key)
             if user_key_down:
                 return user_key_down(event)
