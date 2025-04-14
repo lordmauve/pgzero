@@ -106,10 +106,10 @@ input or redrawing the screen. Loop forever and the game would just sit there,
 so any loops need to finish quickly.
 
 Pygame Zero calls an ``update()`` function when it wants you to update the
-animation by one step, so we just need to a call to ``update_walls()``::
+animation by one step, so we just need to add a call to ``update_pipes()``::
 
    def update():
-      update_walls()
+      update_pipes()
 
 
 The Bird
@@ -192,7 +192,7 @@ react when the bird moves back to its start position.
 Again, this needs to be called every frame, so we add it to ``update()``::
 
    def update():
-      update_walls()
+      update_pipes()
       update_bird()
 
 The final part of the bird logic is that it has to respond to player control.

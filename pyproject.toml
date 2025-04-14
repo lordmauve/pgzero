@@ -1,0 +1,31 @@
+[project]
+name = "pgzero"
+description = "A zero-boilerplate 2D games framework"
+readme = "README.rst"
+requires-python = ">=3.6"
+dependencies = [
+    "pygame>=2.1",
+    "numpy",
+    "pyfxr",
+]
+dynamic = ["version"]
+
+[project.urls]
+Documentation = "https://pygame-zero.readthedocs.io/"
+Source = "https://github.com/lordmauve/pgzero"
+
+[project.scripts]
+pgzrun = "pgzero.runner:main"
+
+[build-system]
+requires = ["setuptools>=64", "setuptools-scm>=8"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
+write_to = "src/pgzero/_version.py"
+
+[tool.ruff]
+builtins = [
+    "Actor", "Rect", "ZRect", "animate", "clock", "exit", "images", "keyboard", "keymods",
+    "keys", "mouse", "music", "screen", "sounds", "storage", "tone"
+]
