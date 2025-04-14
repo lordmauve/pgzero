@@ -1,6 +1,7 @@
 from . import storage
 from . import clock
 from . import loaders
+from . import __version__
 from .game import PGZeroGame, DISPLAY_FLAGS
 from types import ModuleType
 from argparse import ArgumentParser
@@ -67,6 +68,11 @@ def main():
         '--fps',
         action='store_true',
         help="Print periodic FPS measurements on the terminal."
+    )
+    parser.add_argument(
+        '--version',
+        action='version',
+        version=f'%(prog)s {__version__}'
     )
     parser.add_argument(
         'game',
