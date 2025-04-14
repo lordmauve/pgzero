@@ -279,7 +279,7 @@ class ResourceLoader:
 
 
 class ImageLoader(ResourceLoader):
-    EXTNS = ['png', 'gif', 'jpg', 'jpeg', 'bmp']
+    EXTNS = ['png', 'gif', 'jpg', 'jpeg', 'bmp', 'webp']
     TYPE = 'image'
 
     def _load(self, path):
