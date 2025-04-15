@@ -63,8 +63,6 @@ draw images to the screen ("blit" them).
 
         You can press F12 to take a screenshot at any time, without
         needing to call this function.
-        The default keybinding to take screenshots is F12 and doesn't
-        require the user to manually use this function in their code.
 
     .. method:: draw.line(start, end, (r, g, b), width=1)
 
