@@ -1,15 +1,14 @@
+import os
+import sys
+from datetime import datetime
+
 import pygame
 import pygame.draw
+import pygame.image
 
 from . import ptext
 from .rect import RECT_CLASSES, ZRect
 from . import loaders
-
-# Screenshot functionality
-import os
-from sys import platform
-from datetime import datetime
-import pygame.image
 
 
 def round_pos(pos):
@@ -35,7 +34,7 @@ def _get_platform_screenshot_path():
     Under Windows, this is %USERPROFILE%\Pictures\pgzero.
     Under Linux/MacOS, it's ~/Pictures/pgzero.
     If the platform is unsupported, it defaults to the CWD."""
-    if platform == "win32":
+    if sys.platform == "win32":
         try:
             home = os.environ["USERPROFILE"]
         except KeyError:
@@ -43,28 +42,24 @@ def _get_platform_screenshot_path():
                            "screenshots. Please set the %USERPROFILE% "
                            "environment variable.")
         return os.path.join(home, "Pictures", "pgzero")
-    elif platform in ["linux", "linux2", "darwin"]:
+    elif sys.platform in ("linux", "linux2", "darwin"):
         return os.path.expanduser(os.path.join("~", "Pictures", "pgzero"))
     else:
-        print("WARNING: Device platform {} not recognized, thus no user folder"
-              " found. Falling back to current directory to save screenshots."
-              .format(platform))
+        print(f"WARNING: Device platform {sys.platform} not recognized, thus "
+              "no user folder found. Falling back to current directory to save"
+              " screenshots.", file=sys.stderr)
         return os.path.join(os.getcwd(), "pgzero_screenshots")
 
 
 # This function is used to create the screenshot instance with the file name
 # given by runner.py but save it in the scope of screen.
 def _initialize_screenshots(file_path):
-    # If the instance already exists, do nothing.
-    if "screenshots" in globals():
-        return
+    global screenshots
     # Otherwise, create the instance of the Screenshots class used to
     # take and save screenshots.
     if not os.path.isabs(file_path):
         file_path = os.path.abspath(file_path)
     project_name, _ = os.path.splitext(os.path.basename(file_path))
-
-    global screenshots
     screenshots = Screenshots(project_name)
 
 
@@ -79,8 +74,8 @@ class Screenshots:
         os.makedirs(self._path, exist_ok=True)
 
         # Creates the filename, made up of the script name and a timestamp.
-        timestamp = datetime.now().strftime("-%Y-%m-%d_%H:%M:%S")
-        filename = self._project_name + timestamp + ".png"
+        now = datetime.now()
+        filename = f"{self._project_name}-{now:%Y-%m-%d_%H:%M:%S}.png"
         filepath = os.path.join(self._path, filename)
         # Save the screenshot.
         pygame.image.save(surface, filepath)

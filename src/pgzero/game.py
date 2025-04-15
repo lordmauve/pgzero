@@ -3,6 +3,7 @@ import operator
 import time
 import types
 from time import perf_counter, sleep
+from traceback import print_exc
 
 import pygame
 import pgzero.clock
@@ -12,10 +13,6 @@ import pgzero.loaders
 import pgzero.screen
 
 from . import constants
-
-# Traceback for screenshot errors.
-from traceback import format_exc
-import os.path
 
 
 screen = None  # This global surface is what actors draw to
@@ -264,12 +261,10 @@ class PGZeroGame:
             if event.key == pygame.K_F12:
                 try:
                     path = pgzero.screen.screen_instance.screenshot()
-                    folder, name = os.path.split(path)
-                    print("Saved a screenshot named {} in the folder {}.\n"
-                          "Full path: {}".format(name, folder, path))
+                    print(f"Saved screenshot to {path}")
                 except Exception:
                     print("ERROR while trying to take a screenshot with F12.")
-                    print(format_exc())
+                    print_exc()
             self.keyboard._press(event.key)
             if user_key_down:
                 return user_key_down(event)

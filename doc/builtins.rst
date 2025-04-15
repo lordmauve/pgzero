@@ -57,13 +57,12 @@ draw images to the screen ("blit" them).
 
     .. method:: screenshot()
 
-        Takes a screenshot of the entire game window and saves it.
+        Takes a screenshot of the entire game window and saves it to ``Pictures`` in your home directory.
 
-        On Windows, the save location is ``%USERPROFILE%\Pictures\pgzero``,
-        on MacOS and Linux it is ``~/Pictures/pgzero``.
+        Returns the path of the file that was written, as a string.
 
-        The default keybinding to take screenshots is F12 and doesn't
-        require the user to manually use this function in their code.
+        You can press F12 to take a screenshot at any time, without
+        needing to call this function.
 
     .. method:: draw.line(start, end, (r, g, b), width=1)
 
