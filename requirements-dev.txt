@@ -1,6 +1,0 @@
--r requirements.txt
-tox
-pytest
-pytest-cov
-flake8
-pre-commit

@@ -80,9 +80,9 @@ version:
 Development installation
 ------------------------
 
-It's possible to create a locally-editable install using pip. From the root directory of the checked out source, run::
+It's possible to create a locally-editable install using ``uv``. From the root directory of the checked out source, run::
 
-    pip3 install --editable .
+    uv sync
 
 The installed version will now reflect any local changes you make.
 
@@ -100,7 +100,7 @@ How to run tests
 
 The tests can be run with
 
-    python3 setup.py test
+    pytest
 
 
 .. _translating:
