@@ -186,8 +186,6 @@ class Mouse:
     # Another option would be to expose an explicit getter function
     # and then turn it into a property the old fashioned way. This
     # works, but it rather ugly and terrible practise...
-
-    # TODO: Should cursor also be incorporated into an attribute?
     @property
     def cursor(self):
         c = pygame.mouse.get_cursor()
@@ -218,7 +216,7 @@ class Mouse:
                  + c_string + ")")
             if hotspot:
                 print("WARNING: System cursors can't be given a hotspot"
-                      " as they define their own. The given hotspo was"
+                      " as they define their own. The given hotspot was"
                       " ignored.")
         else:
             if not hotspot:
