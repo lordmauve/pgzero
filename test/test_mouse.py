@@ -1,20 +1,34 @@
 import unittest
+from collections import deque
 
 import pygame
 
-from pgzero.mouse import mouse
+from pgzero.loaders import set_root
+from pgzero.mouse import mouse_instance as mouse
 
 
 class MouseTest(unittest.TestCase):
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
+        """Initialise the display and set loaders to target the current dir."""
         pygame.init()
         cls.surf = pygame.display.set_mode((200, 200))
         set_root(__file__)
+
+    @classmethod
+    def tearDownClass(cls):
+        """Shut down the display."""
+        pygame.display.quit()
+
+    def setUp(self):
         mouse._press(mouse.LEFT)
         mouse._press(mouse.MIDDLE)
         mouse._set_pos((10, 10))
         pygame.mouse.set_visible(False)
         pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
+
+    def tearDown(self):
+        mouse._null_rel()
 
     def test_never_pressed(self):
         """A button value is false if never pressed."""
@@ -67,40 +81,57 @@ class MouseTest(unittest.TestCase):
 
     def test_set_position(self):
         """We can change the mouse position."""
-        mouse.pos = (25, 25)
+        # TODO: Can this be done via mouse.pos = (25, 25)? Problem is that a
+        # normal Pygame event would have to be gotten before changes take
+        # effect.
+        mouse._set_pos((25, 25))
         self.assertEqual(mouse.pos, (25, 25))
 
     def test_recent_pos(self):
         """Recent positions can be gotten."""
-        mouse.pos = (1, 1)
-        mouse.pos = (2, 2)
-        self.assertEqual(mouse.recent_pos, ((0,0), (10,10), (1,1), (2,2)))
+        mouse._recent_pos = deque(maxlen=60)
+        # TODO: Can this be done via mouse.pos = (1, 1) etc.? Problem is that a
+        # normal Pygame event would have to be gotten before changes take
+        # effect.
+        mouse._set_pos((1, 1))
+        mouse._set_pos((2, 2))
+        self.assertEqual(mouse.recent_pos, ((2,2), (1,1)))
 
     def test_recent_pos_max(self):
         """We can change the number of recent positions."""
         mouse.recent_pos_max = 120
-        self.assertEqual(mouse.recent_pos.maxlen, 120)
+        self.assertEqual(mouse._recent_pos.maxlen, 120)
 
     def test_get_relative(self):
-        """We can get the last position change, starting frm (10,10)."""
-        mouse.pos = (5, 5)
-        self.assertEqual(mouse.rel, (5, 5))
+        """We can get the last position change, starting from (10,10)."""
+        # TODO: Can this be done via mouse.pos = (5, 5)? Problem is that a
+        # normal Pygame event would have to be gotten before changes take
+        # effect.
+        mouse._add_rel((-5, -5))
+        self.assertEqual(mouse.rel, (-5, -5))
 
     def test_get_lc_relative(self):
         """We can get the last called position change, startig from (0, 0)."""
-        mouse.pos = (25, 25)
+        # TODO: Can this be done via mouse.pos = (25, 25)? Problem is that a
+        # normal Pygame event would have to be gotten before changes take
+        # effect.
+        mouse._add_rel((25, 25))
         self.assertEqual(mouse.last_called_rel, (25, 25))
 
     def test_recent_rel(self):
         """Recent position changes can be gotten."""
-        mouse.pos = (1, 1)
-        mouse.pos = (2, 2)
-        self.assertEqual(mouse.recent_pos, ((0,0), (10,10), (-9,-9), (1,1)))
+        mouse._recent_rel = deque(maxlen=60)
+        # TODO: Can this be done via mouse.pos = (1, 1) etc.? Problem is that a
+        # normal Pygame event would have to be gotten before changes take
+        # effect.
+        mouse._add_rel((2, 2))
+        mouse._add_rel((-1, -1))
+        self.assertEqual(mouse.recent_rel, ((-1, -1), (2, 2)))
 
     def test_recent_rel_max(self):
         """We can change the number of recent position changes."""
         mouse.recent_rel_max = 120
-        self.assertEqual(mouse.recent_rel.maxlen, 120)
+        self.assertEqual(mouse._recent_rel.maxlen, 120)
 
     def test_get_visibility(self):
         """We can get whether the mouse cursor is visible."""
@@ -122,4 +153,4 @@ class MouseTest(unittest.TestCase):
 
     def test_cursor_hotspot(self):
         """We can check the hotspot of the cursor."""
-        self.assertNone(mouse.cursor_hotspot)
+        self.assertIsNone(mouse.cursor_hotspot)
