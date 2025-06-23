@@ -56,7 +56,7 @@ class MouseTest(unittest.TestCase):
         """Releasing an unpressed button still works."""
         mouse._release(mouse.RIGHT)
         self.assertFalse(mouse.pressed_right)
-    
+
     def test_release_other(self):
         """Releasing one key does not release any others that are pressed."""
         mouse._release(mouse.LEFT)
@@ -95,7 +95,7 @@ class MouseTest(unittest.TestCase):
         # effect.
         mouse._set_pos((1, 1))
         mouse._set_pos((2, 2))
-        self.assertEqual(mouse.recent_pos, ((2,2), (1,1)))
+        self.assertEqual(mouse.recent_pos, ((2, 2), (1, 1)))
 
     def test_recent_pos_max(self):
         """We can change the number of recent positions."""
