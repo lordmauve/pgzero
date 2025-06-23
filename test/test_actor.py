@@ -146,3 +146,67 @@ class ActorTest(unittest.TestCase):
         a = Actor("alien")
         for attribute in dir(a):
             a.__getattr__(attribute)
+
+    def test_move_to_angle(self):
+        """Ensure moving towards an arbitrary angle works."""
+        a = Actor("alien")
+        distance = (50**2 + 50**2)**0.5
+        a.move_towards_angle(-45, distance)
+        self.assertEqual(a.pos, (50, 50))
+
+    def test_move_to_point(self):
+        """Ensure moving towards a point works."""
+        a = Actor("alien")
+        position = (50, 50)
+        distance = ((50**2 + 50**2)**0.5)/2
+        a.move_towards_point(position, distance)
+        self.assertEqual(a.pos, (25, 25))
+
+    def test_move_to_point_no_overshoot(self):
+        """Ensure moving towards point won't overshoot if distance to target
+        is smaller than the given distance to move."""
+        a = Actor("alien")
+        position = (10, 10)
+        distance = ((50**2 + 50**2)**0.5)/2
+        a.move_towards_point(position, distance)
+        self.assertEqual(a.pos, (10, 10))
+
+    def test_move_to_point_with_overshoot(self):
+        """Ensure position overshoots correctly if given the parameter."""
+        a = Actor("alien")
+        position = (10, 10)
+        distance = ((50**2 + 50**2)**0.5)/2
+        a.move_towards_point(position, distance, overshoot=True)
+        self.assertEqual(a.pos, (25, 25))
+
+    def test_move_forward(self):
+        """Test whether moving forward by the actor angle works."""
+        a = Actor("alien")
+        a.angle = -45
+        distance = (50**2 + 50**2)**0.5
+        a.move_foward(distance)
+        self.assertEqual(a.pos, (50, 50))
+
+    def test_move_backward(self):
+        """Test whether moving backwards by the actor angle works."""
+        a = Actor("alien")
+        a.angle = 135
+        distance = (50**2 + 50**2)**0.5
+        a.move_backward(distance)
+        self.assertEqual(a.pos, (50, 50))
+
+    def test_move_left(self):
+        """Test whether moving left by the actor angle works."""
+        a = Actor("alien")
+        a.angle = -135
+        distance = (50**2 + 50**2)**0.5
+        a.move_left(distance)
+        self.assertEqual(a.pos, (50, 50))
+
+    def test_move_right(self):
+        """Test whether moving right by the actor angle works."""
+        a = Actor("alien")
+        a.angle = 45
+        distance = (50**2 + 50**2)**0.5
+        a.move_left(distance)
+        self.assertEqual(a.pos, (50, 50))
