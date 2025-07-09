@@ -240,6 +240,28 @@ class Actor:
         else:
             self._anchor = transform_anchor(ax, ay, ow, oh, self._angle)
 
+    # TODO: Currently, there is an issue with __setattr__() being used on all
+    #       assignments. width and height can't be set anymore, but there is
+    #       neither warning nor error when trying to do so, which is not good
+    #       enough.
+    @property
+    def width(self):
+        return self._width
+
+    @width.setter
+    def width(self, val):
+        print("WARNING: width of an actor can't be set directly. Change the"
+              " actors image to change its dimensions.")
+
+    @property
+    def height(self):
+        return self._height
+
+    @height.setter
+    def height(self, val):
+        print("WARNING: height of an actor can't be set directly. Change the"
+              " actors image to change its dimensions.")
+
     @property
     def angle(self):
         return self._angle
@@ -252,8 +274,8 @@ class Actor:
         ra = radians(angle)
         sin_a = sin(ra)
         cos_a = cos(ra)
-        self.height = abs(w * sin_a) + abs(h * cos_a)
-        self.width = abs(w * cos_a) + abs(h * sin_a)
+        self._height = abs(w * sin_a) + abs(h * cos_a)
+        self._width = abs(w * cos_a) + abs(h * sin_a)
         ax, ay = self._untransformed_anchor
         p = self.pos
         self._anchor = transform_anchor(ax, ay, w, h, angle)
@@ -331,7 +353,7 @@ class Actor:
 
     def _update_pos(self):
         p = self.pos
-        self.width, self.height = self._orig_surf.get_size()
+        self._width, self._height = self._orig_surf.get_size()
         self._calc_anchor()
         self.pos = p
 
