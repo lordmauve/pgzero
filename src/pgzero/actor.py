@@ -243,27 +243,23 @@ class Actor:
         else:
             self._anchor = transform_anchor(ax, ay, ow, oh, self._angle)
 
-    # TODO: Currently, there is an issue with __setattr__() being used on all
-    #       assignments. width and height can't be set anymore, but there is
-    #       neither warning nor error when trying to do so, which is not good
-    #       enough.
     @property
     def width(self):
         return self._width
 
     @width.setter
-    def width(self, val):
-        print("WARNING: width of an actor can't be set directly. Change the"
-              " actors image to change its dimensions.")
+    def width(self, _):
+        print("WARNING: The width of an actor can't be set directly. Change "
+              "the actors image to change its dimensions.")
 
     @property
     def height(self):
         return self._height
 
     @height.setter
-    def height(self, val):
-        print("WARNING: height of an actor can't be set directly. Change the"
-              " actors image to change its dimensions.")
+    def height(self, _):
+        print("WARNING: The height of an actor can't be set directly. Change "
+              "the actors image to change its dimensions.")
 
     @property
     def angle(self):
