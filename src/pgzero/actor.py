@@ -222,7 +222,16 @@ class Actor:
 
     @classmethod
     def _make_shape_image(self, kind, width, height, color):
+        """Creates a new shape image and loads it into resources. If an image
+        of the exact parameters already exists, creation is not repeated."""
+        # Create image name and resource cache key from parameters.
         name = kind + str(width) + "x" + str(height) + "_" + str(color)
+        key = (name, (), ())
+        # Return without costly image creation if image already exists.
+        if key in loaders.images._cache:
+            return name
+        # Creates the image with transparency (for non-rects) and fills them
+        # with the appropriate shape.
         s = pygame.Surface((width, height), pygame.SRCALPHA)
         match kind:
             case "__SHAPE_CIRCLE__":
@@ -236,19 +245,23 @@ class Actor:
                                     ((0, 0), (width, height / 2), (0, height)))
             case _:
                 s.fill(color)
-        key = (name, (), ())
+        # Saves the created image in the resource cache for use. This ensures
+        # smooth interoperability with the normal Actor construction.
         loaders.images._cache[key] = s
+        # Returns the name for use in the Actor construction.
         return name
 
     @classmethod
     def square(self, side, color, pos=POS_TOPLEFT, anchor=ANCHOR_CENTER,
                **kwargs):
+        """Creates an actor with a square as an image."""
         name = self._make_shape_image("__SHAPE_SQUARE__", side, side, color)
         return Actor(name, pos, anchor, **kwargs)
 
     @classmethod
     def rectangle(self, width, height, color, pos=POS_TOPLEFT,
                   anchor=ANCHOR_CENTER, **kwargs):
+        """Creates an actor with a rectangle as an image."""
         name = self._make_shape_image("__SHAPE_RECTANGLE__", width, height,
                                       color)
         return Actor(name, pos, anchor, **kwargs)
@@ -256,6 +269,7 @@ class Actor:
     @classmethod
     def circle(self, diameter, color, pos=POS_TOPLEFT, anchor=ANCHOR_CENTER,
                **kwargs):
+        """Creates an actor with a circle as an image."""
         name = self._make_shape_image("__SHAPE_CIRCLE__", diameter, diameter,
                                       color)
         return Actor(name, pos, anchor, **kwargs)
@@ -263,6 +277,7 @@ class Actor:
     @classmethod
     def ellipse(self, width, height, color, pos=POS_TOPLEFT,
                 anchor=ANCHOR_CENTER, **kwargs):
+        """Creates an actor with an ellipse as an image."""
         name = self._make_shape_image("__SHAPE_ELLIPSE__", width, height,
                                       color)
         return Actor(name, pos, anchor, **kwargs)
@@ -270,7 +285,7 @@ class Actor:
     @classmethod
     def triangle(self, width, height, color, pos=POS_TOPLEFT,
                  anchor=ANCHOR_CENTER, **kwargs):
-        name = "__SHAPE_TRIANGLE__"
+        """Creates an actor with a triangle as an image."""
         name = self._make_shape_image("__SHAPE_TRIANGLE__", width, height,
                                       color)
         return Actor(name, pos, anchor, **kwargs)
