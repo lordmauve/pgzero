@@ -220,6 +220,61 @@ class Actor:
                 "function {!r} does not have a registered order."
                 "".format(function))
 
+    @classmethod
+    def _make_shape_image(self, kind, width, height, color):
+        name = kind + str(width) + "x" + str(height) + "_" + str(color)
+        s = pygame.Surface((width, height), pygame.SRCALPHA)
+        match kind:
+            case "__SHAPE_CIRCLE__":
+                pygame.draw.circle(s, color, (width / 2, height / 2),
+                                   width / 2)
+            case "__SHAPE_ELLIPSE__":
+                pygame.draw.ellipse(s, color,
+                                    pygame.Rect((0, 0), (width, height)))
+            case "__SHAPE_TRIANGLE__":
+                pygame.draw.polygon(s, color,
+                                    ((0, 0), (width, height / 2), (0, height)))
+            case _:
+                s.fill(color)
+        key = (name, (), ())
+        loaders.images._cache[key] = s
+        return name
+
+    @classmethod
+    def square(self, side, color, pos=POS_TOPLEFT, anchor=ANCHOR_CENTER,
+               **kwargs):
+        name = self._make_shape_image("__SHAPE_SQUARE__", side, side, color)
+        return Actor(name, pos, anchor, **kwargs)
+
+    @classmethod
+    def rectangle(self, width, height, color, pos=POS_TOPLEFT,
+                  anchor=ANCHOR_CENTER, **kwargs):
+        name = self._make_shape_image("__SHAPE_RECTANGLE__", width, height,
+                                      color)
+        return Actor(name, pos, anchor, **kwargs)
+
+    @classmethod
+    def circle(self, diameter, color, pos=POS_TOPLEFT, anchor=ANCHOR_CENTER,
+               **kwargs):
+        name = self._make_shape_image("__SHAPE_CIRCLE__", diameter, diameter,
+                                      color)
+        return Actor(name, pos, anchor, **kwargs)
+
+    @classmethod
+    def ellipse(self, width, height, color, pos=POS_TOPLEFT,
+                anchor=ANCHOR_CENTER, **kwargs):
+        name = self._make_shape_image("__SHAPE_ELLIPSE__", width, height,
+                                      color)
+        return Actor(name, pos, anchor, **kwargs)
+
+    @classmethod
+    def triangle(self, width, height, color, pos=POS_TOPLEFT,
+                 anchor=ANCHOR_CENTER, **kwargs):
+        name = "__SHAPE_TRIANGLE__"
+        name = self._make_shape_image("__SHAPE_TRIANGLE__", width, height,
+                                      color)
+        return Actor(name, pos, anchor, **kwargs)
+
     @property
     def anchor(self):
         return self._anchor_value
