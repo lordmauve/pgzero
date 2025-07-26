@@ -69,7 +69,7 @@ def queue(name):
     _music.queue(path)
 
 
-def is_playing(name):
+def is_playing():
     """Return True if the music is playing and not paused."""
     return _music.get_busy() and not _paused
 
