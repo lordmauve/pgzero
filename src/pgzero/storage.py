@@ -65,7 +65,7 @@ class Storage(dict):
         """Ensure that the directory for all save game data exists."""
         try:
             os.makedirs(cls.STORAGE_DIR)
-        except IsADirectoryError:
+        except (IsADirectoryError, PermissionError):
             pass
         except FileExistsError:
             pass
