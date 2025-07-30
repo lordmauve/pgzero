@@ -80,11 +80,17 @@ version:
 Development installation
 ------------------------
 
-It's possible to create a locally-editable install using pip. From the root directory of the checked out source, run::
+It's possible to create a locally-editable install using ``uv``. From the root directory of the checked out source, run::
 
-    pip3 install --editable .
+    uv sync --group dev
 
 The installed version will now reflect any local changes you make.
+
+When adding or upgrading dependencies, regenerate ``uv.lock`` with::
+
+    uv lock
+
+and commit the updated lock file.
 
 Alternatively, if you don't want to install it at all, it may be run with:
 
@@ -98,9 +104,12 @@ For example:
 How to run tests
 ----------------
 
-The tests can be run with
+The tests require an X server and Pulseaudio to be available. On most Linux
+systems you can run them with::
 
-    python3 setup.py test
+    export XDG_RUNTIME_DIR=/tmp
+    pulseaudio -D --start
+    xvfb-run --auto-servernum pytest
 
 
 .. _translating:
