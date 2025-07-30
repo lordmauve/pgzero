@@ -115,7 +115,7 @@ def load_and_run(path, *, fps: bool = False):
             src = f.read()
     except FileNotFoundError:
         raise NoMainModule(f"Error: {path} does not exist.")
-    except IsADirectoryError:
+    except (IsADirectoryError, PermissionError):
         name = os.path.basename(path)
         for candidate in (
             '__main__.py',

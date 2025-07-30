@@ -2,12 +2,14 @@ name: "Run tests"
 on: [pull_request, workflow_call]
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    env:
+      SDL_AUDIODRIVER: dummy
+      SDL_VIDEODRIVER: dummy
     steps:
-    - name: Install xvfb and pulseaudio
-      run: |
-          sudo apt update
-          sudo apt install -y xvfb pulseaudio
     - uses: actions/checkout@v4
     - name: Set up Python 3.x
       uses: actions/setup-python@v5
@@ -25,13 +27,8 @@ jobs:
         .venv/bin/flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         # stricter tests for mission critical code
         .venv/bin/flake8 --count src test
-    - name: Run tests under xvfb
-      run: |
-        export XDG_RUNTIME_DIR="$RUNNER_TEMP"
-        pulseaudio -D --start
-        xvfb-run --auto-servernum .venv/bin/pytest
-    - name: Cleanup xvfb pidx
-      uses: bcomnes/cleanup-xvfb@v1
+    - name: Run tests
+      run: .venv/bin/pytest
     - uses: actions/upload-artifact@v4
       if: ${{ failure() }}
       with:
