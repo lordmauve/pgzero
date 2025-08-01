@@ -241,6 +241,7 @@ class ScreenTest(unittest.TestCase):
         )
 
     @patch("sys.platform", "win32")
+    @patch("sys.builtin_module_names", ('nt'))
     @patch.dict("os.environ", {"USERPROFILE": r"c:\Users\user"})
     def test_get_screenshot_path_windows(self):
         r"""Screenshot path on Windows is %USERPROFILE%\Pictures\pgzero."""
@@ -249,6 +250,7 @@ class ScreenTest(unittest.TestCase):
                          os.path.join(r"c:\Users\user", "Pictures", "pgzero"))
 
     @patch("sys.platform", "linux")
+    @patch("sys.builtin_module_names", ('posix'))
     @patch.dict("os.environ", {"HOME": "/home/user"})
     def test_get_screenshot_path_linux(self):
         """Screenshot path on Linux or MacOS is ~/Pictures/pgzero."""
