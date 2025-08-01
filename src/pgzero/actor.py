@@ -101,7 +101,10 @@ def _set_opacity(actor, current_surface):
 class Actor:
     EXPECTED_INIT_KWARGS = SYMBOLIC_POSITIONS
     DELEGATED_ATTRIBUTES = [
-        a for a in dir(rect.ZRect) if not a.startswith("_")
+        a for a in dir(rect.ZRect) if not a.startswith("_") and
+        # To prevent rect width and height being accessible without those
+        # implicating changes to the actors' image width and height.
+        not a == "width" and not a == "height"
     ]
 
     function_order = [_set_opacity, _set_angle]
@@ -241,6 +244,24 @@ class Actor:
             self._anchor = transform_anchor(ax, ay, ow, oh, self._angle)
 
     @property
+    def width(self):
+        return self._width
+
+    @width.setter
+    def width(self, _):
+        print("WARNING: The width of an actor can't be set directly. Change "
+              "the actors image to change its dimensions.")
+
+    @property
+    def height(self):
+        return self._height
+
+    @height.setter
+    def height(self, _):
+        print("WARNING: The height of an actor can't be set directly. Change "
+              "the actors image to change its dimensions.")
+
+    @property
     def angle(self):
         return self._angle
 
@@ -252,8 +273,8 @@ class Actor:
         ra = radians(angle)
         sin_a = sin(ra)
         cos_a = cos(ra)
-        self.height = abs(w * sin_a) + abs(h * cos_a)
-        self.width = abs(w * cos_a) + abs(h * sin_a)
+        self._height = abs(w * sin_a) + abs(h * cos_a)
+        self._width = abs(w * cos_a) + abs(h * sin_a)
         ax, ay = self._untransformed_anchor
         p = self.pos
         self._anchor = transform_anchor(ax, ay, w, h, angle)
@@ -331,7 +352,7 @@ class Actor:
 
     def _update_pos(self):
         p = self.pos
-        self.width, self.height = self._orig_surf.get_size()
+        self._width, self._height = self._orig_surf.get_size()
         self._calc_anchor()
         self.pos = p
 
