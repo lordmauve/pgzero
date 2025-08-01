@@ -8,11 +8,14 @@ from .keyboard import keyboard
 from .animation import animate
 from .rect import Rect, ZRect
 from .loaders import images, sounds
-from .constants import mouse, keys, keymods
+# Removed the former mouse enum import
+from .constants import keys, keymods
 from .game import exit
 
 # The actual screen will be installed here
 from .screen import screen_instance as screen
+# Make mouse globally available
+from .mouse import mouse_instance as mouse
 
 
 __all__ = [
