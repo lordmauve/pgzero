@@ -231,97 +231,81 @@ class Joystick:
     def face_up(self):
         """Returns whether the upper face button is pressed."""
         return self._pressed[self._btn_map.FU]
-    fu = face_up
 
     @property
     def face_down(self):
         """Returns whether the lower face button is pressed."""
         return self._pressed[self._btn_map.FD]
-    fd = face_down
 
     @property
     def face_left(self):
         """Returns whether the left face button is pressed."""
         return self._pressed[self._btn_map.FL]
-    fl = face_left
 
     @property
     def face_right(self):
         """Returns whether the right face button is pressed."""
         return self._pressed[self._btn_map.FR]
-    fr = face_right
 
     @property
     def dpad_up(self):
         """Returns whether the dpad up button is pressed."""
         return self._pressed[self._btn_map.DU]
-    du = dpad_up
 
     @property
     def dpad_down(self):
         """Returns whether the dpad down button is pressed."""
         return self._pressed[self._btn_map.DD]
-    dd = dpad_down
 
     @property
     def dpad_left(self):
         """Returns whether the dpad left button is pressed."""
         return self._pressed[self._btn_map.DL]
-    dl = dpad_left
 
     @property
     def dpad_right(self):
         """Returns whether the dpad right button is pressed."""
         return self._pressed[self._btn_map.DR]
-    dr = dpad_right
 
     @property
     def shoulder_left(self):
         """Returns whether the left shoulder button is pressed."""
         return self._pressed[self._btn_map.SL]
-    sl = shoulder_left
 
     @property
     def shoulder_right(self):
         """Returns whether the right shoulder button is pressed."""
         return self._pressed[self._btn_map.SR]
-    sr = shoulder_right
 
     @property
     def push_left(self):
         """Returns whether the left stick is pressed in."""
         return self._pressed[self._btn_map.PL]
-    pl = push_left
 
     @property
     def push_right(self):
         """Returns whether the right stick is pressed in."""
         return self._pressed[self._btn_map.PR]
-    pr = push_right
 
     @property
     def center_left(self):
         """Returns whether the left center button is pressed."""
         return self._pressed[self._btn_map.CL]
-    cl = center_left
 
     @property
     def center_middle(self):
         """Returns whether the middle center button is pressed."""
         return self._pressed[self._btn_map.CM]
-    cm = center_middle
 
     @property
     def center_right(self):
         """Returns whether the right center button is pressed."""
         return self._pressed[self._btn_map.CR]
-    cr = center_right
 
     @property
     def left_stick(self):
         """Returns a tuple of the axis values for the left stick."""
         return self._axis[self._axis_map.LX], self._axis[self._axis_map.LY]
-    ls = left_stick
 
     @property
     def left_angle(self):
@@ -332,21 +316,18 @@ class Joystick:
         _, p = pygame.math.Vector2(self.left_stick).as_polar()
         degrees = (360 - p) % 360
         return degrees
-    la = left_angle
 
     @property
     def left_x(self):
         """Returns a single axis value for left-right movement of
         the left stick."""
         return self._axis[self._axis_map.LX]
-    lx = left_x
 
     @property
     def left_y(self):
         """Returns a single axis value for up-down movement of
         the left stick."""
         return self._axis[self._axis_map.LY]
-    ly = left_y
 
     @property
     def left_trigger(self):
@@ -355,13 +336,11 @@ class Joystick:
         are recalculated from [-1, 1] to [0, 1] to represent them
         being depressed."""
         return (self._axis[self._axis_map.LT] + 1) / 2
-    lt = left_trigger
 
     @property
     def right_stick(self):
         """Returns a tuple of the axis values for the right stick."""
         return self._axis[self._axis_map.RX], self._axis[self._axis_map.RY]
-    rs = right_stick
 
     @property
     def right_angle(self):
@@ -372,21 +351,18 @@ class Joystick:
         _, p = pygame.math.Vector2(self.right_stick).as_polar()
         degrees = (360 - p) % 360
         return degrees
-    ra = right_angle
 
     @property
     def right_x(self):
         """Returns a single axis value for left-right movement of
         the right stick."""
         return self._axis[self._axis_map.RX]
-    rx = right_x
 
     @property
     def right_y(self):
         """Returns a single axis value for up-down movement of
         the right stick."""
         return self._axis[self._axis_map.RY]
-    ry = right_y
 
     @property
     def right_trigger(self):
@@ -395,7 +371,6 @@ class Joystick:
         are recalculated from [-1, 1] to [0, 1] to represent them
         being depressed."""
         return (self._axis[self._axis_map.RT] + 1) / 2
-    rt = right_trigger
 
 
 class JoystickManager:
