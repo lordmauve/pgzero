@@ -1,166 +1,131 @@
 import pygame
 from enum import IntEnum
+from dataclasses import dataclass
+import platform
 from . import clock
 
 
-# Since controllers map different buttons to the SDL provided
-# button layer numbers, we have enums for each supported
-# controller type mapping generic button identifiers to the
-# specific button indices used.
-class SwitchBtns(IntEnum):
-    NUM = 15
-    FU = 2
-    FD = 1
-    FL = 3
-    FR = 0
-    DU = 11
-    DD = 12
-    DL = 13
-    DR = 14
-    SL = 9
-    SR = 10
-    PL = 7
-    PR = 8
-    CL = 4
-    CM = 5
-    CR = 6
+@dataclass
+class ButtonMap:
+    face_up: int = 99
+    face_down: int = 99
+    face_left: int = 99
+    face_right: int = 99
+    dpad_up: int = 99
+    dpad_down: int = 99
+    dpad_left: int = 99
+    dpad_right: int = 99
+    shoulder_left: int = 99
+    shoulder_right: int = 99
+    push_left: int = 99
+    push_right: int = 99
+    center_left: int = 99
+    center_middle: int = 99
+    center_middle_alt: int = 99
+    center_right: int = 99
 
 
-# Same goes for the axis.
-class SwitchAxis(IntEnum):
-    NUM = 6
-    LX = 0
-    LY = 1
-    LT = 4
-    RX = 2
-    RY = 3
-    RT = 5
+@dataclass
+class AxisMap:
+    left_x: int = 99
+    left_y: int = 99
+    left_trigger: int = 99
+    right_x: int = 99
+    right_y: int = 99
+    right_trigger: int = 99
 
 
-class X360Btns(IntEnum):
-    NUM = 15
-    FU = 3
-    FD = 0
-    FL = 2
-    FR = 1
-    DU = 11  # The D-Pad mappings are fake, as the Xbox treats the D-Pad like
-    DD = 12  # a hat switch. It acting like normal buttons is a simulation
-    DL = 13  # by PGZero to make it easier to work with.
-    DR = 14  # This is the last fake button.
-    SL = 4
-    SR = 5
-    PL = 8
-    PR = 9
-    CL = 6
-    CM = 10
-    CR = 7
+SDL_ASSOCIATIONS = {"a": "face_down", "b": "face_right", "x": "face_left",
+                    "y": "face_up", "dpup": "dpad_up",
+                    "dpdown": "dpad_down", "dpleft": "dpad_left",
+                    "dpright": "dpad_right", "leftshoulder": "shoulder_left",
+                    "rightshoulder": "shoulder_right",
+                    "rightstick": "push_right", "leftstick": "push_left",
+                    "guide": "center_middle", "back": "center_left",
+                    "start": "center_right", "misc1": "center_middle_alt",
+                    "lefttrigger": "left_trigger",
+                    "righttrigger": "right_trigger", "leftx": "left_x",
+                    "lefty": "left_y", "rightx": "right_x", "righty": "right_y"}
 
+BTN_NAMES = ("face_up", "face_down", "face_left", "face_right", "dpad_up",
+             "dpad_down", "dpad_left", "dpad_right", "shoulder_left",
+             "shoulder_right", "push_left", "push_right", "center_left",
+             "center_middle", "center_right")
 
-class X360Axis(IntEnum):
-    NUM = 6
-    LX = 0
-    LY = 1
-    LT = 2
-    RX = 3
-    RY = 4
-    RT = 5
+AXIS_NAMES = {"left_x", "left_y", "left_trigger", "right_x", "right_y",
+              "right_trigger"}
 
+def _get_map_dict(guid):
+    from importlib.resources import files
 
-class XSeriesBtns(IntEnum):
-    NUM = 20
-    FU = 4
-    FD = 0
-    FL = 3
-    FR = 1
-    DU = 16  # Simulated D-Pad like with the Xbox controller.
-    DD = 17
-    DL = 18
-    DR = 19
-    SL = 6
-    SR = 7
-    PL = 13
-    PR = 14
-    CL = 10
-    CM = 15
-    CR = 11
+    # Use the correct file per system type.
+    system = platform.system()
+    if system == "Windows":
+        filename = "controllers_windows.txt"
+    elif system == "Darwin":
+        filename = "controllers_macos.txt"
+    else:
+        # Linux mappings are also used as a fallback default.
+        filename = "controllers_linux.txt"
 
+    filepath = files().joinpath("data").joinpath(filename)
 
-class XSeriesAxis(IntEnum):
-    NUM = 6
-    LX = 0
-    LY = 1
-    LT = 5
-    RX = 2
-    RY = 3
-    RT = 4
+    # Go through the mapping file searching for the given GUID.
+    with open(filepath) as mapfile:
+        for line in mapfile:
+            # If we find the GUID, save the whole line for disection.
+            if line.startswith(guid):
+                raw_map = line
+                break
+        else:
+            # If no mapping is available, a default one for an Xbox 360 is
+            # used in hopes it somewhat matches since the 360 layout seems to
+            # be the most common on older third party controllers for PC.
+            raw_map = "030000005e0400008e02000001000000,Microsoft Xbox 360,"
+                      "a:b0,b:b1,back:b6,dpdown:h0.1,dpleft:h0.2,dpright:h0.8,"
+                      "dpup:h0.4,leftshoulder:b4,leftstick:b9,lefttrigger:a2,"
+                      "leftx:a0,lefty:a1,rightshoulder:b5,rightstick:b10,"
+                      "righttrigger:a5,rightx:a3,righty:a4,start:b7,x:b2,y:b3,"
+                      "platform:Linux,"
 
+    parts = raw_map.split(",")[2:-2]
+    map_dict = {}
+    for p in parts:
+        k, v = p.split(":")
+        map_dict[k] = v
 
-class PS4Btns(IntEnum):
-    NUM = 15
-    FU = 3
-    FD = 0
-    FL = 2
-    FR = 1
-    DU = 11
-    DD = 12
-    DL = 13
-    DR = 14
-    SL = 9
-    SR = 10
-    PL = 7
-    PR = 8
-    CL = 4
-    CM = 5
-    CR = 6
+    return map_dict
 
+def _get_mappings_from_guid(guid):
+    # Remove the CRC component from the GUID
+    generic_guid = guid[:4] + "0000" + guid[8:]
 
-class PS4Axis(IntEnum):
-    NUM = 6
-    LX = 0
-    LY = 1
-    LT = 4
-    RX = 2
-    RY = 3
-    RT = 5
+    # Gets an automatic mapping from the right file and creates a dict from it.
+    map_dict = _get_map_dict(generic_guid)
 
+    # So far empty instances of dataclasses to hold the mappings.
+    btn_map = ButtonMap()
+    axis_map = AxisMap()
 
-class PS5Btns(IntEnum):
-    NUM = 17
-    FU = 3
-    FD = 0
-    FL = 2
-    FR = 1
-    DU = 13  # Simulated D-Pad like with the Xbox controller.
-    DD = 14
-    DL = 15
-    DR = 16
-    SL = 4
-    SR = 5
-    PL = 11
-    PR = 12
-    CL = 8
-    CM = 10
-    CR = 9
+    for k, v in map_dict.items():
+        if k in ("a", "b", "x", "y", "back", "guide", "start", "misc1",
+                 "leftshoulder", "rightshoulder", "leftstick", "rightstick"):
+            setattr(btn_map, SDL_ASSOCIATIONS[k], int(v[1:]))
+        elif k in ("dpup", "dpdown", "dpleft", "dpright"):
+            if v[0] == "b":
+                setattr(btn_map, SDL_ASSOCIATIONS[k], int(v[1:]))
+            else:
+                # If the controller treats the DPad like a Hat-Switch, we
+                # create a (hopefully) unique int from the Hat-Identifier,
+                # the direction and a preceding 9 to not have collisions with
+                # other mapping numbers like 11, 14, 18 etc.
+                num = int("9" + v[1] + v[-1])
+                setattr(btn_map, SDL_ASSOCIATIONS[k], num)
+        elif k in ("lefttrigger", "righttrigger", "leftx", "lefty", "rightx",
+                   "righty"):
+            setattr(axis_map, SDL_ASSOCIATIONS[k], int(v[1:]))
 
-
-class PS5Axis(IntEnum):
-    NUM = 6
-    LX = 0
-    LY = 1
-    LT = 2
-    RX = 3
-    RY = 4
-    RT = 5
-
-
-BTN_NAMES = {"face_up": "FU", "face_down": "FD", "face_left": "FL",
-             "face_right": "FR", "dpad_up": "DU", "dpad_down": "DD",
-             "dpad_left": "DL", "dpad_right": "DR", "shoulder_left": "SL",
-             "shoulder_right": "SR", "push_left": "PL", "push_right": "PR",
-             "center_left": "CL", "center_middle": "CM", "center_right": "CR"}
-
-AXIS_NAMES = {"left_x": "LX", "left_y": "LY", "left_trigger": "LT",
-              "right_x": "RX", "right_y": "RY", "right_trigger": "RT"}
+    return btn_map, axis_map
 
 
 class Joystick:
@@ -168,43 +133,20 @@ class Joystick:
 
     def __init__(self, stick):
         self._stick = stick
-        name = self._stick.get_name()
-        # We use the system name of the controller to determine
-        # the correct mappings to use.
-        if "Series" in name:
-            self._type = "XSeries"
-            self._btn_map = XSeriesBtns
-            self._axis_map = XSeriesAxis
-        elif "Xbox" in name:
-            self._type = "Xbox"
-            self._btn_map = X360Btns
-            self._axis_map = X360Axis
-        elif "PS4" in name:
-            self._type = "PS4"
-            self._btn_map = PS4Btns
-            self._axis_map = PS4Axis
-        elif "Sony Interactive" in name:
-            self._type = "PS5"
-            self._btn_map = PS5Btns
-            self._btn_map = PS5Axis
-        elif "Switch" in name:
-            self._type = "Switch"
-            self._btn_map = SwitchBtns
-            self._axis_map = SwitchAxis
-        else:
-            self._type = "UNKNOWN"
-            # If the type is unknown, we fall back to Xbox
-            # mappings since these are most common among
-            # generic controller layouts.
-            self._btn_map = X360Btns
-            self._axis_map = X360Axis
+        guid = stick.get_guid()
+        self._btn_map, self._axis_map = _get_mappings_from_guid(guid)
 
-        self._pressed = [False] * self._btn_map.NUM
-        self._axis = [0] * self._axis_map.NUM
+        self._pressed = {getattr(self._btn_map, b): False for b in BTN_NAMES}
+        self._axis = {getattr(self._axis_map, a): 0 for a in AXIS_NAMES}
         # Since triggers don't start centered but rather unpressed,
         # their starting values are -1.
-        self._axis[self._axis_map.RT] = -1
-        self._axis[self._axis_map.LT] = -1
+        self._axis[self._axis_map.right_trigger] = -1
+        self._axis[self._axis_map.left_trigger] = -1
+
+        # These lookup dicts are used to determine the semantic button pressed
+        # from the integer button gotten by Pygame.
+        self._btn_lookup = {getattr(self._btn_map, b): b for b in BTN_NAMES}
+        self._axis_lookup = {getattr(self._axis_map, a): a for a in AXIS_NAMES}
 
         # These variables are used to give a lockout time for physical
         # HAT button simulation to prevent ghost inputs.
@@ -218,14 +160,9 @@ class Joystick:
     # held is handled here dynamically.
     def __getattr__(self, name):
         if name in BTN_NAMES:
-            return self._pressed[self._btn_map[BTN_NAMES[name]]]
+            return self._pressed[getattr(self._btn_map, name)]
         elif name in AXIS_NAMES:
-            return self._axis[self._axis_map[AXIS_NAMES[name]]]
-        short_name = name.upper()
-        if short_name in BTN_NAMES.values():
-            return self._pressed[self._btn_map[short_name]]
-        if short_name in AXIS_NAMES.values():
-            return self._axis[self._axis_map[short_name]]
+            return self._axis[getattr(self._axis_map, name)]
         else:
             raise AttributeError("'Joystick' object has no attribute '{}'"
                                  .format(name))
@@ -244,6 +181,16 @@ class Joystick:
         self._DR_open = True
 
     @property
+    def name(self):
+        """Returns the human readable name of the controller."""
+        return self._stick.get_name()
+
+    @property
+    def guid(self):
+        """Returns the GUID of the controller."""
+        return self._stick.get_guid()
+
+    @property
     def instance_id(self):
         """Returns the instance id of the controller."""
         return self._stick.get_instance_id()
@@ -251,7 +198,8 @@ class Joystick:
     @property
     def left_stick(self):
         """Returns a tuple of the axis values for the left stick."""
-        return self._axis[self._axis_map.LX], self._axis[self._axis_map.LY]
+        return (self._axis[self._axis_map.left_x],
+                self._axis[self._axis_map.left_y])
 
     @property
     def left_angle(self):
@@ -269,12 +217,13 @@ class Joystick:
         Since triggers are monodirectional, their value ranges
         are recalculated from [-1, 1] to [0, 1] to represent them
         being depressed."""
-        return (self._axis[self._axis_map.LT] + 1) / 2
+        return (self._axis[self._axis_map.left_trigger] + 1) / 2
 
     @property
     def right_stick(self):
         """Returns a tuple of the axis values for the right stick."""
-        return self._axis[self._axis_map.RX], self._axis[self._axis_map.RY]
+        return (self._axis[self._axis_map.right_x],
+                self._axis[self._axis_map.right_y])
 
     @property
     def right_angle(self):
@@ -292,7 +241,7 @@ class Joystick:
         Since triggers are monodirectional, their value ranges
         are recalculated from [-1, 1] to [0, 1] to represent them
         being depressed."""
-        return (self._axis[self._axis_map.RT] + 1) / 2
+        return (self._axis[self._axis_map.right_trigger] + 1) / 2
 
 
 class JoystickManager:
@@ -306,19 +255,25 @@ class JoystickManager:
 
     def _press(self, iid, button):
         s = self._sticks[iid]
+        # A press of an alternate middle button gets converted to the standard
+        # middle button.
+        if button == s._btn_map.center_middle_alt:
+            button = s._btn_map.center_middle
         s._pressed[button] = True
         # If a button is not recognized, None is returned.
         try:
-            identifier = s._btn_map(button).name
+            identifier = s._btn_lookup[button]
         except ValueError:
             identifier = None
         return identifier
 
     def _release(self, iid, button):
         s = self._sticks[iid]
+        if button == s._btn_map.center_middle_alt:
+            button = s._btn_map.center_middle
         s._pressed[button] = False
         try:
-            identifier = s._btn_map(button).name
+            identifier = s._btn_lookup[button]
         except ValueError:
             identifier = None
         return identifier
@@ -328,9 +283,9 @@ class JoystickManager:
         deadzone to prevent jittery results from slightly drifting or
         uncentered sticks."""
         s = self._sticks[iid]
-        ax = s._axis_map(axis).name
+        ax = s._axis_lookup[axis]
         changed = True
-        if ax == "LT" or ax == "RT":
+        if ax == "left_trigger" or ax == "right_trigger":
             if value < -1 + self._deadzone:
                 # If no change was made, no user joy motion event should be
                 # triggered.
@@ -350,7 +305,7 @@ class JoystickManager:
                 changed = False
             s._axis[axis] = 0
         try:
-            identifier = s._axis_map(axis).name
+            identifier = s._axis_lookup[axis]
         except ValueError:
             identifier = None
         return identifier, s._axis[axis], changed
@@ -372,58 +327,58 @@ class JoystickManager:
             # instance. To prevent this, a lockout of 0.05 seconds is enforced
             # after shifting each simulated Dpad button before it can be
             # accessed again.
-            if not s.dr and s._DR_open:
-                pressed.append(s._btn_map.DR)
+            if not s.dpad_right and s._DR_open:
+                pressed.append(s._btn_map.dpad_right)
                 s._DR_open = False
                 clock.schedule(s._unlock_DR, 0.05)
-            if s.dl and s._DL_open:
-                released.append(s._btn_map.DL)
+            if s.dpad_left and s._DL_open:
+                released.append(s._btn_map.dpad_left)
                 s._DL_open = False
                 clock.schedule(s._unlock_DL, 0.05)
         elif vx == 0:
-            if s.dr and s._DR_open:
-                released.append(s._btn_map.DR)
+            if s.dpad_right and s._DR_open:
+                released.append(s._btn_map.dpad_right)
                 s._DR_open = False
                 clock.schedule(s._unlock_DR, 0.05)
-            if s.dl and s._DL_open:
-                released.append(s._btn_map.DL)
+            if s.dpad_left and s._DL_open:
+                released.append(s._btn_map.dpad_left)
                 s._DL_open = False
                 clock.schedule(s._unlock_DL, 0.05)
         elif vx == -1:
-            if not s.dl and s._DL_open:
-                pressed.append(s._btn_map.DL)
+            if not s.dpad_left and s._DL_open:
+                pressed.append(s._btn_map.dpad_left)
                 s._DL_open = False
                 clock.schedule(s._unlock_DL, 0.05)
-            if s.dr and s._DR_open:
-                pressed.append(s._btn_map.DR)
+            if s.dpad_right and s._DR_open:
+                pressed.append(s._btn_map.dpad_right)
                 s._DR_open = False
                 clock.schedule(s._unlock_DR, 0.05)
 
         if vy == 1:
-            if not s.du and s._DU_open:
-                pressed.append(s._btn_map.DU)
+            if not s.dpad_up and s._DU_open:
+                pressed.append(s._btn_map.dpad_up)
                 s._DU_open = False
                 clock.schedule(s._unlock_DU, 0.05)
-            if s.dd and s._DD_open:
-                released.append(s._btn_map.DD)
+            if s.dpad_down and s._DD_open:
+                released.append(s._btn_map.dpad_down)
                 s._DD_open = False
                 clock.schedule(s._unlock_DD, 0.05)
         elif vy == 0:
-            if s.du and s._DU_open:
-                released.append(s._btn_map.DU)
+            if s.dpad_up and s._DU_open:
+                released.append(s._btn_map.dpad_up)
                 s._DU_open = False
                 clock.schedule(s._unlock_DU, 0.05)
-            if s.dd and s._DD_open:
-                released.append(s._btn_map.DD)
+            if s.dpad_down and s._DD_open:
+                released.append(s._btn_map.dpad_down)
                 s._DD_open = False
                 clock.schedule(s._unlock_DD, 0.05)
         elif vy == -1:
-            if not s.dd and s._DD_open:
-                pressed.append(s._btn_map.DD)
+            if not s.dpad_down and s._DD_open:
+                pressed.append(s._btn_map.dpad_down)
                 s._DD_open = False
                 clock.schedule(s._unlock_DD, 0.05)
-            if s.du and s._DU_open:
-                pressed.append(s._btn_map.DU)
+            if s.dpad_up and s._DU_open:
+                pressed.append(s._btn_map.dpad_up)
                 s._DU_open = False
                 clock.schedule(s._unlock_DU, 0.05)
 

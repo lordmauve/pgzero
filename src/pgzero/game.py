@@ -284,7 +284,7 @@ class PGZeroGame:
                 # Translate the button int value for the specific controller
                 # used to the generic layout exposed to the user.
                 if btn:
-                    event.joybtn = constants.joybtn[btn]
+                    event.joybtn = constants.joybtn[btn.upper()]
                 # If the pressed button is not recognized by the mapping,
                 # the button given to the user function is marked as such.
                 else:
