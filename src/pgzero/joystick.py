@@ -1,5 +1,4 @@
 import pygame
-from collections import namedtuple
 from enum import IntEnum
 from . import clock
 
@@ -158,7 +157,6 @@ BTN_NAMES = ("face_up", "face_down", "face_left", "face_right", "dpad_up",
              "dpad_down", "dpad_left", "dpad_right", "shoulder_left",
              "shoulder_right", "push_left", "push_right", "center_left",
              "center_middle", "center_right")
-PressedBtns = namedtuple("PressedBtns", BTN_NAMES)
 
 
 class Joystick:
@@ -228,17 +226,6 @@ class Joystick:
     def instance_id(self):
         """Returns the instance id of the controller."""
         return self._stick.get_instance_id()
-
-    @property
-    def pressed(self):
-        """Returns a named tuple with the current pressed state
-        of all buttons on the controller."""
-        btns = iter(self._btn_map)
-        next(btns)
-        states = []
-        for b in btns:
-            states.append(self._pressed[b])
-        return PressedBtns(*states)
 
     @property
     def face_up(self):
