@@ -1,5 +1,4 @@
 import pygame
-from collections import namedtuple
 from enum import IntEnum
 from . import clock
 
@@ -154,11 +153,14 @@ class PS5Axis(IntEnum):
     RT = 5
 
 
-BTN_NAMES = ("face_up", "face_down", "face_left", "face_right", "dpad_up",
-             "dpad_down", "dpad_left", "dpad_right", "shoulder_left",
-             "shoulder_right", "push_left", "push_right", "center_left",
-             "center_middle", "center_right")
-PressedBtns = namedtuple("PressedBtns", BTN_NAMES)
+BTN_NAMES = {"face_up": "FU", "face_down": "FD", "face_left": "FL",
+             "face_right": "FR", "dpad_up": "DU", "dpad_down": "DD",
+             "dpad_left": "DL", "dpad_right": "DR", "shoulder_left": "SL",
+             "shoulder_right": "SR", "push_left": "PL", "push_right": "PR",
+             "center_left": "CL", "center_middle": "CM", "center_right": "CR"}
+
+AXIS_NAMES = {"left_x": "LX", "left_y": "LY", "left_trigger": "LT",
+              "right_x": "RX", "right_y": "RY", "right_trigger": "RT"}
 
 
 class Joystick:
@@ -211,6 +213,23 @@ class Joystick:
         self._DL_open = True
         self._DR_open = True
 
+    # Since writing out each button and axis creates a lot of redundant code,
+    # all logic to simply check if a button is pressed or where an axis is
+    # held is handled here dynamically.
+    def __getattr__(self, name):
+        if name in BTN_NAMES:
+            return self._pressed[self._btn_map[BTN_NAMES[name]]]
+        elif name in AXIS_NAMES:
+            return self._axis[self._axis_map[AXIS_NAMES[name]]]
+        short_name = name.upper()
+        if short_name in BTN_NAMES.values():
+            return self._pressed[self._btn_map[short_name]]
+        if short_name in AXIS_NAMES.values():
+            return self._axis[self._axis_map[short_name]]
+        else:
+            raise AttributeError("'Joystick' object has no attribute '{}'"
+                                 .format(name))
+
     # Used with clock.schedule to prevent ghost button presses via timeouts.
     def _unlock_DU(self):
         self._DU_open = True
@@ -230,111 +249,9 @@ class Joystick:
         return self._stick.get_instance_id()
 
     @property
-    def pressed(self):
-        """Returns a named tuple with the current pressed state
-        of all buttons on the controller."""
-        btns = iter(self._btn_map)
-        next(btns)
-        states = []
-        for b in btns:
-            states.append(self._pressed[b])
-        return PressedBtns(*states)
-
-    @property
-    def face_up(self):
-        """Returns whether the upper face button is pressed."""
-        return self._pressed[self._btn_map.FU]
-    fu = face_up
-
-    @property
-    def face_down(self):
-        """Returns whether the lower face button is pressed."""
-        return self._pressed[self._btn_map.FD]
-    fd = face_down
-
-    @property
-    def face_left(self):
-        """Returns whether the left face button is pressed."""
-        return self._pressed[self._btn_map.FL]
-    fl = face_left
-
-    @property
-    def face_right(self):
-        """Returns whether the right face button is pressed."""
-        return self._pressed[self._btn_map.FR]
-    fr = face_right
-
-    @property
-    def dpad_up(self):
-        """Returns whether the dpad up button is pressed."""
-        return self._pressed[self._btn_map.DU]
-    du = dpad_up
-
-    @property
-    def dpad_down(self):
-        """Returns whether the dpad down button is pressed."""
-        return self._pressed[self._btn_map.DD]
-    dd = dpad_down
-
-    @property
-    def dpad_left(self):
-        """Returns whether the dpad left button is pressed."""
-        return self._pressed[self._btn_map.DL]
-    dl = dpad_left
-
-    @property
-    def dpad_right(self):
-        """Returns whether the dpad right button is pressed."""
-        return self._pressed[self._btn_map.DR]
-    dr = dpad_right
-
-    @property
-    def shoulder_left(self):
-        """Returns whether the left shoulder button is pressed."""
-        return self._pressed[self._btn_map.SL]
-    sl = shoulder_left
-
-    @property
-    def shoulder_right(self):
-        """Returns whether the right shoulder button is pressed."""
-        return self._pressed[self._btn_map.SR]
-    sr = shoulder_right
-
-    @property
-    def push_left(self):
-        """Returns whether the left stick is pressed in."""
-        return self._pressed[self._btn_map.PL]
-    pl = push_left
-
-    @property
-    def push_right(self):
-        """Returns whether the right stick is pressed in."""
-        return self._pressed[self._btn_map.PR]
-    pr = push_right
-
-    @property
-    def center_left(self):
-        """Returns whether the left center button is pressed."""
-        return self._pressed[self._btn_map.CL]
-    cl = center_left
-
-    @property
-    def center_middle(self):
-        """Returns whether the middle center button is pressed."""
-        return self._pressed[self._btn_map.CM]
-    cm = center_middle
-
-    @property
-    def center_right(self):
-        """Returns whether the right center button is pressed."""
-        return self._pressed[self._btn_map.CR]
-    cr = center_right
-
-    @property
     def left_stick(self):
         """Returns a tuple of the axis values for the left stick."""
         return self._axis[self._axis_map.LX], self._axis[self._axis_map.LY]
-    ls = left_stick
 
     @property
     def left_angle(self):
@@ -345,21 +262,6 @@ class Joystick:
         _, p = pygame.math.Vector2(self.left_stick).as_polar()
         degrees = (360 - p) % 360
         return degrees
-    la = left_angle
-
-    @property
-    def left_x(self):
-        """Returns a single axis value for left-right movement of
-        the left stick."""
-        return self._axis[self._axis_map.LX]
-    lx = left_x
-
-    @property
-    def left_y(self):
-        """Returns a single axis value for up-down movement of
-        the left stick."""
-        return self._axis[self._axis_map.LY]
-    ly = left_y
 
     @property
     def left_trigger(self):
@@ -368,13 +270,11 @@ class Joystick:
         are recalculated from [-1, 1] to [0, 1] to represent them
         being depressed."""
         return (self._axis[self._axis_map.LT] + 1) / 2
-    lt = left_trigger
 
     @property
     def right_stick(self):
         """Returns a tuple of the axis values for the right stick."""
         return self._axis[self._axis_map.RX], self._axis[self._axis_map.RY]
-    rs = right_stick
 
     @property
     def right_angle(self):
@@ -385,21 +285,6 @@ class Joystick:
         _, p = pygame.math.Vector2(self.right_stick).as_polar()
         degrees = (360 - p) % 360
         return degrees
-    ra = right_angle
-
-    @property
-    def right_x(self):
-        """Returns a single axis value for left-right movement of
-        the right stick."""
-        return self._axis[self._axis_map.RX]
-    rx = right_x
-
-    @property
-    def right_y(self):
-        """Returns a single axis value for up-down movement of
-        the right stick."""
-        return self._axis[self._axis_map.RY]
-    ry = right_y
 
     @property
     def right_trigger(self):
@@ -408,7 +293,6 @@ class Joystick:
         are recalculated from [-1, 1] to [0, 1] to represent them
         being depressed."""
         return (self._axis[self._axis_map.RT] + 1) / 2
-    rt = right_trigger
 
 
 class JoystickManager:
@@ -418,7 +302,7 @@ class JoystickManager:
     def __init__(self):
         self._sticks = {}
         self._default = None
-        self._deadzone = 0.05
+        self._deadzone = 0.065
 
     def _press(self, iid, button):
         s = self._sticks[iid]
@@ -445,22 +329,31 @@ class JoystickManager:
         uncentered sticks."""
         s = self._sticks[iid]
         ax = s._axis_map(axis).name
+        changed = True
         if ax == "LT" or ax == "RT":
             if value < -1 + self._deadzone:
+                # If no change was made, no user joy motion event should be
+                # triggered.
+                if s._axis[axis] == -1:
+                    changed = False
                 s._axis[axis] = -1
             elif value > 1 - self._deadzone:
+                if s._axis[axis] == 1:
+                    changed = False
                 s._axis[axis] = 1
             else:
                 s._axis[axis] = value
         elif value > self._deadzone or value < self._deadzone * -1:
             s._axis[axis] = value
         else:
+            if s._axis[axis] == 0:
+                changed = False
             s._axis[axis] = 0
         try:
             identifier = s._axis_map(axis).name
         except ValueError:
             identifier = None
-        return identifier, s._axis[axis]
+        return identifier, s._axis[axis], changed
 
     def _convert_hat(self, iid, hat, value):
         """Takes the values of a joystick HAT event and simulates
