@@ -1,7 +1,11 @@
 import sys
 import unittest
+from unittest.mock import patch
+from tempfile import TemporaryDirectory
 from pathlib import Path
 import os
+import ntpath
+import posixpath
 import warnings
 
 import numpy as np
@@ -9,7 +13,7 @@ import pygame
 import pygame.image
 import pygame.surfarray
 
-from pgzero.screen import Screen
+import pgzero.screen as screen
 from pgzero.loaders import set_root, images
 from pgzero.rect import Rect, ZRect
 
@@ -96,7 +100,7 @@ class ScreenTest(unittest.TestCase):
         pygame.display.quit()
 
     def setUp(self):
-        self.screen = Screen()
+        self.screen = screen.Screen()
         self.screen._set_surface(self.surf)
         self.screen.clear()
 
@@ -237,6 +241,42 @@ class ScreenTest(unittest.TestCase):
             self.screen.bounds(),
             ZRect(0, 0, 200, 200)
         )
+
+    @patch("sys.platform", "win32")
+    @patch("os.path", ntpath)
+    @patch.dict("os.environ", {"USERPROFILE": r"c:\Users\user"})
+    def test_get_screenshot_path_windows(self):
+        r"""Screenshot path on Windows is %USERPROFILE%\Pictures\pgzero."""
+        result_path = screen._get_platform_screenshot_path()
+        self.assertEqual(result_path,
+                         os.path.join(r"c:\Users\user", "Pictures", "pgzero"))
+
+    @patch("sys.platform", "linux")
+    @patch("os.path", posixpath)
+    @patch.dict("os.environ", {"HOME": "/home/user"})
+    def test_get_screenshot_path_linux(self):
+        """Screenshot path on Linux or MacOS is ~/Pictures/pgzero."""
+        result_path = screen._get_platform_screenshot_path()
+        self.assertEqual(result_path,
+                         os.path.join("/home/user", "Pictures", "pgzero"))
+
+    @patch("sys.platform", "NOTHING")
+    def test_get_screenshot_path_other(self):
+        """If OS is not supported, CWD is used for screenshots."""
+        result_path = screen._get_platform_screenshot_path()
+        self.assertEqual(result_path,
+                         os.path.join(os.getcwd(), "pgzero_screenshots"))
+
+    @patch("sys.platform", "NOTHING")
+    def test_take_screenshot(self):
+        """Screenshot files are created and have the proper extension."""
+        with TemporaryDirectory("screenshot_testdir") as td:
+            os.chdir(td)
+            screen._initialize_screenshots(__file__)
+            self.screen.screenshot()
+            self.assertEqual(len(os.listdir("pgzero_screenshots")), 1)
+            ext = os.listdir("pgzero_screenshots")[0].split(".")[-1]
+            self.assertEqual(ext, "png")
 
 
 if __name__ == '__main__':

@@ -55,6 +55,15 @@ draw images to the screen ("blit" them).
         parameter. If ``image`` is a ``str`` then the named image will be
         loaded from the ``images/`` directory.
 
+    .. method:: screenshot()
+
+        Takes a screenshot of the entire game window and saves it to ``Pictures`` in your home directory.
+
+        Returns the path of the file that was written, as a string.
+
+        You can press F12 to take a screenshot at any time, without
+        needing to call this function.
+
     .. method:: draw.line(start, end, (r, g, b), width=1)
 
         Draw a line from start to end with a certain line width.
