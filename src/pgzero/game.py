@@ -301,9 +301,10 @@ class PGZeroGame:
                 return user_joy_up(event)
 
         def joy_move(event):
-            axis, v = self.joysticks._set_axis(event.instance_id, event.axis,
-                                               event.value)
-            if user_joy_move:
+            axis, value, changed = self.joysticks._set_axis(event.instance_id,
+                                                            event.axis,
+                                                            event.value)
+            if user_joy_move and changed:
                 if axis:
                     # Translating the axis int to the generic layout as done
                     # above for button events.
@@ -312,7 +313,7 @@ class PGZeroGame:
                     event.axis = constants.axis.UNKNOWN
                 # Since _set_axis enforces the axis deadzone, event.value is
                 # updated to reflect the now current value of the axis.
-                event.value = v
+                event.value = value
                 return user_joy_move(event)
 
         def joy_hat(event):
