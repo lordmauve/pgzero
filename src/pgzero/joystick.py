@@ -1,5 +1,4 @@
 import pygame
-from enum import IntEnum
 from dataclasses import dataclass
 import platform
 from . import clock
@@ -47,13 +46,16 @@ SDL_ASSOCIATIONS = {"a": "face_down", "b": "face_right", "x": "face_left",
                     "righttrigger": "right_trigger", "leftx": "left_x",
                     "lefty": "left_y", "rightx": "right_x", "righty": "right_y"}
 
+
 BTN_NAMES = ("face_up", "face_down", "face_left", "face_right", "dpad_up",
              "dpad_down", "dpad_left", "dpad_right", "shoulder_left",
              "shoulder_right", "push_left", "push_right", "center_left",
              "center_middle", "center_right")
 
+
 AXIS_NAMES = {"left_x", "left_y", "left_trigger", "right_x", "right_y",
               "right_trigger"}
+
 
 def _get_map_dict(guid):
     from importlib.resources import files
@@ -96,6 +98,7 @@ def _get_map_dict(guid):
 
     return map_dict
 
+
 def _get_mappings_from_guid(guid):
     # Remove the CRC component from the GUID
     generic_guid = guid[:4] + "0000" + guid[8:]
@@ -130,7 +133,6 @@ def _get_mappings_from_guid(guid):
 
 class Joystick:
     """PGZero wrapper class for joystick use."""
-
     def __init__(self, stick):
         self._stick = stick
         guid = stick.get_guid()
@@ -139,7 +141,7 @@ class Joystick:
         self._initialize_state_tracking()
 
         self._initialize_debounce_gates()
-    
+
     # Since writing out each button and axis creates a lot of redundant code,
     # all logic to simply check if a button is pressed or where an axis is
     # held is handled here dynamically.
@@ -153,6 +155,8 @@ class Joystick:
                                  .format(name))
 
     def _initialize_state_tracking(self):
+        """Creates the dicts used to record the controller state and look up
+        the association of a button or axis int with the semantic part."""
         self._pressed = {getattr(self._btn_map, b): False for b in BTN_NAMES}
         self._axis = {getattr(self._axis_map, a): 0 for a in AXIS_NAMES}
         # Since triggers don't start centered but rather unpressed,
@@ -166,6 +170,8 @@ class Joystick:
         self._axis_lookup = {getattr(self._axis_map, a): a for a in AXIS_NAMES}
 
     def _initialize_debounce_gates(self):
+        """Creates the four variables that save whether a HAT button is in
+        debounce lockdown or not."""
         # These variables are used to give a lockout time for physical
         # HAT button simulation to prevent ghost inputs.
         self._DU_open = True
@@ -175,15 +181,19 @@ class Joystick:
 
     # Used with clock.schedule to prevent ghost button presses via timeouts.
     def _unlock_DU(self):
+        """Unlocks the debounce gate for 'dpad_up'."""
         self._DU_open = True
 
     def _unlock_DD(self):
+        """Unlocks the debounce gate for 'dpad_down'."""
         self._DD_open = True
 
     def _unlock_DL(self):
+        """Unlocks the debounce gate for 'dpad_left'."""
         self._DL_open = True
 
     def _unlock_DR(self):
+        """Unlocks the debounce gate for 'dpad_right'."""
         self._DR_open = True
 
     @property
@@ -249,10 +259,16 @@ class Joystick:
         being depressed."""
         return (self._axis[self._axis_map.right_trigger] + 1) / 2
 
+    def __repr__(self):
+        return ("<PGZero Joystick (Name: " + self.name + ", Instance ID: " +
+                str(self.instance_id) + ")>")
+
+    def __str__(self):
+        return self.name
+
 
 class GenericJoystick(Joystick):
     """PGZero joystick wrapper with a predefined generic mapping."""
-
     def __init__(self):
         self._btn_map = ButtonMap(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13,
                                   15, 14)
@@ -284,13 +300,44 @@ class GenericJoystick(Joystick):
 
 class JoystickManager:
     """Interface to pygame joystick support. Holds all active joysticks
-    and modifies their states based on pygame events."""
+    and modifies their states based on pygame events. It also functions
+    like a dictionary to allow easy access to individual joysticks."""
 
     def __init__(self):
         self._sticks = {}
         self._union_stick = GenericJoystick()
         self._default = None
+        self._last_used_stick = None
         self._deadzone = 0.065
+
+    def __len__(self):
+        return len(self._sticks)
+
+    def __getitem__(self, instance_id):
+        """Returns a Joystick object by its instance_id."""
+        if instance_id in self._sticks:
+            return self._sticks[instance_id]
+        else:
+            raise ValueError(f"The given instance id '{instance_id}' is not "
+                             "associated with a connected controller. Check "
+                             "joysticks.ids to get a tuple of all valid IDs.")
+
+    def __setitem__(self, key, value):
+        self._raise_access_error()
+
+    def __delitem__(self, key, value):
+        self._raise_access_error()
+
+    def __iter__(self):
+        return iter(self._sticks.keys())
+
+    def __contains__(self, instance_id):
+        return instance_id in self._sticks
+
+    def _raise_access_error(self):
+        raise TypeError("'joysticks' automatically keeps track of all "
+                        "connected devices. Changing its contents can not be"
+                        " done manually.")
 
     def _press(self, iid, button):
         s = self._sticks[iid]
@@ -309,6 +356,7 @@ class JoystickManager:
             us._pressed[getattr(us._btn_map, identifier)] = True
         except ValueError:
             identifier = None
+        self._last_used_stick = iid
         return identifier
 
     def _release(self, iid, button):
@@ -323,6 +371,7 @@ class JoystickManager:
             us._pressed[getattr(us._btn_map, identifier)] = False
         except ValueError:
             identifier = None
+        self._last_used_stick = iid
         return identifier
 
     def _set_axis(self, iid, axis, value):
@@ -361,6 +410,7 @@ class JoystickManager:
             us._axis[getattr(us._axis_map, identifier)] = s._axis[axis]
         except ValueError:
             identifier = None
+        self._last_used_stick = iid
         return identifier, s._axis[axis], changed
 
     def _convert_hat(self, iid, hat, value):
@@ -458,6 +508,39 @@ class JoystickManager:
             self._default = None
         elif instance_id == self._default:
             self._default = tuple(self._sticks.keys())[0]
+        if instance_id == self._last_used_stick:
+            self._last_used_stick = None
+
+    def keys(self):
+        return self._sticks.keys()
+
+    def values(self):
+        return self._sticks.values()
+
+    def items(self):
+        return self._sticks.items()
+
+    def get(self, instance_id):
+        return self._sticks.get(instance_id)
+
+    def clear(self):
+        self._raise_access_error()
+
+    def setdefault(self):
+        self._raise_access_error()
+
+    def pop(self, instance_id):
+        self._raise_access_error()
+
+    def popitem(self, instance_id):
+        self._raise_access_error()
+
+    def copy(self):
+        raise TypeError("'joysticks' functions as a single manager of devices"
+                        ". Copying its contents is not supported.")
+
+    def update(self):
+        self._raise_access_error()
 
     @property
     def num(self):
@@ -469,6 +552,11 @@ class JoystickManager:
         """Returns the currently available ids for joystick access."""
         return tuple(self._sticks.keys())
 
+    @property
+    def last_used_stick(self):
+        """Returns the Joystick that most recently recorded an input."""
+        return self._sticks[self._last_used_stick]
+
     # @property
     def get_default(self):
         """Returns a reference to the currently earliest connected
@@ -477,6 +565,12 @@ class JoystickManager:
             return self._sticks[self._default]
         else:
             return None
+
+    def __repr__(self):
+        return f"<PGZero JoystickManager (Joysticks: {repr(self._sticks)})"
+
+    def __str__(self):
+        return str(self._sticks)
 
 
 joysticks_instance = JoystickManager()
