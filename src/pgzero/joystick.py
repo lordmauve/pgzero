@@ -499,6 +499,7 @@ class JoystickManager:
         if len(self._sticks) == 0:
             self._default = joy.instance_id
         self._sticks[joy.instance_id] = joy
+        return joy.instance_id
 
     def _remove(self, instance_id):
         """Removes a disconnected joystick."""

@@ -15,7 +15,7 @@ class mouse(IntEnum):
     WHEEL_DOWN = 5
 
 
-class joybtn(IntEnum):
+class joybutton(IntEnum):
     NUM = 16
     FACE_UP = 0
     FACE_DOWN = 1
@@ -35,7 +35,7 @@ class joybtn(IntEnum):
     UNKNOWN = 15
 
 
-class axis(IntEnum):
+class joyaxis(IntEnum):
     NUM = 7
     LEFT_X = 0
     LEFT_Y = 1

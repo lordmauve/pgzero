@@ -142,8 +142,8 @@ class PGZeroGame:
         'buttons': map_buttons,
         'button': constants.mouse,
         'key': constants.keys,
-        'joybtn': constants.joybtn,
-        'axis': constants.axis
+        'joybtn': constants.joybutton,
+        'axis': constants.joyaxis
     }
 
     def load_handlers(self):
@@ -284,20 +284,20 @@ class PGZeroGame:
                 # Translate the button int value for the specific controller
                 # used to the generic layout exposed to the user.
                 if btn:
-                    event.joybtn = constants.joybtn[btn.upper()]
+                    event.joybtn = constants.joybutton[btn.upper()]
                 # If the pressed button is not recognized by the mapping,
                 # the button given to the user function is marked as such.
                 else:
-                    event.joybtn = constants.joybtn.UNKNOWN
+                    event.joybtn = constants.joybutton.UNKNOWN
                 return user_joy_down(event)
 
         def joy_up(event):
             btn = self.joysticks._release(event.instance_id, event.button)
             if user_joy_up:
                 if btn:
-                    event.joybtn = constants.joybtn[btn]
+                    event.joybtn = constants.joybutton[btn.upper()]
                 else:
-                    event.joybtn = constants.joybtn.UNKNOWN
+                    event.joybtn = constants.joybutton.UNKNOWN
                 return user_joy_up(event)
 
         def joy_move(event):
@@ -308,9 +308,9 @@ class PGZeroGame:
                 if axis:
                     # Translating the axis int to the generic layout as done
                     # above for button events.
-                    event.axis = constants.axis[axis]
+                    event.axis = constants.joyaxis[axis]
                 else:
-                    event.axis = constants.axis.UNKNOWN
+                    event.axis = constants.joyaxis.UNKNOWN
                 # Since _set_axis enforces the axis deadzone, event.value is
                 # updated to reflect the now current value of the axis.
                 event.value = value
@@ -330,8 +330,9 @@ class PGZeroGame:
                 pygame.event.post(e)
 
         def joy_added(event):
-            self.joysticks._add(event.device_index)
+            instance_id = self.joysticks._add(event.device_index)
             if user_joy_added:
+                event.instance_id = instance_id
                 return user_joy_added(event)
 
         def joy_removed(event):
