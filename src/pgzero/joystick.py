@@ -81,12 +81,12 @@ def _get_map_dict(guid):
             # If no mapping is available, a default one for an Xbox 360 is
             # used in hopes it somewhat matches since the 360 layout seems to
             # be the most common on older third party controllers for PC.
-            raw_map = "030000005e0400008e02000001000000,Microsoft Xbox 360,"
-                      "a:b0,b:b1,back:b6,dpdown:h0.1,dpleft:h0.2,dpright:h0.8,"
-                      "dpup:h0.4,leftshoulder:b4,leftstick:b9,lefttrigger:a2,"
-                      "leftx:a0,lefty:a1,rightshoulder:b5,rightstick:b10,"
-                      "righttrigger:a5,rightx:a3,righty:a4,start:b7,x:b2,y:b3,"
-                      "platform:Linux,"
+            raw_map = ("030000005e0400008e02000001000000,Microsoft Xbox 360,"
+                       "a:b0,b:b1,back:b6,dpdown:h0.1,dpleft:h0.2,"
+                       "dpright:h0.8,dpup:h0.4,leftshoulder:b4,leftstick:b9,"
+                       "lefttrigger:a2,leftx:a0,lefty:a1,rightshoulder:b5,"
+                       "rightstick:b10,righttrigger:a5,rightx:a3,righty:a4,"
+                       "start:b7,x:b2,y:b3,platform:Linux,")
 
     parts = raw_map.split(",")[2:-2]
     map_dict = {}
@@ -136,6 +136,23 @@ class Joystick:
         guid = stick.get_guid()
         self._btn_map, self._axis_map = _get_mappings_from_guid(guid)
 
+        self._initialize_state_tracking()
+
+        self._initialize_debounce_gates()
+    
+    # Since writing out each button and axis creates a lot of redundant code,
+    # all logic to simply check if a button is pressed or where an axis is
+    # held is handled here dynamically.
+    def __getattr__(self, name):
+        if name in BTN_NAMES:
+            return self._pressed[getattr(self._btn_map, name)]
+        elif name in AXIS_NAMES:
+            return self._axis[getattr(self._axis_map, name)]
+        else:
+            raise AttributeError("'Joystick' object has no attribute '{}'"
+                                 .format(name))
+
+    def _initialize_state_tracking(self):
         self._pressed = {getattr(self._btn_map, b): False for b in BTN_NAMES}
         self._axis = {getattr(self._axis_map, a): 0 for a in AXIS_NAMES}
         # Since triggers don't start centered but rather unpressed,
@@ -148,24 +165,13 @@ class Joystick:
         self._btn_lookup = {getattr(self._btn_map, b): b for b in BTN_NAMES}
         self._axis_lookup = {getattr(self._axis_map, a): a for a in AXIS_NAMES}
 
+    def _initialize_debounce_gates(self):
         # These variables are used to give a lockout time for physical
         # HAT button simulation to prevent ghost inputs.
         self._DU_open = True
         self._DD_open = True
         self._DL_open = True
         self._DR_open = True
-
-    # Since writing out each button and axis creates a lot of redundant code,
-    # all logic to simply check if a button is pressed or where an axis is
-    # held is handled here dynamically.
-    def __getattr__(self, name):
-        if name in BTN_NAMES:
-            return self._pressed[getattr(self._btn_map, name)]
-        elif name in AXIS_NAMES:
-            return self._axis[getattr(self._axis_map, name)]
-        else:
-            raise AttributeError("'Joystick' object has no attribute '{}'"
-                                 .format(name))
 
     # Used with clock.schedule to prevent ghost button presses via timeouts.
     def _unlock_DU(self):
@@ -244,17 +250,51 @@ class Joystick:
         return (self._axis[self._axis_map.right_trigger] + 1) / 2
 
 
+class GenericJoystick(Joystick):
+    """PGZero joystick wrapper with a predefined generic mapping."""
+
+    def __init__(self):
+        self._btn_map = ButtonMap(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13,
+                                  15, 14)
+        self._axis_map = AxisMap(0, 1, 2, 3, 4, 5)
+
+        self._initialize_state_tracking()
+
+        # When this class is used for the all-in-one controller of the
+        # JoystickManager, the gates aren't actually used. They are still
+        # initialized for full compatibility however, in case other uses for a
+        # generic Joystick come up.
+        self._initialize_debounce_gates()
+
+    @property
+    def name(self):
+        """Returns the human readable name of the controller."""
+        return "GENERIC PGZERO CONTROLLER"
+
+    @property
+    def guid(self):
+        """Returns the GUID of the controller."""
+        return "00000000000000000000000000000000"
+
+    @property
+    def instance_id(self):
+        """Returns the instance id of the controller."""
+        return 999
+
+
 class JoystickManager:
     """Interface to pygame joystick support. Holds all active joysticks
     and modifies their states based on pygame events."""
 
     def __init__(self):
         self._sticks = {}
+        self._union_stick = GenericJoystick()
         self._default = None
         self._deadzone = 0.065
 
     def _press(self, iid, button):
         s = self._sticks[iid]
+        us = self._union_stick
         # A press of an alternate middle button gets converted to the standard
         # middle button.
         if button == s._btn_map.center_middle_alt:
@@ -263,17 +303,24 @@ class JoystickManager:
         # If a button is not recognized, None is returned.
         try:
             identifier = s._btn_lookup[button]
+
+            # We also press the corresponding button on the all-in-one
+            # controller.
+            us._pressed[getattr(us._btn_map, identifier)] = True
         except ValueError:
             identifier = None
         return identifier
 
     def _release(self, iid, button):
         s = self._sticks[iid]
+        us = self._union_stick
         if button == s._btn_map.center_middle_alt:
             button = s._btn_map.center_middle
         s._pressed[button] = False
         try:
             identifier = s._btn_lookup[button]
+
+            us._pressed[getattr(us._btn_map, identifier)] = False
         except ValueError:
             identifier = None
         return identifier
@@ -283,6 +330,7 @@ class JoystickManager:
         deadzone to prevent jittery results from slightly drifting or
         uncentered sticks."""
         s = self._sticks[iid]
+        us = self._union_stick
         ax = s._axis_lookup[axis]
         changed = True
         if ax == "left_trigger" or ax == "right_trigger":
@@ -306,6 +354,11 @@ class JoystickManager:
             s._axis[axis] = 0
         try:
             identifier = s._axis_lookup[axis]
+
+            # Since deadzones are in play, we make sure the all-in-one stick
+            # has the right value by simply aligning it with the change made
+            # to the individual joystick.
+            us._axis[getattr(us._axis_map, identifier)] = s._axis[axis]
         except ValueError:
             identifier = None
         return identifier, s._axis[axis], changed
@@ -382,6 +435,11 @@ class JoystickManager:
                 s._DU_open = False
                 clock.schedule(s._unlock_DU, 0.05)
 
+        # The all-in-one joystick doesn't have its debounce gates triggered
+        # since jittery input from one controller is avoided by its own gating
+        # whereas jitters can't be prevented if multiple gamepads have their
+        # hats pressed in a very close timespan.
+
         return pressed, released
 
     def _add(self, device_index):
@@ -422,4 +480,4 @@ class JoystickManager:
 
 
 joysticks_instance = JoystickManager()
-joy = joysticks_instance.get_default
+joy = joysticks_instance._union_stick
