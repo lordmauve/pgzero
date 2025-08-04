@@ -569,6 +569,10 @@ that last recorded an input. If you want your players to be able to pick
 their controllers, simply tell them to make any input and then assign them
 ``joysticks.last_used`` one after the other.
 
+**Important:** Since ``joysticks`` automatically updates the connected
+controllers, we can't change the contents of the "dictionary" it represents.
+Trying to do something like ``joysticks[5] = ...`` will result in an error.
+
 
 .. _clock:
 
