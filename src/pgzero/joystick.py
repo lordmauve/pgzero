@@ -307,7 +307,7 @@ class JoystickManager:
         self._sticks = {}
         self._union_stick = GenericJoystick()
         self._default = None
-        self._last_used_stick = None
+        self._last_used = None
         self._deadzone = 0.065
 
     def __len__(self):
@@ -316,7 +316,7 @@ class JoystickManager:
     def __getitem__(self, instance_id):
         """Returns a Joystick object by its instance_id."""
         if instance_id in self._sticks:
-            return self._sticks[instance_id]
+            return self._sticks.get(instance_id)
         else:
             raise ValueError(f"The given instance id '{instance_id}' is not "
                              "associated with a connected controller. Check "
@@ -356,7 +356,7 @@ class JoystickManager:
             us._pressed[getattr(us._btn_map, identifier)] = True
         except ValueError:
             identifier = None
-        self._last_used_stick = iid
+        self._last_used = iid
         return identifier
 
     def _release(self, iid, button):
@@ -371,7 +371,7 @@ class JoystickManager:
             us._pressed[getattr(us._btn_map, identifier)] = False
         except ValueError:
             identifier = None
-        self._last_used_stick = iid
+        self._last_used = iid
         return identifier
 
     def _set_axis(self, iid, axis, value):
@@ -410,7 +410,7 @@ class JoystickManager:
             us._axis[getattr(us._axis_map, identifier)] = s._axis[axis]
         except ValueError:
             identifier = None
-        self._last_used_stick = iid
+        self._last_used = iid
         return identifier, s._axis[axis], changed
 
     def _convert_hat(self, iid, hat, value):
@@ -509,8 +509,8 @@ class JoystickManager:
             self._default = None
         elif instance_id == self._default:
             self._default = tuple(self._sticks.keys())[0]
-        if instance_id == self._last_used_stick:
-            self._last_used_stick = None
+        if instance_id == self._last_used:
+            self._last_used = None
 
     def keys(self):
         return self._sticks.keys()
@@ -554,9 +554,9 @@ class JoystickManager:
         return tuple(self._sticks.keys())
 
     @property
-    def last_used_stick(self):
+    def last_used(self):
         """Returns the Joystick that most recently recorded an input."""
-        return self._sticks[self._last_used_stick]
+        return self._sticks[self._last_used]
 
     # @property
     def get_default(self):
