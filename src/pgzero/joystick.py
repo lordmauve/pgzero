@@ -314,13 +314,9 @@ class JoystickManager:
         return len(self._sticks)
 
     def __getitem__(self, instance_id):
-        """Returns a Joystick object by its instance_id."""
-        if instance_id in self._sticks:
-            return self._sticks.get(instance_id)
-        else:
-            raise ValueError(f"The given instance id '{instance_id}' is not "
-                             "associated with a connected controller. Check "
-                             "joysticks.ids to get a tuple of all valid IDs.")
+        """Returns a Joystick object by its instance_id. Returns None if the
+        ID is not valid."""
+        return self._sticks.get(instance_id)
 
     def __setitem__(self, key, value):
         self._raise_access_error()
