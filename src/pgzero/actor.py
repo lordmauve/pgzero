@@ -5,6 +5,7 @@ from . import game
 from . import loaders
 from . import rect
 from . import spellcheck
+from .actor_animation import ActorAnimationSystem, ActorAnimation
 
 
 ANCHORS = {
@@ -108,11 +109,22 @@ class Actor:
     _anchor = _anchor_value = (0, 0)
     _angle = 0.0
     _opacity = 1.0
+    _anim = ActorAnimationSystem() # Initialize any actor with a new animation system
+    _a_image = None # Image variable to hold the currently displayed animation frame.
+    # This image is separate from the static image so that falling back to it is 
+    # possible if something goes wrong with the animations.
 
     def _build_transformed_surf(self):
         cache_len = len(self._surface_cache)
         if cache_len == 0:
-            last = self._orig_surf
+            # If there is no cache and the actor is in an animation,
+            # the last drawn surface is the animation image.
+            if self._anim._current_animation:
+                last = self._a_image
+            # Otherwise, it's the static image.
+            else:
+                last = self._orig_surf
+        # If there is a cache, it reflects the correct image either way.
         else:
             last = self._surface_cache[-1]
         for f in self.function_order[cache_len:]:
@@ -230,10 +242,35 @@ class Actor:
         self._calc_anchor()
 
     def _calc_anchor(self):
+        # Values are "left", "center", etc.
         ax, ay = self._anchor_value
-        ow, oh = self._orig_surf.get_size()
+        # If an animation is ongoing, the current
+        # frame is used.
+        if self._anim._current_animation:
+            ow, oh = self._a_image.get_size()
+        # Otherwise, the static image is used.
+        else:
+            ow, oh = self._orig_surf.get_size()
+        #ow, oh = self._orig_surf.get_size()
+        # calculate_anchor() returns the x and y coords
+        # of the anchor in relation to the topleft of
+        # the image. (e.g. if img. is 200x150 and anchor
+        # is centered, ax and ay would be 100 and 75
+        # after the operation)
         ax = calculate_anchor(ax, 'x', ow)
         ay = calculate_anchor(ay, 'y', oh)
+        # If an animation is playing, change the anchor coordinates
+        # based on animation frame offsets.
+        if self._anim._current_animation:
+            # Add the frame offsets to the relative pos of
+            # anchor in relation to topleft.
+            ax -= self._anim._current_animation.offset_x
+            ay -= self._anim._current_animation.offset_y
+        # The untransformed anchor assumes the image isn't 
+        # rotated. If it is, the anchor position has to be
+        # recalculated because the rotated image has a different
+        # size and topleft, so the position of the anchor
+        # in relation to topleft must also change.
         self._untransformed_anchor = ax, ay
         if self._angle == 0.0:
             self._anchor = self._untransformed_anchor
@@ -247,7 +284,10 @@ class Actor:
     @angle.setter
     def angle(self, angle):
         self._angle = angle
-        w, h = self._orig_surf.get_size()
+        if self._anim._current_animation:
+            w, h = self._a_image.get_size()
+        else:
+            w, h = self._orig_surf.get_size()
 
         ra = radians(angle)
         sin_a = sin(ra)
@@ -328,14 +368,59 @@ class Actor:
         self._orig_surf = loaders.images.load(image)
         self._surface_cache.clear()  # Clear out old image's cache.
         self._update_pos()
+        # Stop any running animation to show the static image instead.
+        self._anim.stop()
+        self._a_image = None
+
+    # The instance of animation system should be able to be returned
+    # but not be able to be set directly by the user.
+    @property
+    def anim(self):
+        return self._anim
 
     def _update_pos(self):
         p = self.pos
+        # TODO: Decide whether the actors base width should be
+        #       changed with each animation frame or not.
+        #if self._anim._current_animation:
+        #    self.width, self.height = self._a_image.get_size()
+        #else: 
+        #    self.width, self.height = self._orig_surf.get_size()
         self.width, self.height = self._orig_surf.get_size()
         self._calc_anchor()
         self.pos = p
 
     def draw(self):
+        # If an animation is running and it has advanced a frame, the 
+        # actors new animation image needs to be fetched.
+        # TODO: Solve this differently? An animation could directly 
+        # change actor._a_image when it runs _next_frame, would that
+        # be better?
+        if self._anim._current_animation and self._anim._current_animation._new_frame:
+            # Index of the right frame.
+            i = self._anim._current_animation._frame_index
+            # Setting the actors animation image to the right frame.
+            self._a_image = self._anim._current_animation.frames[i]
+            # Updating the animation status that the frame has been udpated.
+            self._anim._current_animation.new_frame = False
+            # Clear the surface cache for the new image.
+            self._surface_cache.clear()
+            """
+            DEBUG PRINTS
+            print("\nPos:", self.pos)
+            print("Anchor:", self._anchor)
+            print("Topleft:", self.topleft)
+            print("Added:", self._anchor[0] + self.topleft[0], self._anchor[1] + self.topleft[1])
+            print("Width:", self.width, "Height:", self.height)
+            """
+            # Update actor position to incorporate frame offsets.
+            self._update_pos()
+        # Otherwise, if no animation is running but there still is an 
+        # animation image, it is deleted and the surface cache cleared
+        # so that the static image is displayed again.
+        elif not self._anim._current_animation and self._a_image and not self._anim.paused:
+            self._a_image = None
+            self._surface_cache.clear()
         s = self._build_transformed_surf()
         game.screen.blit(s, self.topleft)
 
@@ -363,3 +448,4 @@ class Actor:
 
     def unload_image(self):
         loaders.images.unload(self._image_name)
+
