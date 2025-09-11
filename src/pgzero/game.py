@@ -63,6 +63,7 @@ class PGZeroGame:
         self.icon = None
         self.fps = fps
         self.keyboard = pgzero.keyboard.keyboard
+        self.joysticks = pgzero.joystick.joysticks_instance
         self.handlers = {}
 
     def reinit_screen(self) -> bool:
@@ -126,6 +127,11 @@ class PGZeroGame:
         pygame.MOUSEMOTION: 'on_mouse_move',
         pygame.KEYDOWN: 'on_key_down',
         pygame.KEYUP: 'on_key_up',
+        pygame.JOYAXISMOTION: "on_joy_move",
+        pygame.JOYBUTTONDOWN: "on_joy_down",
+        pygame.JOYBUTTONUP: "on_joy_up",
+        pygame.JOYDEVICEADDED: "on_joy_added",
+        pygame.JOYDEVICEREMOVED: "on_joy_removed",
         constants.MUSIC_END: 'on_music_end'
     }
 
@@ -135,7 +141,9 @@ class PGZeroGame:
     EVENT_PARAM_MAPPERS = {
         'buttons': map_buttons,
         'button': constants.mouse,
-        'key': constants.keys
+        'key': constants.keys,
+        'joybtn': constants.joybutton,
+        'axis': constants.joyaxis
     }
 
     def load_handlers(self):
@@ -251,6 +259,11 @@ class PGZeroGame:
 
         user_key_down = self.handlers.get(pygame.KEYDOWN)
         user_key_up = self.handlers.get(pygame.KEYUP)
+        user_joy_down = self.handlers.get(pygame.JOYBUTTONDOWN)
+        user_joy_up = self.handlers.get(pygame.JOYBUTTONUP)
+        user_joy_move = self.handlers.get(pygame.JOYAXISMOTION)
+        user_joy_added = self.handlers.get(pygame.JOYDEVICEADDED)
+        user_joy_removed = self.handlers.get(pygame.JOYDEVICEREMOVED)
 
         def key_down(event):
             if event.key == pygame.K_q and \
@@ -265,8 +278,76 @@ class PGZeroGame:
             if user_key_up:
                 return user_key_up(event)
 
+        def joy_down(event):
+            btn = self.joysticks._press(event.instance_id, event.button)
+            if user_joy_down:
+                # Translate the button int value for the specific controller
+                # used to the generic layout exposed to the user.
+                if btn:
+                    event.joybtn = constants.joybutton[btn.upper()]
+                # If the pressed button is not recognized by the mapping,
+                # the button given to the user function is marked as such.
+                else:
+                    event.joybtn = constants.joybutton.UNKNOWN
+                return user_joy_down(event)
+
+        def joy_up(event):
+            btn = self.joysticks._release(event.instance_id, event.button)
+            if user_joy_up:
+                if btn:
+                    event.joybtn = constants.joybutton[btn.upper()]
+                else:
+                    event.joybtn = constants.joybutton.UNKNOWN
+                return user_joy_up(event)
+
+        def joy_move(event):
+            axis, value, changed = self.joysticks._set_axis(event.instance_id,
+                                                            event.axis,
+                                                            event.value)
+            if user_joy_move and changed:
+                if axis:
+                    # Translating the axis int to the generic layout as done
+                    # above for button events.
+                    event.axis = constants.joyaxis[axis]
+                else:
+                    event.axis = constants.joyaxis.UNKNOWN
+                # Since _set_axis enforces the axis deadzone, event.value is
+                # updated to reflect the now current value of the axis.
+                event.value = value
+                return user_joy_move(event)
+
+        def joy_hat(event):
+            pressed, released = self.joysticks._convert_hat(event.instance_id,
+                                                            event.hat,
+                                                            event.value)
+            for p in pressed:
+                e = pygame.event.Event(pygame.JOYBUTTONDOWN, button=p,
+                                       instance_id=event.instance_id)
+                pygame.event.post(e)
+            for r in released:
+                e = pygame.event.Event(pygame.JOYBUTTONUP, button=r,
+                                       instance_id=event.instance_id)
+                pygame.event.post(e)
+
+        def joy_added(event):
+            instance_id = self.joysticks._add(event.device_index)
+            if user_joy_added:
+                event.instance_id = instance_id
+                return user_joy_added(event)
+
+        def joy_removed(event):
+            self.joysticks._remove(event.instance_id)
+            if user_joy_removed:
+                return user_joy_removed(event)
+
         self.handlers[pygame.KEYDOWN] = key_down
         self.handlers[pygame.KEYUP] = key_up
+        self.handlers[pygame.JOYBUTTONDOWN] = joy_down
+        self.handlers[pygame.JOYBUTTONUP] = joy_up
+        self.handlers[pygame.JOYAXISMOTION] = joy_move
+        self.handlers[pygame.JOYHATMOTION] = joy_hat
+        self.handlers[pygame.JOYDEVICEADDED] = joy_added
+        self.handlers[pygame.JOYDEVICEREMOVED] = joy_removed
 
     def handle_events(self, dt, update) -> bool:
         """Handle all events for the current frame.
@@ -300,6 +381,12 @@ class PGZeroGame:
         draw = self.get_draw_func()
         self.load_handlers()
         self.inject_global_handlers()
+
+        # We initialize all connected joysticks before starting
+        # the game loop.
+        joystick_count = pygame.joystick.get_count()
+        for did in range(joystick_count):
+            self.joysticks._add(did)
 
         logic_timer = Timer('logic', print=self.fps)
         draw_timer = Timer('draw', print=self.fps)
