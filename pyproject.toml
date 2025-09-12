@@ -10,6 +10,16 @@ dependencies = [
 ]
 dynamic = ["version"]
 
+
+[dependency-groups]
+dev = [
+    "tox",
+    "pytest",
+    "pytest-cov",
+    "flake8",
+    "pre-commit",
+]
+
 [project.urls]
 Documentation = "https://pygame-zero.readthedocs.io/"
 Source = "https://github.com/lordmauve/pgzero"
