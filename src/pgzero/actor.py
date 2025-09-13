@@ -433,9 +433,6 @@ class Actor:
         time1 = p - q
         time2 = p + q
 
-        #if isinstance(time1, complex) or isinstance(time2, complex):
-         #   return None # If there is no valid intercept solution, return None.
-
         # Otherwise, choose the correct intercept option.
         if time1 > time2 and time2 > 0:
             intercept_time = time2
