@@ -134,6 +134,8 @@ class Actor:
 
         self.image = image
         self._init_position(pos, anchor, **kwargs)
+        self._vx = 0
+        self._vy = 0
 
     def __getattr__(self, attr):
         if attr in self.__class__.DELEGATED_ATTRIBUTES:
@@ -322,6 +324,43 @@ class Actor:
         self.top = py - self._anchor[1]
 
     @property
+    def vx(self):
+        return self._vx
+
+    @vx.setter
+    def vx(self, value):
+        if isinstance(value, (int, float)):
+            self._vx = value
+        else:
+            raise TypeError("Velocity components must be integers or floats,"
+                            " not {type(value)}.")
+
+    @property
+    def vy(self):
+        return self._vy
+
+    @vy.setter
+    def vy(self, value):
+        if isinstance(value, (int, float)):
+            self._vy = value
+        else:
+            raise TypeError("Velocity components must be integers or floats,"
+                            " not {type(value)}.")
+
+    @property
+    def vel(self):
+        return (self._vx, self._vy)
+
+    @vel.setter
+    def vel(self, value):
+        if isinstance(value, tuple) and len(value) == 2:
+            self._vx = value[0]
+            self._vy = value[1]
+        else:
+            raise TypeError(f"Velocity must be set to a tuple of two numbers,"
+                            " not {value}.")
+
+    @property
     def image(self):
         return self._image_name
 
@@ -364,16 +403,27 @@ class Actor:
         dy = ty - myy
         return sqrt(dx * dx + dy * dy)
 
-    def intercept(self, target, target_move_vector, speed):
+    def move_by_vel(self, scale=1.0):
+        """Moves the position of the actor by its velocity. scale can be set
+        to slow down or quicken the movement, for example if the game's
+        timescale is not 1."""
+        if not isinstance(scale, (int, float)):
+            raise TypeError(f"The velocity scaling must be of type integer or"
+                             " float, not {type(scale)}.")
+        self.x += self._vx * scale
+        self.y += self._vy * scale
+
+    def intercept_vector(self, target, speed, target_move_vector=(0, 0)):
         """Returns a vector with the given magnitude (movement speed) that will
         intercept the target actor or point if it keeps moving along the same 
         direction."""
         self_pos = pygame.math.Vector2(self.pos)
         if isinstance(target, Actor): # If target is an actor, use its pos.
             target_pos = pygame.math.Vector2(target.pos)
+            target_vel = pygame.math.Vector2(target.vel)
         else: # If it is a tuple, use it directly.
             target_pos = pygame.math.Vector2(target)
-        target_vel = pygame.math.Vector2(target_move_vector)
+            target_vel = pygame.math.Vector2(target_move_vector)
 
         totarget_vec = target_pos - self_pos
 
