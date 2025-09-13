@@ -3,6 +3,7 @@ import operator
 import time
 import types
 from time import perf_counter, sleep
+from traceback import print_exc
 
 import pygame
 import pgzero.clock
@@ -256,6 +257,14 @@ class PGZeroGame:
             if event.key == pygame.K_q and \
                     event.mod & (pygame.KMOD_CTRL | pygame.KMOD_META):
                 sys.exit(0)
+            # Default key for screenshots is F12.
+            if event.key == pygame.K_F12:
+                try:
+                    path = pgzero.screen.screen_instance.screenshot()
+                    print(f"Saved screenshot to {path}")
+                except Exception:
+                    print("ERROR while trying to take a screenshot with F12.")
+                    print_exc()
             self.keyboard._press(event.key)
             if user_key_down:
                 return user_key_down(event)
