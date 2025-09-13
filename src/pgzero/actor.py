@@ -333,7 +333,7 @@ class Actor:
             self._vx = value
         else:
             raise TypeError("Velocity components must be integers or floats,"
-                            " not {type(value)}.")
+                            " not {}.".format(type(value)))
 
     @property
     def vy(self):
@@ -345,7 +345,7 @@ class Actor:
             self._vy = value
         else:
             raise TypeError("Velocity components must be integers or floats,"
-                            " not {type(value)}.")
+                            " not {}.".format(type(value)))
 
     @property
     def vel(self):
@@ -357,8 +357,8 @@ class Actor:
             self._vx = value[0]
             self._vy = value[1]
         else:
-            raise TypeError(f"Velocity must be set to a tuple of two numbers,"
-                            " not {value}.")
+            raise TypeError("Velocity must be set to a tuple of two numbers,"
+                            " not {}.".format(value))
 
     @property
     def image(self):
@@ -413,17 +413,13 @@ class Actor:
         self.x += self._vx * scale
         self.y += self._vy * scale
 
-    def intercept_vector(self, target, speed, target_move_vector=(0, 0)):
+    def intercept_velocity(self, target, speed):
         """Returns a vector with the given magnitude (movement speed) that will
         intercept the target actor or point if it keeps moving along the same 
         direction."""
         self_pos = pygame.math.Vector2(self.pos)
-        if isinstance(target, Actor): # If target is an actor, use its pos.
-            target_pos = pygame.math.Vector2(target.pos)
-            target_vel = pygame.math.Vector2(target.vel)
-        else: # If it is a tuple, use it directly.
-            target_pos = pygame.math.Vector2(target)
-            target_vel = pygame.math.Vector2(target_move_vector)
+        target_pos = pygame.math.Vector2(target.pos)
+        target_vel = pygame.math.Vector2(target.vel)
 
         totarget_vec = target_pos - self_pos
 
@@ -431,14 +427,17 @@ class Actor:
         b = 2 * target_vel.dot(totarget_vec)
         c = totarget_vec.dot(totarget_vec)
 
-        p = -b / (2 * a)
-        q = sqrt((b * b) - 4 * a * c) / (2 * a)
+        try:
+            p = -b / (2 * a)
+            q = sqrt((b * b) - 4 * a * c) / (2 * a)
+        except Exception:
+            return None
 
         time1 = p - q
         time2 = p + q
 
-        if isinstance(time1, complex) or isinstance(time2, complex):
-            return None # If there is no valid intercept solution, return None.
+        #if isinstance(time1, complex) or isinstance(time2, complex):
+         #   return None # If there is no valid intercept solution, return None.
 
         # Otherwise, choose the correct intercept option.
         if time1 > time2 and time2 > 0:
