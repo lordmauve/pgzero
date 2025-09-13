@@ -414,6 +414,7 @@ class Actor:
         """Returns a vector with the given magnitude (movement speed) that will
         intercept the target actor or point if it keeps moving along the same 
         direction."""
+        # Convert values to pygame vectors for easier math.
         self_pos = pygame.math.Vector2(self.pos)
         target_pos = pygame.math.Vector2(target.pos)
         target_vel = pygame.math.Vector2(target.vel)
@@ -433,7 +434,7 @@ class Actor:
         time1 = p - q
         time2 = p + q
 
-        # Otherwise, choose the correct intercept option.
+        # Choose the correct intercept option.
         if time1 > time2 and time2 > 0:
             intercept_time = time2
         else:
