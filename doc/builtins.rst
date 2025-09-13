@@ -624,6 +624,81 @@ Actors or ``(x, y)`` coordinate pairs.
     * Down is -90 degrees.
 
 
+.. _angle_movement:
+
+Angle Movement
+''''''''''''''
+
+If an actor is rotated and should move based on its rotation, doing so by
+adjusting X and Y coordinates manually can be complicated. To make moving
+actors around their rotation easier, Pygame Zero provides built-in functions.
+
+.. method:: Actor.move_towards_angle(angle, distance)
+
+    Moves the actor the given distance along the given angle.
+
+
+.. method:: Actor.move_towards_point(point, distance, [overshoot])
+
+    Moves the actor the given distance towards the given point of X and Y.
+
+    By default, if the distance to the point is smaller than the given
+    distance, the actor will only move up to the point but not overshoot it.
+    If the optional parameter ``overshoot`` is given as True however, the
+    actor will move past the target point if the given distance is far enough.
+
+
+.. method:: Actor.move_forward(distance)
+
+    Moves the actor forwards along its current angle by the given distance.
+
+
+.. method:: Actor.move_backward(distance)
+
+    Moves the actor backwards in the opposite direction of its current angle
+    by the given distance.
+
+.. method:: Actor.move_left(distance)
+
+    Moves the actor sideways to the left when viewing its angle as forward.
+
+    This does not mean the actor moves along the Y-axis, but instead that if
+    the actor is pointing to the right, then right is forward to the actor and
+    left from its perspective would be up in the game window.
+
+.. method:: Actor.move_right(distance)
+
+    Moves the actor sideways to the right when viewing its angle as forward.
+
+    The same applies here. Right is always in relation to where the actor is
+    pointing.
+
+These function could be used to have actors always move towards the player,
+circle around a point in a level, get pushed away from something or many other
+options. As a small example, let's have the spaceship follow the mouse around
+the game window::
+
+    ship = Actor('ship')
+    mouse_position = (0, 0)
+
+    def on_mouse_move(pos):
+        # To change mouse_position from within a function,
+        # we have to declare it global here.
+        global mouse_position
+        mouse_position = pos
+
+    def update():
+        # To just read the value of the global variable,
+        # we don't have to do anything else.
+        ship.move_towards_point(mouse_position, 5)
+
+*Note:* When using ``move_towards_point()`` with ``overshoot=True``, if the
+function is called every frame (for example in ``update()``), the actor will
+rapidly jump back and forth since the angle to the target point gets inverted
+every frame. To prevent this, use ``move_towards_point()`` without ``overshoot``
+or make sure it is not called rapidly with ``overshoot``.
+
+
 .. _transparency:
 
 Transparency

@@ -246,6 +246,8 @@ class Actor:
 
     @angle.setter
     def angle(self, angle):
+        # Keeps the angle between 0 and 359 degrees
+        angle = angle % 360
         self._angle = angle
         w, h = self._orig_surf.get_size()
 
@@ -349,6 +351,52 @@ class Actor:
         dx = tx - myx
         dy = myy - ty   # y axis is inverted from mathematical y in Pygame
         return degrees(atan2(dy, dx))
+
+    def move_towards_angle(self, angle, distance):
+        """Move the actor a certain distance towards a certain
+        angle. Does not change the actors angle property.
+        All other functions for movement around angles use
+        this basic function."""
+        # Modulo of angle is there to prevent invalid angles leading to
+        # incorrect movement because of wrong radian values messing up
+        # the calculation.
+        rad_angle = radians(angle % 360)
+        move_x = cos(rad_angle) * distance
+        move_y = -1 * sin(rad_angle) * distance
+        self.x += move_x
+        self.y += move_y
+
+    def move_towards_point(self, point, distance, overshoot=False):
+        """Figure out the angle to the given point and then
+        move the actor towards it by the given distance."""
+        angle = self.angle_to(point)
+        if overshoot:
+            self.move_towards_angle(angle, distance)
+        else:
+            m_distance = min(self.distance_to(point), distance)
+            self.move_towards_angle(angle, m_distance)
+
+    def move_forward(self, distance):
+        """Move the actor in the direction it is facing."""
+        self.move_towards_angle(self._angle, distance)
+
+    def move_backward(self, distance):
+        """Move the actor in the opposite direction of its
+        heading."""
+        angle = (self._angle + 180) % 360
+        self.move_towards_angle(angle, distance)
+
+    def move_left(self, distance):
+        """Move the actor left based on its heading. "Strafing"
+        left."""
+        angle = (self._angle + 90) % 360
+        self.move_towards_angle(angle, distance)
+
+    def move_right(self, distance):
+        """Move the actor right based on its heading. "Strafing"
+        right."""
+        angle = (self._angle - 90) % 360
+        self.move_towards_angle(angle, distance)
 
     def distance_to(self, target):
         """Return the distance from this actor's pos to target, in pixels."""
