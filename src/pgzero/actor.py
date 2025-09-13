@@ -33,9 +33,6 @@ def calculate_anchor(value, dim, total):
             )
     return float(value)
 
-def dot_product(vector1, vector2):
-    return vector1[0] * vector1[1] + vector2[0] * vector2[1]
-
 
 # These are methods (of the same name) on pygame.Rect
 SYMBOLIC_POSITIONS = set((
