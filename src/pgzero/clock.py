@@ -90,6 +90,10 @@ class Clock:
         self.events = []
         self._each_tick = []
 
+    def time(self):
+        """Simple function to return the total elapsed time."""
+        return self.t
+
     def clear(self):
         """Remove all handlers from this clock."""
         self.events.clear()
@@ -193,6 +197,7 @@ class Clock:
 
 # One instance of a clock is available by default, to simplify the API
 clock = Clock()
+time = clock.time
 tick = clock.tick
 schedule = clock.schedule
 schedule_interval = clock.schedule_interval
