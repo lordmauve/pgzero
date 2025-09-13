@@ -146,3 +146,52 @@ class ActorTest(unittest.TestCase):
         a = Actor("alien")
         for attribute in dir(a):
             a.__getattr__(attribute)
+
+    def test_velocity_starts_at_Zero(self):
+        """An Actors velocity starts at zero in both axes."""
+        a = Actor("alien")
+        self.assertEqual(a.vel, (0, 0))
+
+    def test_velocity_components(self):
+        """We can use the Actors velocity by individual components."""
+        a = Actor("alien")
+        a.vx = 15
+        a.vy = -5
+        self.assertEqual(a.vx, 15)
+        self.assertEqual(a.vy, -5)
+        self.assertEqual(a.vel, (15, -5))
+
+    def test_velocity_together(self):
+        """We can use the Actors velocity as a tuple."""
+        a = Actor("alien")
+        a.vel = (15, -5)
+        self.assertEqual(a.vx, 15)
+        self.assertEqual(a.vy, -5)
+        self.assertEqual(a.vel, (15, -5))
+
+    def test_move_by_vel(self):
+        """We can move an actor by its velocity."""
+        a = Actor("alien", (10, 10))
+        a.vel = (15, -5)
+        a.move_by_vel()
+        self.assertEqual(a.pos, (25, 5))
+
+    def test_interception_velocity(self):
+        """We can get a valid interception vector from a starting Actor to
+        a moving target Actor."""
+        a = Actor("alien", (0, 10))
+        b = Actor("alien", (10, 0))
+        b.vy = 5
+        # Due to floating point inaccuracy, if we simply give 5 as the speed,
+        # no intersection will be found even though it should be.
+        a.vel = a.intercept_velocity(b, 5.0001)
+        # For the same reason, the result must be rounded to compare.
+        self.assertEqual((round(a.vx), round(a.vy)), (5, 0))
+
+    def test_no_interception(self):
+        """If no valid interception vector exists, None is returned."""
+        a = Actor("alien", (0, 10))
+        b = Actor("alien", (10, 0))
+        b.vy = 5
+        v = a.intercept_velocity(b, 1)
+        self.assertIsNone(v)

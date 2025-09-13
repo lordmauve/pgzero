@@ -624,6 +624,62 @@ Actors or ``(x, y)`` coordinate pairs.
     * Down is -90 degrees.
 
 
+Velocity and interception
+'''''''''''''''''''''''''
+
+In many games, there are lots of things only ever moving along straight lines.
+This means they always move with a constant velocity in the X and Y axes, for
+which Actors have properties:
+
+* ``.vx`` and ``.vy`` represent the velocity in either axis direction.
+* ``.vel`` represents the velocity in both axes as a tuple.
+
+Just like ``.x``, ``.y`` and ``.pos``, these can be read or set individually
+or together.
+
+Once an Actor has a velocity, moving them along it is easy. 
+
+.. method:: Actor.move_by_vel([scale])
+
+    Moves the Actors position by its velocity once. Calling this every
+    ``update()`` will smoothly move the actor along its velocity trajectory.
+
+    If the Actor should be moved at the same angle but different speed, the
+    function can be given an optional parameter. ``2.0`` would move twice as
+    fast, whereas ``0.1`` would move at 10% of the speed.
+
+Almost as often, we might also want to have an object lead its trajectory
+to intercept some other game object which is also moving. There is also a
+dedicated function for this.
+
+.. method:: Actor.intercept_velocity(target, speed)
+
+    Returns a velocity tuple that will move from the position of the Actor
+    to intercept the target Actor with the given speed, as long as the
+    target does not change its velocity at some point.
+
+    The target Actor must have its velocity set for this to work. If no
+    valid interception is possible (because the speed is too low), ``None`` is
+    returned.
+
+To move an Actor to intercept a target, we can simply set its velocity to the
+calculated interception velocity.::
+
+    catcher = Actor("catcher", (40, 20))
+    catcher.vel = (3, -1)
+    ball = Actor("ball", (10, 10))
+    ball.vel = ball.intercept_velocity(catcher, 12.0)
+
+    def update():
+        catcher.move_by_vel()
+        ball.move_by_vel()
+
+    def draw()
+        screen.clear()
+        catcher.draw()
+        ball.draw()
+
+
 .. _transparency:
 
 Transparency
