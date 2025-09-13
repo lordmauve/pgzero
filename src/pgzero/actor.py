@@ -33,6 +33,9 @@ def calculate_anchor(value, dim, total):
             )
     return float(value)
 
+def dot_product(vector1, vector2):
+    return vector1[0] * vector1[1] + vector2[0] * vector2[1]
+
 
 # These are methods (of the same name) on pygame.Rect
 SYMBOLIC_POSITIONS = set((
@@ -360,6 +363,44 @@ class Actor:
         dx = tx - myx
         dy = ty - myy
         return sqrt(dx * dx + dy * dy)
+
+    def intercept(self, target, target_move_vector, speed):
+        """Returns a vector with the given magnitude (movement speed) that will
+        intercept the target actor or point if it keeps moving along the same 
+        direction."""
+        self_pos = pygame.math.Vector2(self.pos)
+        if isinstance(target, Actor): # If target is an actor, use its pos.
+            target_pos = pygame.math.Vector2(target.pos)
+        else: # If it is a tuple, use it directly.
+            target_pos = pygame.math.Vector2(target)
+        target_vel = pygame.math.Vector2(target_move_vector)
+
+        totarget_vec = target_pos - self_pos
+
+        a = target_vel.dot(target_vel) - speed**2
+        b = 2 * target_vel.dot(totarget_vec)
+        c = totarget_vec.dot(totarget_vec)
+
+        p = -b / (2 * a)
+        q = sqrt((b * b) - 4 * a * c) / (2 * a)
+
+        time1 = p - q
+        time2 = p + q
+
+        if isinstance(time1, complex) or isinstance(time2, complex):
+            return None # If there is no valid intercept solution, return None.
+
+        # Otherwise, choose the correct intercept option.
+        if time1 > time2 and time2 > 0:
+            intercept_time = time2
+        else:
+            intercept_time = time1
+
+        intercept_point = target_pos + target_vel * intercept_time
+        intercept_vec = (intercept_point - self_pos).normalize() * speed
+
+        # Since Vector2s aren't used in pgzero directly, return as a tuple.
+        return tuple(intercept_vec)
 
     def unload_image(self):
         loaders.images.unload(self._image_name)
