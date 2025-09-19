@@ -111,14 +111,20 @@ class Actor:
 
     def _build_transformed_surf(self):
         cache_len = len(self._surface_cache)
+        # Note if the surface to be displayed has changed.
+        surf_changed = False
         if cache_len == 0:
             last = self._orig_surf
         else:
             last = self._surface_cache[-1]
         for f in self.function_order[cache_len:]:
+            surf_changed = True  # We note that we have to change the mask.
             new_surf = f(self, last)
             self._surface_cache.append(new_surf)
             last = new_surf
+        # If the actor has a mask, it is updated.
+        if self._mask and surf_changed:
+            self._mask = pygame.mask.from_surface(self._surface_cache[-1])
         return self._surface_cache[-1]
 
     def __init__(self, image, pos=POS_TOPLEFT, anchor=ANCHOR_CENTER, **kwargs):
@@ -327,6 +333,7 @@ class Actor:
         self._image_name = image
         self._orig_surf = loaders.images.load(image)
         self._surface_cache.clear()  # Clear out old image's cache.
+        self._mask = None
         self._update_pos()
 
     def _update_pos(self):
@@ -360,6 +367,39 @@ class Actor:
         dx = tx - myx
         dy = ty - myy
         return sqrt(dx * dx + dy * dy)
+
+    def _create_mask(self):
+        """Gives the actor a mask from the surface that is displayed."""
+        if not self._surface_cache:
+            self._mask = pygame.mask.from_surface(self._orig_surf)
+        else:
+            self._mask = pygame.mask.from_surface(self._surface_cache[-1])
+
+    def collidemask(self, target):
+        """Returns True if the actor's mask is colliding with the targets'.
+        Masks are only created and checked when necessary."""
+        # Check if the target is an actor and thus suitable.
+        if not isinstance(target, Actor):
+            raise TypeError("collidemask() can only be used with other actors,"
+                            "not with a value of type '{}'."
+                            .format(type(target)))
+
+        # If the rects don't collide, exit early.
+        if not self.colliderect(target):
+            return False
+
+        # Create masks that are not yet present.
+        if not self._mask:
+            self._create_mask()
+        if not target._mask:
+            target._create_mask()
+
+        # Calculate the positional offsets of both actors.
+        x_offset = int(target.left - self.left)
+        y_offset = int(target.top - self.top)
+
+        # Check for pixel perfect collision
+        return self._mask.overlap(target._mask, (x_offset, y_offset))
 
     def unload_image(self):
         loaders.images.unload(self._image_name)

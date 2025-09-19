@@ -146,3 +146,29 @@ class ActorTest(unittest.TestCase):
         a = Actor("alien")
         for attribute in dir(a):
             a.__getattr__(attribute)
+
+    def test_mask_collision(self):
+        """Collisions are detected with masks in use."""
+        a1 = Actor("alien")
+        # For some reason, this is necessary if actors are not drawn but
+        # collisions should be checked.
+        a1.pos = (0, 0)
+        a2 = Actor("alien")
+        a2.angle = 180
+        # Since nothing is drawn, the surface has to be updated manually to
+        # reflect rotation.
+        a2._build_transformed_surf()
+        # Collision is detected.
+        self.assertIsNotNone(a1.collidemask(a2))
+
+    def test_mask_no_collision(self):
+        """Even if rects overlap, masks correctly report no collision if no
+        pixels overlap."""
+        a1 = Actor("alien")
+        a1.pos = (0, 0)
+        a2 = Actor("alien")
+        a2.angle = 180
+        a2._build_transformed_surf()
+        a2.pos = (10, 87)
+        # No collision is detected.
+        self.assertIsNone(a1.collidemask(a2))

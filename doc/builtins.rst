@@ -491,10 +491,17 @@ attribute to some new image name::
 
 Actors have all the same attributes and methods as :ref:`Rect <rect>`,
 including methods like `.colliderect()`__ which can be used to test whether
-two actors have collided.
+two actors have collided. This is quick but imperfect collision detection.
 
 .. __: https://www.pygame.org/docs/ref/rect.html#pygame.Rect.colliderect
 
+Additionally, collisions between actors can be checked more precisely by
+calling ``actor1.collidemask(actor2)``. This checks collision down to the
+pixel level, meaning that if the rects of two actors overlap but their
+images don't actually intersect, a collision won't be reported. This is
+a lot more precise but also more work to check for. If coarse detection
+is fine, always use ``.colliderect()``. If you need high precision, use
+``.collidemask()`` only where it is necessary.
 
 Positioning Actors
 ''''''''''''''''''
