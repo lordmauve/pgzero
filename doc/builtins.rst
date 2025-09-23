@@ -660,6 +660,47 @@ of transparency:
     through a ghost.
 
 
+.. _simple-shapes:
+
+Simple shapes
+'''''''''''''
+
+If you don't have images yet, not to worry! You can start by creating actors
+from simple colored shapes like a rectangle or a circle. Instead of calling
+``Actor("image_name")`` you instead call
+``Actor.Shape(width, height, color)``.
+
+Here's an example::
+
+    character = Actor.Rectangle(100, 100, "red")
+    shot = Actor.Ellipse(60, 20, "blue")
+    sword = Actor.Triangle(50, 15, "green")
+
+The following shapes can be created this way:
+
+.. method:: Actor.Rectangle(width, height, color)
+
+    Creates an actor with a filled rectangle of the given color as its
+    image. To create a perfect square, simply give the same value for both
+    width and height.
+
+.. method:: Actor.Ellipse(width, height, color)
+
+    Creates an actor with a filled circular shape of the given color as its
+    image. The background of the image is transparent. To create a perfect
+    circle, simply give the same value for both width and height.
+
+.. method:: Actor.Triangle(width, height, color)
+
+    Creates an actor with a filled triangle of the given color as its image.
+    The triangle points to the right so it always points in the direction of
+    the ``angle`` of the actor.
+
+If you wanted to define other parameters like anchor or position when creating
+the actors, you can still do so just like with a normal Actor construction::
+
+    balloon = Actor.Ellipse(50, 50, "red", (150, 150), anchor=("center", "bottom"))
+
 The Keyboard
 ------------
 
