@@ -660,6 +660,20 @@ of transparency:
     through a ghost.
 
 
+On screen or not
+''''''''''''''''
+
+There is a simple function to check whether an Actor is visible on the screen:
+
+.. method:: Actor.is_onscreen()
+
+    Returns ``True`` if the Actor is currently inside the screen bounds and
+    ``False`` if not.
+
+This can be useful if you have many game objects flying around the screen that
+should disappear as soon as they are out of sight.
+
+
 The Keyboard
 ------------
 

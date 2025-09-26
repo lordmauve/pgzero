@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import patch
 
 import pygame
 
@@ -146,3 +147,25 @@ class ActorTest(unittest.TestCase):
         a = Actor("alien")
         for attribute in dir(a):
             a.__getattr__(attribute)
+
+    # Since the tests don't create the proper screen, it must be mocked for
+    # these test functions.
+    @patch("pgzero.actor.game.screen.get_height")
+    @patch("pgzero.actor.game.screen.get_width")
+    @patch("pgzero.actor.game.screen")
+    def test_onscreen(self, mock_screen, mock_get_width, mock_get_height):
+        """We can check if the Actor is in the screen bounds."""
+        mock_get_width.return_value = 200
+        mock_get_height.return_value = 100
+        a = Actor("alien", (10, 10))
+        self.assertTrue(a.is_onscreen())
+
+    @patch("pgzero.actor.game.screen.get_height")
+    @patch("pgzero.actor.game.screen.get_width")
+    @patch("pgzero.actor.game.screen")
+    def test_not_onscreen(self, mock_screen, mock_get_width, mock_get_height):
+        """We can check if the Actor is not within the screen bounds."""
+        a = Actor("alien", (10, 1000))
+        mock_get_width.return_value = 200
+        mock_get_height.return_value = 100
+        self.assertFalse(a.is_onscreen())
