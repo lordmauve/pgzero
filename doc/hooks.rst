@@ -159,6 +159,55 @@ To handle mouse drags, use code such as the following::
                 :ref:`below <buttons-and-keys>`).
     :param mod: A bitmask of modifier keys that were depressed.
 
+Game controllers also have their own events:
+
+.. _joystick-hooks:
+
+.. function:: on_joy_down([joybtn], [instance_id])
+
+    Called when a controller button is depressed.
+
+    :param joybtn: An integer indicating the button that was pressed (see 
+                   :ref:`below <buttons-and-keys>`).
+    :param instance_id: An integer identifying the device on which the button
+                        was pressed. This can be used to distinguish controls
+                        for multiple controllers for example in co-op games.
+
+.. function:: on_joy_up([joybtn], [instance_id])
+
+    Called when a controller button is released.
+
+    :param joybtn: An integer indicating the button that was let go off (see 
+                   :ref:`below <buttons-and-keys>`).
+    :param instance_id: An integer identifying the device on which the button
+                        was released. 
+
+.. function:: on_joy_move([axis], [value], [instance_id])
+
+    Called when a controller axis is moved, for example the thumbsticks on a
+    typical console controller.
+
+    :param axis: An integer indicating the axis that had its value change
+                 (see :ref:`below <buttons-and-keys>`).
+    :param value: The new value of the changed axis. Values for thumbsticks
+                  range from -1 to 1 with 0 being centered while shoulder
+                  triggers range from 0 to 1 with 1 being fully pressed in.
+    :param instance_id: An integer identifying the device on which the axis
+                        value was changed. 
+
+.. function:: on_joy_added([instance_id])
+
+    Called when a new controller is connected.
+
+    :param instance_id: An integer identifying the device that was just
+                        connected.
+
+.. function:: on_joy_removed([instance_id])
+
+    Called when a known controller is disconnected.
+
+    :param instance_id: An integer identifying the device that was just
+                        disconnected.
 
 .. function:: on_music_end()
 
@@ -172,8 +221,8 @@ To handle mouse drags, use code such as the following::
 Buttons and Keys
 ''''''''''''''''
 
-Built-in objects ``mouse`` and ``keys`` can be used to determine which buttons
-or keys were pressed in the above events.
+Built-in objects ``mouse``, ``keys``, ``joybutton`` and ``joyaxis`` can be
+used to determine which buttons or keys were pressed in the above events.
 
 Note that mouse scrollwheel events appear as button presses with the below
 ``WHEEL_UP``/``WHEEL_DOWN`` button constants.
@@ -351,3 +400,43 @@ Additionally you can access a set of constants that represent modifier keys:
     .. attribute:: NUM
     .. attribute:: CAPS
     .. attribute:: MODE
+
+.. class:: joybutton
+
+    A built-in enumeration of buttons that can be received by the
+    ``on_joy_down`` and ``on_joy_up`` handlers.
+
+    Since controllers have different symbols on their buttons based on the
+    brand, generic descriptors are used. ``FACE_*`` denote the four buttons in
+    a square layout on the right side of the controller. ``PUSH_*`` denote the
+    button pressed when pressing the thumbsticks in.
+
+    .. attribute:: FACE_UP
+    .. attribute:: FACE_DOWN
+    .. attribute:: FACE_LEFT
+    .. attribute:: FACE_RIGHT
+    .. attribute:: DPAD_UP
+    .. attribute:: DPAD_DOWN
+    .. attribute:: DPAD_LEFT
+    .. attribute:: DPAD_RIGHT
+    .. attribute:: SHOULDER_LEFT
+    .. attribute:: SHOULDER_RIGHT
+    .. attribute:: PUSH_LEFT
+    .. attribute:: PUSH_RIGHT
+    .. attribute:: CENTER_LEFT
+    .. attribute:: CENTER_MIDDLE
+    .. attribute:: CENTER_RIGHT
+
+.. class:: joyaxis
+
+    A built-in enumeration of axes that can be received by the
+    ``on_joy_move`` handlers.
+
+    ``X`` and ``Y`` refer to the horizontal and vertical movements of the thumbsticks.
+
+    .. attribute:: LEFT_X
+    .. attribute:: LEFT_Y
+    .. attribute:: LEFT_TRIGGER
+    .. attribute:: RIGHT_X
+    .. attribute:: RIGHT_Y
+    .. attribute:: RIGHT_TRIGGER

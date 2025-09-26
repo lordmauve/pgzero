@@ -374,6 +374,206 @@ can use the :func:`on_music_end() hook <on_music_end>` to do something when the
 music ends - for example, to pick another track at random.
 
 
+.. _controllers:
+
+Controllers
+-----------
+
+PGZero supports one or multiple game controllers for use as input devices.
+There are two builtin objects to use: ``joy`` and ``joysticks``.
+
+.. _joy:
+
+joy
+'''
+
+``joy`` is the easy and accessible way to check for the state of connected
+controllers. If you want to support just one controller as an input method
+just like a keyboard or a mouse, then you can think of ``joy`` the same way
+you do of ``keyboard`` to check if a key is pressed down or not::
+
+    def update():
+        if joy.face_down:
+            move_speed = 15
+        else:
+            move_speed = 10
+
+        player.x = player.x + joy.left_x * move_speed
+        player.y = player.y + joy.left_y * move_speed
+
+In the same way, you can also use the current state of a controller axis
+like a thumbstick. In the example, we change the movement speed of the player
+if the the lower face button is held down. Then, we change the players position
+based on the left stick deflection. Since the axis returns values from -1 to 1
+we have to multiply this by however fast we want the Actor to move at most.
+
+It's that easy to get smooth controller movement with varying speeds based on
+how far a stick is pushed. ``joy`` has the following attributes that you can
+use:
+
+.. class:: Joystick
+
+    .. attribute:: face_up
+
+        Returns ``True`` if the upper face button is currently held down.
+        ``face_down``, ``face_left`` and ``face_right`` are also
+        available.
+
+    .. attribute:: dpad_up
+
+        Returns ``True`` if the DPAD is held up. ``dpad_down``,
+        ``dpad_left`` and ``dpad_right`` are also available.
+
+    .. attribute:: shoulder_left
+
+        Returns ``True`` if the left shoulder button is pressed down.
+        ``shoulder_right`` is also available.
+
+    .. attribute:: push_left
+
+        Returns ``True`` if the left thumbstick is pressed in.
+        ``push_right`` is also available.
+
+    .. attribute:: center_left
+
+        Returns ``True`` if the left most button on the controller front is
+        pressed. ``center_middle`` and ``center_right`` are also
+        available.
+
+        *Note:* Left, middle and right buttons usually correspond to the
+        physical locations on the controller, but there may be some devices
+        where this is not true.
+
+    .. attribute:: left_x
+
+        Returns the value of the X axis of the left thumbstick (horizontal
+        movement). Values range from -1 to 1 with -1 being fully pressed left,
+        0 being centered and 1 being fully pressed right. ``right_x`` is
+        also available.
+
+    .. attribute:: left_y
+
+        Returns the value of the Y axis of the left thumbstick (vertical
+        movement). Values range from -1 to 1 with -1 being fully pressed up,
+        0 being centered and 1 being fully pressed down. ``right_x`` is
+        also available.
+
+    .. attribute:: left_stick
+
+        Returns the values of both axes of the left thumbstick as a tuple of
+        two floats between -1 and 1. ``right_stick`` ist also available.
+
+    .. attribute:: left_angle
+
+        Returns the angle to which the left thumbstick is currently held with
+        0 degrees indicating straight right (see :ref:`rotation` of Actors).
+        ``right_angle`` is also available.
+
+        If the stick is centered, ``None`` is returned.
+
+    .. attribute:: left_trigger
+
+        Returns the value of the left trigger axis as a float between 0 and 1
+        with 0 being unpressed and 1 being fully pressed in. ``right_trigger``
+        is also available.
+
+    .. attribute:: name
+
+        Returns the human readable name of the controller as a string.
+
+    .. attribute:: guid
+
+        Returns the unique hardware identifier of the controller as a string.
+
+    .. attribute:: instance_id
+
+        Returns the integer index by which the controller is identified in
+        PGZero. This is used to get access to a specific controller (see
+        :ref:`joysticks`) or to determine which controller triggered an event.
+
+``joy`` is a special controller object that is always available and always safe
+to access. Even if no actual controller is connected, ``joy`` will always be
+available and simply report all buttons unpressed and all axes in neutral
+position. This is because ``joy`` is a virtual controller that is affected
+by any controller input.
+
+That means that when ``face_up`` is pressed on any connected controller,
+``face_up`` will be pressed on ``joy``. If at the same time the left stick is
+moved on a different controller, ``joy`` will mirror that movement.
+
+It's done this way to make coding a game with support for a single controller
+as easy as possible. If you want a single person to control your game with a
+controller, you don't need to think about anything else, you can use ``joy``
+and it will just work. The only downside is that ``name``, ``guid`` and
+``instance_id`` of ``joy`` will not report the values for the actual controller
+used but instead generic stand-ins.
+
+If you want support for multiple controllers, then you use the ``joysticks``
+object.
+
+.. _joysticks:
+
+joysticks
+'''''''''
+
+The ``joysticks`` object acts as a manager for the connected joystick devices.
+It works like a dictionary that you can only read from, not change manually,
+that also has some additional functions. Each entry has the ``instance_id``
+of the controller as its key with the value being the actual Joystick object.
+It automatically tracks connected devices and their inputs, so the only thing
+you need to think about it accessing the right controller. This works the
+following way::
+
+    if len(joysticks) >= 2:
+        cons = joysticks.keys()
+        player_1_con = joysticks[cons[0]]
+        player_2_con = joysticks[cons[1]]
+
+Because ``joysticks`` works like a dictionary, you can get the number of
+connected devices with ``len(joysticks)``. ``joysticks.keys()`` gives you
+all IDs of the connected controllers. Since the IDs are the key for the
+``joysticks`` dictionary, you can get any Joystick object with
+``joysticks[instance_id]``. In this case, we assign the first two connected
+devices to player 1 and player 2 as their controllers. We save them in
+variables to have easier access to them later and if a device is disconnected,
+we can assign a different controller to that player.
+
+Using specific joysticks works exactly the same as using ``joy``. Here's an
+example of how to differentiate controls between joysticks::
+
+    def update():
+        if player_1_con:
+            p1_actor.x = p1_actor.x + player_1_con.left_x * move_speed
+            p1_actor.y = p1_actor.y + player_1_con.left_y * move_speed
+
+        if player_2_con:
+            p2_actor.x = p2_actor.x + player_2_con.left_x * move_speed
+            p2_actor.y = p2_actor.y + player_2_con.left_y * move_speed
+
+Since we aren't working with ``joy`` anymore but with specific devices,
+we always have to make sure to account for the possibility of them being
+disconnected. If that happens, whatever access method we used before
+(directly via ``joysticks`` or with a variable) will return ``None``
+instead. This way, simply checking ``if con_object:`` let's us only run
+code if a valid device can be reached.
+
+If a device is disconnected, an event is triggered that can be reacted
+to by defining an ``on_joy_removed()`` function. Here, we could assign
+``player_1_con`` to a different joystick object, if the previous one is
+disconnected. More information on this can be found in the section on
+:ref:`joystick event hooks <joystick-hooks>`.
+
+It's common to assign controllers based on which one was last used. To
+make this possible, ``joysticks.last_used`` returns the Joystick object
+that last recorded an input. If you want your players to be able to pick
+their controllers, simply tell them to make any input and then assign them
+``joysticks.last_used`` one after the other.
+
+**Important:** Since ``joysticks`` automatically updates the connected
+controllers, we can't change the contents of the "dictionary" it represents.
+Trying to do something like ``joysticks[5] = ...`` will result in an error.
+
+
 .. _clock:
 
 Clock

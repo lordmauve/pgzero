@@ -8,11 +8,13 @@ from .keyboard import keyboard
 from .animation import animate
 from .rect import Rect, ZRect
 from .loaders import images, sounds
-from .constants import mouse, keys, keymods
+from .constants import mouse, keys, keymods, joybutton, joyaxis
 from .game import exit
 
 # The actual screen will be installed here
 from .screen import screen_instance as screen
+from .joystick import joysticks_instance as joysticks
+from .joystick import joy
 
 
 __all__ = [
@@ -22,6 +24,7 @@ __all__ = [
     'clock', 'animate',  # timing
     'Rect', 'ZRect',  # geometry
     'keyboard', 'mouse', 'keys', 'keymods',  # input
+    'joysticks', 'joy', 'joybutton', 'joyaxis',
     'storage',  # persistence
     'exit',
 ]
