@@ -10,7 +10,7 @@ On desktop systems
 
 This will also install Pygame. Pre-compiled Pygame packages are available to pip
 for Windows & Linux (32-bit and 64-bit), and for Mac OS (64-bit only). If you
-have a different system, you'll need to find a way to install pygame first. Make
+have a different system, you'll need to find a way to install pygame-ce first. Make
 sure you are using Python 3 not Python 2.
 
 Mac
@@ -28,7 +28,7 @@ so you will need to upgrade Python to >=3.6 (or use python 2.7) in
 order to be able to install pygame. For a list of available Wheels, please visit
 `pyPI_`
 
-.. _pyPI: https://pypi.org/project/Pygame/#files
+.. _pyPI: https://pypi.org/project/pygame-ce/#files
 
 Linux
 '''''
